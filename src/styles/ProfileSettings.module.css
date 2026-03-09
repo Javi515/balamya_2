@@ -1,0 +1,141 @@
+/* src/styles/ProfileSettings.css */
+
+/* --- Settings List --- */
+.settings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.setting-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.setting-item:hover {
+    background-color: #f9fafb;
+}
+
+.setting-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.setting-icon-box {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #eff6ff;
+    /* blue-50 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--profile-primary);
+}
+
+.setting-text h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+}
+
+.setting-text p {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0;
+}
+
+.setting-arrow {
+    color: #9ca3af;
+    font-size: 1.25rem;
+}
+
+.setting-item:hover .setting-arrow {
+    color: var(--profile-primary);
+}
+
+/* Token Toggle Switch */
+.toggle-wrapper {
+    position: relative;
+    width: 48px;
+    height: 24px;
+}
+
+.toggle-checkbox {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-label {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #d1d5db;
+    transition: .4s;
+    border-radius: 24px;
+}
+
+.toggle-label:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+.toggle-checkbox:checked+.toggle-label {
+    background-color: var(--profile-primary);
+}
+
+.toggle-checkbox:checked+.toggle-label:before {
+    transform: translateX(24px);
+}
+
+/* Preferences List */
+.pref-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.pref-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.pref-label {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #4b5563;
+}
+
+.pref-select {
+    padding: 6px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background-color: white;
+    font-size: 0.875rem;
+    color: #374151;
+    cursor: pointer;
+    outline: none;
+}
+
+.pref-select:focus {
+    border-color: var(--profile-primary);
+}

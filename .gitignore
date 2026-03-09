@@ -1,0 +1,24 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Testing
+coverage
+
+# Production
+build
+
+# Secrets
+.env
+backend/.env
+
+# Temporary Files
+.git_head_*
+.git_history_*
+*.log
+eslint_report.txt
+
+# OS
+.DS_Store
+Thumbs.db

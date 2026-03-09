@@ -1,0 +1,189 @@
+/* NotificacionAltaForm.module.css */
+
+.notificacion-form {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    color: #333;
+}
+
+/* Header */
+.form-header {
+    text-align: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #333;
+}
+
+.form-header h1 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #1e293b;
+    margin: 0 0 4px 0;
+}
+
+.form-header h2 {
+    font-size: 1rem;
+    font-weight: 400;
+    font-style: italic;
+    color: #555;
+    margin: 0 0 10px 0;
+}
+
+.form-header h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #000;
+    margin: 0;
+}
+
+/* Section / form group */
+.form-section {
+    margin-bottom: 20px;
+}
+
+.section-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #1e293b;
+    text-transform: uppercase;
+    padding: 8px 12px;
+    background-color: #f8f9fa;
+    border-left: 4px solid #0891b2;
+    margin-bottom: 14px;
+}
+
+/* Grid layouts */
+.form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+}
+
+.form-grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+}
+
+/* Form groups */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.form-group label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.form-input {
+    padding: 7px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    outline: none;
+    font-family: inherit;
+    transition: border-color 0.2s;
+    background-color: #fff;
+}
+
+.form-input:focus {
+    border-color: #0891b2;
+    box-shadow: 0 0 0 2px rgba(8, 145, 178, 0.1);
+}
+
+.form-textarea {
+    padding: 8px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.2s;
+    min-height: 80px;
+}
+
+.form-textarea:focus {
+    border-color: #0891b2;
+    box-shadow: 0 0 0 2px rgba(8, 145, 178, 0.1);
+}
+
+/* Hora de alta row - inline style */
+.hora-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.hora-row span {
+    white-space: nowrap;
+    color: #475569;
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+}
+
+.hora-input {
+    padding: 6px 8px;
+    border: none;
+    border-bottom: 1px solid #333;
+    border-radius: 0;
+    font-size: 0.9rem;
+    font-family: inherit;
+    outline: none;
+    background: transparent;
+    transition: border-color 0.2s;
+    width: 100px;
+    text-align: center;
+}
+
+.hora-input.wide {
+    width: 160px;
+}
+
+.hora-input:focus {
+    border-bottom-color: #0891b2;
+}
+
+/* Signature section */
+.signature-section {
+    display: flex;
+    justify-content: space-around;
+    gap: 30px;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.signature-block {
+    text-align: center;
+    flex: 1;
+    max-width: 300px;
+}
+
+.signature-line {
+    border-bottom: 1px solid #333;
+    height: 50px;
+    margin-bottom: 8px;
+}
+
+.signature-block label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+}

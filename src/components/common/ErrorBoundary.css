@@ -1,0 +1,112 @@
+.error-boundary-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color: #f3f4f6;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    text-align: center;
+    padding: 20px;
+}
+
+.error-card {
+    background-color: white;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    max-width: 500px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.error-icon {
+    font-size: 4rem;
+    color: #ef4444;
+    /* Red-500 */
+    margin-bottom: 20px;
+}
+
+.error-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    /* Gray-800 */
+    margin-bottom: 10px;
+}
+
+.error-message {
+    font-size: 1rem;
+    color: #6b7280;
+    /* Gray-500 */
+    margin-bottom: 30px;
+    line-height: 1.5;
+}
+
+.error-actions {
+    display: flex;
+    gap: 15px;
+}
+
+.btn-retry {
+    padding: 10px 20px;
+    background-color: #3b82f6;
+    /* Blue-500 */
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-retry:hover {
+    background-color: #2563eb;
+    /* Blue-600 */
+}
+
+.btn-home {
+    padding: 10px 20px;
+    background-color: #e5e7eb;
+    /* Gray-200 */
+    color: #374151;
+    /* Gray-700 */
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-home:hover {
+    background-color: #d1d5db;
+    /* Gray-300 */
+}
+
+.error-details {
+    margin-top: 20px;
+    text-align: left;
+    width: 100%;
+    background-color: #f9fafb;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+}
+
+.error-details summary {
+    cursor: pointer;
+    color: #6b7280;
+    font-size: 0.9rem;
+    outline: none;
+}
+
+.error-pre {
+    white-space: pre-wrap;
+    font-family: monospace;
+    font-size: 0.8rem;
+    color: #ef4444;
+    overflow-x: auto;
+    margin-top: 10px;
+}

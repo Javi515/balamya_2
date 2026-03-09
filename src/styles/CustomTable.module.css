@@ -1,0 +1,112 @@
+/* src/styles/CustomTable.module.css */
+
+.custom-table-container {
+    background: white;
+    border-radius: 10px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+    overflow-x: auto;
+    border: 1px solid #e8edf2;
+}
+
+.custom-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    table-layout: auto;
+}
+
+/* Headers — sentence case, readable weight, not screaming uppercase */
+.custom-table th {
+    text-align: left;
+    padding: 13px 14px;
+    color: #6b7a8d;
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: 0;
+    border-bottom: 1px solid #dde3ea;
+    white-space: nowrap;
+    background-color: transparent;
+}
+
+.custom-table td {
+    padding: 14px 14px;
+    border-bottom: 1px solid #f0f3f7;
+    color: #2d3748;
+    font-size: 0.88rem;
+    vertical-align: middle;
+    line-height: 1.5;
+    transition: background-color 0.15s ease;
+}
+
+.custom-table tr:last-child td {
+    border-bottom: none;
+}
+
+.custom-table tr:hover td {
+    background-color: #f7f9fc;
+}
+
+.custom-table th:first-child,
+.custom-table td:first-child {
+    padding-left: 18px;
+}
+
+.custom-table th:last-child,
+.custom-table td:last-child {
+    padding-right: 18px;
+    text-align: center;
+}
+
+/* Inline "Ver" action — small, plain text link style, no heavy borders */
+.action-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: #3b82f6;
+    background: transparent;
+    padding: 5px 10px;
+    border-radius: 6px;
+    border: 1px solid #dbeafe;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 500;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    letter-spacing: 0;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.action-button:hover {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border-color: #bfdbfe;
+}
+
+/* Animal name */
+.highlight-text {
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 0.9rem;
+}
+
+/* ID — same font as page, lighter color, slightly smaller */
+.id-text {
+    color: #869ab0;
+    font-size: 0.82rem;
+    font-weight: 400;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+}
+
+/* Empty value placeholder */
+.empty-value {
+    color: #b0bac7;
+    font-size: 0.82rem;
+    font-style: italic;
+}
+
+.species-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}

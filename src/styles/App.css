@@ -1,0 +1,50 @@
+body {
+  margin: 0;
+  /* font-family removed */
+  background-color: #F4F6F8;
+  color: #333;
+}
+
+#root {
+  height: 100vh;
+}
+
+.App {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  /* Evita el scroll en toda la ventana */
+}
+
+/* Logout Transition Overlay */
+.logout-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #f8f9fa;
+  /* Matching the login background-light */
+  opacity: 0;
+  pointer-events: none;
+  z-index: 9999;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.logout-overlay.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.form-container-standard {
+  max-width: 960px !important;
+  margin: 0 auto !important;
+  width: 100% !important;
+}
+
+.global-form-width {
+  max-width: 960px !important;
+  margin: 0 auto !important;
+  width: 100% !important;
+}

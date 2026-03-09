@@ -1,0 +1,386 @@
+/* TreatmentForm.css */
+
+.treatment-form {
+    padding: 15px;
+}
+
+/* Header */
+.treatment-form .form-page {
+    background-color: #ffffff;
+    padding: 30px 40px;
+    border-radius: 8px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+    position: relative;
+}
+
+.treatment-header {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.treatment-header h1 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+    font-style: italic;
+}
+
+.treatment-header h2 {
+    font-size: 1rem;
+    font-weight: 400;
+    color: #475569;
+    margin: 0 0 5px 0;
+    font-style: italic;
+}
+
+.treatment-header hr {
+    border: none;
+    border-top: 2px solid #334155;
+    margin: 8px auto;
+    width: 80%;
+}
+
+.treatment-header h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+    letter-spacing: 0.5px;
+}
+
+/* Sections */
+.treatment-form .form-section {
+    margin-bottom: 15px;
+    padding: 0;
+    background-color: transparent;
+    border: none;
+    border-radius: 0;
+}
+
+.treatment-form .section-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 8px 0;
+    padding-bottom: 4px;
+    border-bottom: 2px solid #3b82f6;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+/* Grid layouts */
+.treatment-form .form-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.treatment-form .form-grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+/* Form groups */
+.treatment-form .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.treatment-form .form-group.compact {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+}
+
+.treatment-form .form-group.compact label {
+    white-space: nowrap;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #475569;
+    min-width: fit-content;
+}
+
+.treatment-form .form-group label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #475569;
+}
+
+.treatment-form .form-input {
+    padding: 6px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    color: #1e293b;
+    background: #fff;
+    transition: border-color 0.2s;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.treatment-form .form-input:focus {
+    border-color: #3b82f6;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+}
+
+/* Treatment tables */
+.treatment-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.treatment-table th {
+    background-color: #f1f5f9;
+    color: #334155;
+    font-weight: 700;
+    padding: 8px 6px;
+    text-align: center;
+    border: 1px solid #cbd5e1;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+}
+
+.treatment-table td {
+    padding: 4px;
+    border: 1px solid #cbd5e1;
+    text-align: center;
+}
+
+.table-input {
+    width: 100%;
+    border: none;
+    padding: 5px 4px;
+    font-size: 0.8rem;
+    text-align: center;
+    background: transparent;
+    box-sizing: border-box;
+}
+
+.table-input:focus {
+    outline: none;
+    background-color: #eff6ff;
+}
+
+.table-input.wide {
+    text-align: left;
+}
+
+/* Action column (no border) */
+.treatment-table th.action-col,
+.treatment-table td.action-col {
+    border: none;
+    background-color: transparent;
+    width: 30px;
+    padding: 2px 5px;
+}
+
+/* Delete Row Button (hidden by default) */
+.delete-row-btn {
+    background: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 1.4rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    margin: 0 auto;
+    opacity: 0;
+    transition: all 0.2s ease;
+    border-radius: 50%;
+}
+
+.delete-row-btn:hover {
+    background-color: #dc2626;
+    color: white;
+    transform: scale(1.1);
+}
+
+/* Show button and shaded background on row hover */
+.protocol-row:hover .delete-row-btn {
+    opacity: 1;
+    background-color: #f87171;
+    color: white;
+}
+
+/* Add Row Button Container */
+.add-row-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+
+/* Add Row Button */
+.add-row-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background-color: transparent;
+    color: #3b82f6;
+    border: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.add-row-btn:hover,
+.add-row-btn:focus,
+.add-row-btn:active {
+    background-color: transparent;
+    color: #2563eb;
+    outline: none;
+    box-shadow: none;
+}
+
+/* Full-width fields */
+.treatment-form .form-group.full-width {
+    margin-top: 8px;
+}
+
+.treatment-form .form-group.full-width label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 4px;
+    display: block;
+}
+
+.treatment-form .full-textarea {
+    width: 100%;
+    resize: vertical;
+    font-family: inherit;
+}
+
+/* Footer */
+.treatment-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.footer-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.footer-field label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #334155;
+    white-space: nowrap;
+}
+
+.signature-line {
+    width: 200px;
+    border-bottom: 1px solid #334155;
+    height: 1px;
+}
+
+.footer-field .form-input.small {
+    width: 60px;
+    padding: 4px 8px;
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+/* Variant toggle */
+.variant-toggle {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 14px;
+}
+
+.variant-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 18px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    border: 2px solid #cbd5e1;
+    border-radius: 8px;
+    background: #f8fafc;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.variant-btn:hover {
+    border-color: #94a3b8;
+    background: #f1f5f9;
+    color: #334155;
+}
+
+.variant-btn.active {
+    border-color: #3b82f6;
+    background: #eff6ff;
+    color: #1d4ed8;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+/* Normal variant – observations rows */
+.normal-applied-table .observations-row td {
+    background: #f8fafc;
+    padding: 4px 8px !important;
+    text-align: left;
+}
+
+.obs-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 2px;
+}
+
+.obs-input {
+    text-align: left !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .treatment-form .form-grid-4 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .treatment-form .form-grid-2 {
+        grid-template-columns: 1fr;
+    }
+
+    .treatment-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .variant-toggle {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .variant-btn {
+        justify-content: center;
+    }
+}

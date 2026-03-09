@@ -1,0 +1,380 @@
+/* AnesthesiaForm.css */
+
+.anesthesia-form {
+    padding: 15px;
+}
+
+.anesthesia-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.anesthesia-header h1 {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #333;
+    margin: 0 0 4px 0;
+}
+
+.anesthesia-header h2 {
+    font-size: 1.1rem;
+    color: #666;
+    font-weight: normal;
+    margin: 0 0 10px 0;
+}
+
+.anesthesia-header hr {
+    border: none;
+    border-top: 1px solid #ccc;
+    margin: 10px 0 12px 0;
+}
+
+.anesthesia-header h3 {
+    font-size: 1.1rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #000;
+    margin: 0;
+    letter-spacing: 0.5px;
+}
+
+.anesthesia-form .page-indicator {
+    text-align: right;
+    font-size: 0.85rem;
+    color: #999;
+    margin-bottom: 15px;
+}
+
+/* Form Pages */
+.anesthesia-form .form-page {
+    background-color: #ffffff;
+    padding: 30px 40px;
+    border-radius: 8px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+    position: relative;
+}
+
+/* Sections */
+.anesthesia-form .form-section {
+    margin-bottom: 15px;
+    padding: 0;
+    background-color: transparent;
+    border: none;
+    border-radius: 0;
+}
+
+.anesthesia-form .section-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 8px 0;
+    padding-bottom: 4px;
+    border-bottom: 2px solid #3b82f6;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+/* Grid Layouts */
+.form-grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.form-grid-1 {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Form Inputs */
+.anesthesia-form .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.anesthesia-form .form-group.compact {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+}
+
+.anesthesia-form .form-group.compact label {
+    min-width: 180px;
+    font-size: 0.82rem;
+}
+
+.anesthesia-form .form-group label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.anesthesia-form .form-input {
+    padding: 7px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+    background-color: white;
+}
+
+.anesthesia-form .form-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.anesthesia-form .form-textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.anesthesia-form .form-textarea:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+/* Two Column Layout */
+.two-column-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+/* Radio Groups */
+.radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.88rem;
+    color: #334155;
+    cursor: pointer;
+    padding: 3px 0;
+}
+
+.radio-label input[type="radio"] {
+    accent-color: #3b82f6;
+    cursor: pointer;
+}
+
+.checkbox-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 4px;
+}
+
+/* Valoración Grid */
+.valoracion-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Tables */
+.anesthesia-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.anesthesia-table th {
+    background-color: #f1f5f9;
+    padding: 8px 10px;
+    text-align: center;
+    font-weight: 700;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.anesthesia-table td {
+    padding: 4px;
+    border: 1px solid #e2e8f0;
+    text-align: center;
+}
+
+.table-input {
+    width: 100%;
+    border: none;
+    padding: 6px 4px;
+    font-size: 0.85rem;
+    text-align: center;
+    outline: none;
+    background: transparent;
+}
+
+.table-input:focus {
+    background-color: #eff6ff;
+}
+
+.table-input.wide {
+    min-width: 120px;
+}
+
+/* Action column (no border) */
+.anesthesia-table th.action-col,
+.anesthesia-table td.action-col {
+    border: none;
+    background-color: transparent;
+    width: 30px;
+    padding: 2px 5px;
+}
+
+/* Delete Row Button (hidden by default) */
+.delete-row-btn {
+    background: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 1.4rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    margin: 0 auto;
+    opacity: 0;
+    transition: all 0.2s ease;
+    border-radius: 50%;
+}
+
+.delete-row-btn:hover {
+    background-color: #dc2626;
+    color: white;
+    transform: scale(1.1);
+}
+
+/* Show button and shaded background on row hover */
+.protocol-row:hover .delete-row-btn {
+    opacity: 1;
+    background-color: #f87171;
+    color: white;
+}
+
+/* Add Row Button Container */
+.add-row-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+
+/* Add Row Button */
+.add-row-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background-color: transparent;
+    color: #3b82f6;
+    border: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.add-row-btn:hover,
+.add-row-btn:focus,
+.add-row-btn:active {
+    background-color: transparent;
+    color: #2563eb;
+    outline: none;
+    box-shadow: none;
+}
+
+.sample-check {
+    width: 18px;
+    height: 18px;
+    accent-color: #3b82f6;
+    cursor: pointer;
+}
+
+/* Signature */
+.signature-section {
+    display: flex;
+    justify-content: center;
+}
+
+.signature-block {
+    text-align: center;
+    width: 300px;
+}
+
+.signature-line {
+    border-bottom: 1px solid #333;
+    height: 60px;
+    margin-bottom: 5px;
+}
+
+.signature-block label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #475569;
+}
+
+/* Buttons */
+.anesthesia-form .form-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #e8ecf0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .form-grid-4 {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .two-column-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .anesthesia-form .form-group.compact {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .anesthesia-form .form-group.compact label {
+        min-width: auto;
+    }
+
+    .checkbox-row {
+        flex-direction: column;
+        gap: 6px;
+    }
+}
+
+@media (max-width: 480px) {
+    .form-grid-4 {
+        grid-template-columns: 1fr;
+    }
+}

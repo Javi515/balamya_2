@@ -1,0 +1,58 @@
+/* Floating circular action buttons - shared across all forms */
+.floating-actions {
+    position: fixed;
+    right: -20px;
+    bottom: 0px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 1000;
+}
+
+.floating-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.floating-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+}
+
+.floating-btn:active {
+    transform: scale(0.95);
+}
+
+.floating-btn.save-btn {
+    background-color: #007bff;
+}
+
+.floating-btn.save-btn:hover {
+    background-color: #0056b3;
+}
+
+.floating-btn.pdf-btn {
+    background-color: #dc3545;
+}
+
+.floating-btn.pdf-btn:hover {
+    background-color: #b02a37;
+}
+
+.floating-btn.print-btn {
+    background-color: #6c757d;
+}
+
+.floating-btn.print-btn:hover {
+    background-color: #5a6268;
+}

@@ -1,0 +1,269 @@
+/* HospFollowUpForm.css */
+
+.hosp-followup-form {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 15px;
+}
+
+/* Header */
+.hosp-header {
+    margin-bottom: 15px;
+}
+
+.hosp-header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    margin-bottom: 10px;
+}
+
+.hosp-header-left {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.7rem;
+    color: #475569;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.hosp-institution {
+    font-weight: 700;
+    font-size: 0.75rem;
+    color: #1e293b;
+}
+
+.hosp-sub {
+    font-size: 0.7rem;
+}
+
+.hosp-header-center {
+    text-align: center;
+    flex: 1;
+}
+
+.hosp-header-center h3 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+}
+
+.hosp-header-right {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.65rem;
+    color: #64748b;
+    text-align: right;
+    line-height: 1.4;
+}
+
+/* Data row */
+.hosp-data-row {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.hosp-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.hosp-field label {
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #334155;
+    white-space: nowrap;
+}
+
+.hosp-field .form-input {
+    padding: 6px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    color: #1e293b;
+    background: #fff;
+    min-width: 200px;
+}
+
+.hosp-field .form-input:focus {
+    border-color: #3b82f6;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+}
+
+/* Section */
+.hosp-followup-form .form-section {
+    margin-bottom: 15px;
+    padding: 0;
+    background-color: transparent;
+    border: none;
+}
+
+/* Monitoring Table */
+.hosp-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+}
+
+.hosp-table th {
+    background-color: #f1f5f9;
+    color: #334155;
+    font-weight: 700;
+    padding: 8px 4px;
+    text-align: center;
+    border: 1px solid #cbd5e1;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+}
+
+.hosp-table th small {
+    display: block;
+    font-weight: 400;
+    font-size: 0.65rem;
+    color: #64748b;
+    text-transform: none;
+}
+
+.th-patient {
+    min-width: 140px;
+}
+
+.th-obs {
+    min-width: 180px;
+}
+
+.hosp-table td {
+    padding: 3px;
+    border: 1px solid #cbd5e1;
+    text-align: center;
+}
+
+.td-patient {
+    min-width: 140px;
+}
+
+.hosp-table .table-input {
+    width: 100%;
+    border: none;
+    padding: 5px 4px;
+    font-size: 0.8rem;
+    text-align: center;
+    background: transparent;
+    box-sizing: border-box;
+}
+
+.hosp-table .table-input:focus {
+    outline: none;
+    background-color: #eff6ff;
+}
+
+.hosp-table .table-input.wide {
+    text-align: left;
+}
+
+/* Action column (no border) */
+.hosp-table th.action-col,
+.hosp-table td.action-col {
+    border: none;
+    background-color: transparent;
+    width: 30px;
+    padding: 2px 5px;
+}
+
+/* Delete Row Button (hidden by default) */
+.delete-row-btn {
+    background: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 1.4rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    margin: 0 auto;
+    opacity: 0;
+    transition: all 0.2s ease;
+    border-radius: 50%;
+}
+
+.delete-row-btn:hover {
+    background-color: #dc2626;
+    color: white;
+    transform: scale(1.1);
+}
+
+/* Show button and shaded background on row hover */
+.protocol-row:hover .delete-row-btn {
+    opacity: 1;
+    background-color: #f87171;
+    color: white;
+}
+
+/* Add Row Button Container */
+.add-row-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+
+/* Add Row Button */
+.add-row-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background-color: transparent;
+    color: #3b82f6;
+    border: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.add-row-btn:hover,
+.add-row-btn:focus,
+.add-row-btn:active {
+    background-color: transparent;
+    color: #2563eb;
+    outline: none;
+    box-shadow: none;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    .hosp-header-top {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .hosp-header-left,
+    .hosp-header-right {
+        text-align: center;
+    }
+
+    .hosp-data-row {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .hosp-table {
+        font-size: 0.75rem;
+    }
+}

@@ -1,0 +1,106 @@
+.image-uploader-container {
+    width: 140px;
+    height: 80px;
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.2s ease;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.image-uploader-container.empty {
+    border: 2px dashed #cbd5e1;
+    background-color: #f8fafc;
+}
+
+.image-uploader-container.empty:hover {
+    border-color: #3b82f6;
+    background-color: #eff6ff;
+}
+
+.image-uploader-container.empty:hover .upload-icon,
+.image-uploader-container.empty:hover .upload-text {
+    color: #3b82f6;
+}
+
+.image-uploader-container.has-image {
+    border: none;
+    background-color: transparent;
+}
+
+.uploader-placeholder {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    color: #94a3b8;
+    transition: color 0.2s ease;
+}
+
+.upload-icon {
+    font-size: 1.2rem;
+}
+
+.upload-text {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-align: center;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.uploaded-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+@media print {
+
+    /* Don't print empty placeholders */
+    .image-uploader-container.empty {
+        display: none !important;
+        border: none !important;
+        background: transparent !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+    }
+
+    /* Important: preserve the width/height of the container so the image sizes correctly on PDF */
+    .image-uploader-container.has-image {
+        display: flex !important;
+    }
+}
+
+.remove-btn {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    /* Mantiene el borde del contenedor */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 10;
+    font-size: 24px;
+    opacity: 0;
+    transition: opacity 0.3s ease, background-color 0.3s ease;
+}
+
+.image-uploader-container.has-image:hover .remove-btn {
+    opacity: 1;
+}
+
+.remove-btn:hover {
+    background-color: rgba(0, 0, 0, 0.75);
+}
