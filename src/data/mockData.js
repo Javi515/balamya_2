@@ -25,6 +25,7 @@ export const patients = [
     age: 5,
     weight: 190,
     status: 'Saludable',
+    origin: 'Cautiverio',
     imageUrl: 'https://images.unsplash.com/photo-1614027164847-1b28cfe1df60?auto=format&fit=crop&q=80&w=800'
   },
   {
@@ -40,6 +41,7 @@ export const patients = [
     age: 12,
     weight: 1.1,
     status: 'Estable',
+    origin: 'Vida libre',
     imageUrl: 'https://images.unsplash.com/photo-1555169062-013468b47731?auto=format&fit=crop&q=80&w=800'
   },
   {
@@ -55,6 +57,7 @@ export const patients = [
     age: 4,
     weight: 220,
     status: 'Crítico',
+    origin: 'Cautiverio',
     isQuarantine: true,
     imageUrl: 'https://images.unsplash.com/photo-1500964757637-c852700913c3?auto=format&fit=crop&q=80&w=800'
   },
@@ -71,6 +74,7 @@ export const patients = [
     age: 3,
     weight: 4.2,
     status: 'Saludable',
+    origin: 'Abandono',
     imageUrl: 'https://images.unsplash.com/photo-1518049757303-3bae753da31e?auto=format&fit=crop&q=80&w=800'
   },
   {
@@ -86,6 +90,7 @@ export const patients = [
     age: 8,
     weight: 800,
     status: 'Saludable',
+    origin: 'Cautiverio',
     imageUrl: 'https://images.unsplash.com/photo-1547721064-da6cfb341d50?auto=format&fit=crop&q=80&w=800'
   },
   {
@@ -101,6 +106,7 @@ export const patients = [
     age: 1,
     weight: 0.05,
     status: 'Saludable',
+    origin: 'Vida libre',
     imageUrl: 'https://images.unsplash.com/photo-1599488615731-7e5c03df392e?auto=format&fit=crop&q=80&w=800'
   },
   {
@@ -116,6 +122,7 @@ export const patients = [
     age: 6,
     weight: 0.5,
     status: 'Observación',
+    origin: 'Abandono',
     imageUrl: 'https://images.unsplash.com/photo-1550853024-843963036a61?auto=format&fit=crop&q=80&w=800'
   },
   {
@@ -131,6 +138,7 @@ export const patients = [
     age: 10,
     weight: 60,
     status: 'Estable',
+    origin: 'Vida libre',
     isQuarantine: true,
     imageUrl: 'https://images.unsplash.com/photo-1531386816483-219ab031813b?auto=format&fit=crop&q=80&w=800'
   },
@@ -147,6 +155,7 @@ export const patients = [
     age: 15,
     weight: 150,
     status: 'Saludable',
+    origin: 'Vida libre',
     imageUrl: 'https://images.unsplash.com/photo-1589656966895-2f33e7653819?auto=format&fit=crop&q=80&w=800'
   },
   {
@@ -162,6 +171,7 @@ export const patients = [
     age: 4,
     weight: 1.5,
     status: 'Saludable',
+    origin: 'Abandono',
     imageUrl: 'https://images.unsplash.com/photo-1579562211933-2895b6c0c282?auto=format&fit=crop&q=80&w=800'
   },
   {
@@ -177,6 +187,7 @@ export const patients = [
     age: 2,
     weight: 0.2,
     status: 'Crítico',
+    origin: 'Cautiverio',
     isQuarantine: true,
     imageUrl: 'https://images.unsplash.com/photo-1588166524941-3bf61a9c41db?auto=format&fit=crop&q=80&w=800'
   },
@@ -193,6 +204,7 @@ export const patients = [
     age: 25,
     weight: 250,
     status: 'Saludable',
+    origin: 'Vida libre',
     imageUrl: 'https://images.unsplash.com/photo-1601655959326-724a7374dc73?auto=format&fit=crop&q=80&w=800'
   }
 ];

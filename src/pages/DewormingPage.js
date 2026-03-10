@@ -205,44 +205,28 @@ const DewormingPage = () => {
     // ==========================================
     if (viewState === 'menu') {
         return (
-            <div
-                className={formStyles['forms-page-wrapper']}
-                style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center',
-                    minHeight: 'calc(100vh - 140px)',
-                    marginTop: '0'
-                }}
-            >
+            <div className={`${formStyles['forms-page-wrapper']} ${formStyles['module-menu-wrapper']}`}>
                 <div className={formStyles['forms-page-container']}>
-                    <div className={formStyles['forms-page-header']} style={{ textAlign: 'center', marginBottom: '50px' }}>
+                    <div className={formStyles['forms-page-header']} style={{ textAlign: 'center', marginBottom: '40px' }}>
                         <h1 className={formStyles['forms-page-title']} style={{ fontSize: '2.5rem' }}>Desparasitaciones</h1>
-                        <p className={formStyles['forms-page-subtitle']} style={{ fontSize: '1.1rem' }}>¿Qué deseas hacer?</p>
+                        <p className={formStyles['forms-page-subtitle']}>¿Qué deseas hacer?</p>
                     </div>
-                    <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
-                        gap: '40px',
-                        padding: '20px',
-                        maxWidth: '1000px',
-                        margin: '0 auto'
-                    }}>
-                        <div className={`${formStyles['form-card']} ${formStyles['form-card-deworming']}`} onClick={goToRegister} style={{ cursor: 'pointer', minHeight: '350px' }}>
-                            <div className={formStyles['form-card-content']} style={{ flexDirection: 'column', textAlign: 'center', justifyContent: 'center', gap: '25px' }}>
-                                <FaBug className={formStyles['form-card-icon']} style={{ color: '#28a745', fontSize: '72px' }} />
-                                <div className={formStyles['form-card-text']} style={{ textAlign: 'center' }}>
-                                    <h3 className={formStyles['form-card-title']} style={{ fontSize: '1.5rem', marginBottom: '15px' }}>REGISTRAR DESPARASITACIÓN</h3>
-                                    <p className={formStyles['form-card-description']} style={{ fontSize: '1.1rem' }}>Selecciona un ejemplar y registra una nueva desparasitación en su historial clínico.</p>
+                    <div className={formStyles['module-menu-grid']}>
+                        <div className={`${formStyles['form-card']} ${formStyles['form-card-deworming']} ${formStyles['module-menu-card']}`} onClick={goToRegister}>
+                            <div className={`${formStyles['form-card-content']} ${formStyles['module-menu-card-content']}`}>
+                                <FaBug className={`${formStyles['form-card-icon']} ${formStyles['module-menu-icon']}`} style={{ color: '#28a745' }} />
+                                <div className={formStyles['form-card-text']}>
+                                    <h3 className={`${formStyles['form-card-title']} ${formStyles['module-menu-title']}`}>REGISTRAR DESPARASITACIÓN</h3>
+                                    <p className={`${formStyles['form-card-description']} ${formStyles['module-menu-desc']}`}>Selecciona un ejemplar y registra una nueva desparasitación en su historial clínico.</p>
                                 </div>
                             </div>
                         </div>
-                        <div className={`${formStyles['form-card']} ${formStyles['form-card-deworming']}`} onClick={goToSummary} style={{ cursor: 'pointer', minHeight: '350px' }}>
-                            <div className={formStyles['form-card-content']} style={{ flexDirection: 'column', textAlign: 'center', justifyContent: 'center', gap: '25px' }}>
-                                <FaListAlt className={formStyles['form-card-icon']} style={{ color: '#28a745', fontSize: '72px' }} />
-                                <div className={formStyles['form-card-text']} style={{ textAlign: 'center' }}>
-                                    <h3 className={formStyles['form-card-title']} style={{ fontSize: '1.5rem', marginBottom: '15px' }}>VER DESPARASITACIONES</h3>
-                                    <p className={formStyles['form-card-description']} style={{ fontSize: '1.1rem' }}>Consulta el resumen de desparasitaciones de todos los pacientes y accede a su historial.</p>
+                        <div className={`${formStyles['form-card']} ${formStyles['form-card-deworming']} ${formStyles['module-menu-card']}`} onClick={goToSummary}>
+                            <div className={`${formStyles['form-card-content']} ${formStyles['module-menu-card-content']}`}>
+                                <FaListAlt className={`${formStyles['form-card-icon']} ${formStyles['module-menu-icon']}`} style={{ color: '#28a745' }} />
+                                <div className={formStyles['form-card-text']}>
+                                    <h3 className={`${formStyles['form-card-title']} ${formStyles['module-menu-title']}`}>VER DESPARASITACIONES</h3>
+                                    <p className={`${formStyles['form-card-description']} ${formStyles['module-menu-desc']}`}>Consulta el resumen de desparasitaciones de todos los pacientes y accede a su historial.</p>
                                 </div>
                             </div>
                         </div>

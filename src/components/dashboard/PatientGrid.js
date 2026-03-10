@@ -6,7 +6,7 @@ import styles from '../../styles/PatientGrid.module.css';
 
 const ITEMS_PER_PAGE = 10;
 
-const PatientGrid = ({ patients, searchTerm, category, location, group, viewMode = 'grid', isCasualties = false }) => {
+const PatientGrid = ({ patients, searchTerm, category, location, group, casualtyType, viewMode = 'grid', isCasualties = false }) => {
     const navigate = useNavigate();
     const [currentPage, setCurrentPage] = useState(1);
     const [filteredPatients, setFilteredPatients] = useState([]);
@@ -14,7 +14,7 @@ const PatientGrid = ({ patients, searchTerm, category, location, group, viewMode
     // reset to page 1 when filters change
     useEffect(() => {
         setCurrentPage(1);
-    }, [searchTerm, category, location, group]);
+    }, [searchTerm, category, location, group, casualtyType]);
 
     useEffect(() => {
         let result = patients;
@@ -36,7 +36,13 @@ const PatientGrid = ({ patients, searchTerm, category, location, group, viewMode
 
         // Filter by Location
         if (location && location.length > 0 && !location.includes('Todas')) {
-            result = result.filter(p => location.includes(p.locationType));
+            result = result.filter(p =>
+                location.some(loc => {
+                    if (loc === 'Abandono') return p.origin === 'Abandono';
+                    if (loc === 'Recién Nacidos') return p.age <= 1;
+                    return p.locationType === loc;
+                })
+            );
         }
 
         // Filter by Group
@@ -51,8 +57,13 @@ const PatientGrid = ({ patients, searchTerm, category, location, group, viewMode
             }
         }
 
+        // Filter by Casualty Type (only relevant on casualties page)
+        if (isCasualties && casualtyType && casualtyType.length > 0 && !casualtyType.includes('Todas')) {
+            result = result.filter(p => p.casualtyType && casualtyType.includes(p.casualtyType));
+        }
+
         setFilteredPatients(result);
-    }, [patients, searchTerm, category, location, group]);
+    }, [patients, searchTerm, category, location, group, casualtyType, isCasualties]);
 
     // Pagination Logic
     const totalPages = Math.ceil(filteredPatients.length / ITEMS_PER_PAGE);

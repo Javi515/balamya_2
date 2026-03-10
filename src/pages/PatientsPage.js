@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { FaSearch, FaTree, FaDove, FaFrog, FaUsers, FaUser, FaClinicMedical, FaSlidersH, FaMapMarkerAlt, FaTh, FaThList, FaTimes, FaPaw, FaFeatherAlt } from 'react-icons/fa';
+import { FaSearch, FaTree, FaDove, FaFrog, FaUsers, FaUser, FaClinicMedical, FaSlidersH, FaMapMarkerAlt, FaTh, FaThList, FaTimes, FaPaw, FaFeatherAlt, FaSkull, FaHandshake, FaExchangeAlt, FaGift, FaLeaf, FaHeart, FaBaby } from 'react-icons/fa';
 import { GiSnake } from 'react-icons/gi';
 import { useAuth } from '../context/AuthContext';
 import PatientGrid from '../components/dashboard/PatientGrid';
@@ -16,10 +16,12 @@ const PatientsPage = () => {
   const [selectedLocations, setSelectedLocations] = useState(['Todas']);
   const [selectedSpecies, setSelectedSpecies] = useState(['todos']);
   const [selectedGroups, setSelectedGroups] = useState(['Todos']);
+  const [selectedCasualtyTypes, setSelectedCasualtyTypes] = useState(['Todas']);
   const [expandedSections, setExpandedSections] = useState({
     especie: true,
     ubicacion: true,
-    agrupacion: true
+    agrupacion: true,
+    tipoBaja: true
   });
   const location = useLocation();
   const navigate = useNavigate();
@@ -167,8 +169,12 @@ const PatientsPage = () => {
                     {[
                       { id: 'Todas', label: 'Todas las Ubicaciones', icon: null },
                       { id: 'Cuarentena', label: 'Cuarentena', icon: <FaClinicMedical className={styles['filter-icon']} /> },
-                      { id: 'Al aire libre', label: 'Al aire libre', icon: <FaTree className={styles['filter-icon']} /> },
-                      { id: 'Recinto', label: 'En Recinto', icon: <FaMapMarkerAlt className={styles['filter-icon']} /> }
+                      { id: 'Al aire libre', label: 'Vida libre', icon: <FaLeaf className={styles['filter-icon']} /> },
+                      { id: 'Recinto', label: 'En Recinto', icon: <FaMapMarkerAlt className={styles['filter-icon']} /> },
+                      ...(!isCasualtiesPage ? [
+                        { id: 'Abandono', label: 'Abandono', icon: <FaHeart className={styles['filter-icon']} /> },
+                        { id: 'Recién Nacidos', label: 'Recién Nacidos', icon: <FaBaby className={styles['filter-icon']} /> }
+                      ] : [])
                     ].map((opt) => (
                       <label key={opt.id} className={`${styles['checkbox-item']} ${selectedLocations.includes(opt.id) ? styles.active : ''} ${opt.id === 'Todas' ? styles['full-width'] : ''}`}>
                         <input
@@ -216,6 +222,40 @@ const PatientsPage = () => {
                   </div>
                 )}
               </div>
+
+              {/* Tipo de Baja Section — solo en la pestaña de bajas */}
+              {isCasualtiesPage && (
+                <div className={styles['filter-section']}>
+                  <div className={styles['section-header']} onClick={() => toggleSection('tipoBaja')}>
+                    <span className={styles['filter-label']}>TIPO DE BAJA</span>
+                    <span className={`${styles['collapse-icon']} ${expandedSections.tipoBaja ? styles.expanded : ''}`}>▼</span>
+                  </div>
+                  {expandedSections.tipoBaja && (
+                    <div className={styles['filter-options-grid']}>
+                      {[
+                        { id: 'Todas', label: 'Todas', icon: null },
+                        { id: 'Muerte', label: 'Muerte', icon: <FaSkull className={styles['filter-icon']} /> },
+                        { id: 'Préstamo', label: 'Préstamo', icon: <FaHandshake className={styles['filter-icon']} /> },
+                        { id: 'Intercambio', label: 'Intercambio', icon: <FaExchangeAlt className={styles['filter-icon']} /> },
+                        { id: 'Donación', label: 'Donación', icon: <FaGift className={styles['filter-icon']} /> }
+                      ].map((opt) => (
+                        <label key={opt.id} className={`${styles['checkbox-item']} ${selectedCasualtyTypes.includes(opt.id) ? styles.active : ''} ${opt.id === 'Todas' ? styles['full-width'] : ''}`}>
+                          <input
+                            type="checkbox"
+                            checked={selectedCasualtyTypes.includes(opt.id)}
+                            onChange={() => toggleFilter(opt.id, selectedCasualtyTypes, setSelectedCasualtyTypes, 'Todas')}
+                          />
+                          <div className={styles['checkbox-custom']}></div>
+                          <div className={styles['checkbox-content']}>
+                            {opt.icon}
+                            <span>{opt.label}</span>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className={styles['drawer-footer']}>
@@ -257,6 +297,7 @@ const PatientsPage = () => {
         category={selectedSpecies}
         location={selectedLocations}
         group={selectedGroups}
+        casualtyType={selectedCasualtyTypes}
         viewMode={viewMode}
         isCasualties={isCasualtiesPage}
       />

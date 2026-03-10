@@ -267,3 +267,15 @@
         font-size: 0.75rem;
     }
 }
+
+@media (max-width: 768px) {
+    /* Make the table section scroll horizontally */
+    .form-section {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .hosp-table {
+        min-width: 600px;
+    }
+}

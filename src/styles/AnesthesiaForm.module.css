@@ -371,6 +371,21 @@
         flex-direction: column;
         gap: 6px;
     }
+
+    /* Make sections with tables scroll horizontally */
+    .form-section {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .anesthesia-table {
+        min-width: 500px;
+    }
+
+    /* Hemograma/Bioquímica: stack on very narrow screens */
+    .form-grid-4[style] {
+        grid-template-columns: 1fr !important;
+    }
 }
 
 @media (max-width: 480px) {

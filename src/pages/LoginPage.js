@@ -68,13 +68,12 @@ const LoginPage = () => {
             </div>
 
             {/* Right Column - Login Form */}
-            <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-8 lg:p-16 bg-white dark:bg-[#0f172a] relative">
-                <div className="lg:hidden absolute top-8 left-8 flex items-center space-x-2 text-[#1e293b] dark:text-white">
+            <div className="w-full lg:w-1/2 flex flex-col items-center p-8 lg:p-16 bg-white dark:bg-[#0f172a] overflow-y-auto">
+                <div className="w-full max-w-lg mx-auto flex flex-col justify-center min-h-full">
+                <div className="lg:hidden flex items-center space-x-2 text-[#1e293b] dark:text-white mb-8">
                     <MdPets className="text-3xl" />
                     <span className="text-xl font-bold">ZOOMAT</span>
                 </div>
-
-                <div className="w-full max-w-lg mx-auto flex flex-col justify-center h-full">
                     <div className="mb-10">
                         <div className="w-16 h-16 bg-[#17468d] rounded-full flex items-center justify-center shadow-lg mb-6">
                             <MdMedicalServices className="text-white text-4xl" />

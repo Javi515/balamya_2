@@ -1,14 +1,25 @@
-/* Records Section — renders inside parent's white card */
+/* Records Section */
 .records-container {
     background: transparent;
     padding: 0;
+}
+
+/* White card wrapper — only for table mode */
+.table-card-wrapper {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(15, 23, 42, 0.06);
+    border: 1px solid #f1f5f9;
+    padding: 20px 20px 16px 20px;
+    max-width: 100%;
+    overflow-x: auto;
 }
 
 .records-header {
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: 18px;
+    margin-bottom: 14px;
     padding-bottom: 12px;
     border-bottom: 1px solid #edf0f4;
 }
@@ -33,53 +44,64 @@
 .records-table {
     width: 100%;
     border-collapse: collapse;
+    font-size: 0.875rem;
+    text-align: left;
+    min-width: 700px;
 }
 
-/* Headers — sentence case, muted, thin border */
+/* Headers */
 .records-table th {
     text-align: left;
-    padding: 10px 14px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: #7c8a9a;
-    text-transform: none;
-    letter-spacing: 0;
-    border-bottom: 1px solid #e5e9ee;
+    padding: 8px 12px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    border-bottom: 2px solid #f1f5f9;
     white-space: nowrap;
     background: transparent;
 }
 
-/* All data cells — uniform, clean, no decorations */
-.records-table td {
-    padding: 13px 14px;
-    border-bottom: 1px solid #f2f4f7;
-    color: #374151;
-    font-size: 0.85rem;
-    font-weight: 400;
-    font-style: normal;
-    text-transform: none;
-    vertical-align: middle;
-    line-height: 1.45;
+/* Data rows */
+.records-table tbody tr {
+    border-bottom: 1px solid #f3f4f6;
+    transition: background-color 0.15s ease;
 }
 
-.records-table tr:last-child td {
+.records-table tbody tr:last-child {
     border-bottom: none;
 }
 
-.records-table tbody tr:hover td {
-    background-color: #fafbfc;
+.records-table tbody tr:hover {
+    background-color: #f8fafc;
 }
 
-/* ID column — slightly smaller */
+/* All data cells */
+.records-table td {
+    padding: 11px 12px;
+    color: #1f2937;
+    font-size: 0.85rem;
+    vertical-align: middle;
+    line-height: 1.4;
+}
+
+/* ID column */
 .records-table td:nth-child(1) {
     white-space: nowrap;
-    font-size: 0.82rem;
+    font-size: 0.8rem;
     color: #64748b;
+    font-family: monospace;
 }
 
 /* Date — keep on one line */
 .records-table td:nth-child(5) {
     white-space: nowrap;
+}
+
+/* Veterinario — allow wrapping but limit width */
+.records-table td:nth-child(6) {
+    max-width: 130px;
 }
 
 /* Action column */

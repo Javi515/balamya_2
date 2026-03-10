@@ -149,69 +149,76 @@ const RecordsTable = ({ records, viewMode = 'grid' }) => {
 
     return (
         <div className={styles['records-container']}>
-            <div className={styles['records-header']}>
-                <h3 className={styles['records-title']}>Registros Encontrados</h3>
-                <span className={styles['records-count-badge']}>{records.length} resultados</span>
-            </div>
-
             {viewMode === 'grid' ? (
-                <div className={gridStyles['medical-history-grid']}>
-                    {currentItems.length > 0 ? (
-                        currentItems.map(renderCard)
-                    ) : (
-                        <div className={`${gridStyles['no-results']} col-span-full`}>
-                            No se encontraron registros que coincidan con tu búsqueda.
-                        </div>
-                    )}
-                </div>
-            ) : (
-                <table className={styles['records-table']}>
-                    <thead>
-                        <tr>
-                            <th>ID del Animal</th>
-                            <th>Nombre Común</th>
-                            <th>Especie</th>
-                            <th>Ubicación</th>
-                            <th>Fecha que atendió</th>
-                            <th>Veterinario</th>
-                            <th>Procedimiento</th>
-                            <th>Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+                <>
+                    <div className={styles['records-header']}>
+                        <h3 className={styles['records-title']}>Registros Encontrados</h3>
+                        <span className={styles['records-count-badge']}>{records.length} resultados</span>
+                    </div>
+                    <div className={gridStyles['medical-history-grid']}>
                         {currentItems.length > 0 ? (
-                            currentItems.map((record) => (
-                                <tr key={record.id}>
-                                    <td>{record.id}</td>
-                                    <td>{record.commonName || 'Sin Nombre Común'}</td>
-                                    <td>{record.scientificName}</td>
-                                    <td>{record.location}</td>
-                                    <td>{record.date}</td>
-                                    <td>{record.doctor}</td>
-                                    <td>{(record.type || '').toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}</td>
-                                    <td>
-                                        <button
-                                            className={styles['view-record-btn']}
-                                            onClick={() => {
-                                                const formKey = getFormKey(record.type);
-                                                const patientIdParam = record.patientId ? `&patientId=${record.patientId}` : '';
-                                                navigate(`/forms?form=${formKey}&animalName=${encodeURIComponent(record.name)}&origin=history${patientIdParam}`);
-                                            }}
-                                        >
-                                            Ver detalles
-                                        </button>
+                            currentItems.map(renderCard)
+                        ) : (
+                            <div className={`${gridStyles['no-results']} col-span-full`}>
+                                No se encontraron registros que coincidan con tu búsqueda.
+                            </div>
+                        )}
+                    </div>
+                </>
+            ) : (
+                <div className={styles['table-card-wrapper']}>
+                    <div className={styles['records-header']}>
+                        <h3 className={styles['records-title']}>Registros Encontrados</h3>
+                        <span className={styles['records-count-badge']}>{records.length} resultados</span>
+                    </div>
+                    <table className={styles['records-table']}>
+                        <thead>
+                            <tr>
+                                <th>ID del Animal</th>
+                                <th>Nombre Común</th>
+                                <th>Especie</th>
+                                <th>Ubicación</th>
+                                <th>Fecha que atendió</th>
+                                <th>Veterinario</th>
+                                <th>Procedimiento</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {currentItems.length > 0 ? (
+                                currentItems.map((record) => (
+                                    <tr key={record.id}>
+                                        <td>{record.id}</td>
+                                        <td>{record.commonName || 'Sin Nombre Común'}</td>
+                                        <td>{record.scientificName}</td>
+                                        <td>{record.location}</td>
+                                        <td>{record.date}</td>
+                                        <td>{record.doctor}</td>
+                                        <td>{(record.type || '').toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}</td>
+                                        <td>
+                                            <button
+                                                className={styles['view-record-btn']}
+                                                onClick={() => {
+                                                    const formKey = getFormKey(record.type);
+                                                    const patientIdParam = record.patientId ? `&patientId=${record.patientId}` : '';
+                                                    navigate(`/forms?form=${formKey}&animalName=${encodeURIComponent(record.name)}&origin=history${patientIdParam}`);
+                                                }}
+                                            >
+                                                Ver detalles
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="8" className={styles['empty-state']}>
+                                        No se encontraron registros que coincidan con tu búsqueda.
                                     </td>
                                 </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan="8" className={styles['empty-state']}>
-                                    No se encontraron registros que coincidan con tu búsqueda.
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
             )}
 
 

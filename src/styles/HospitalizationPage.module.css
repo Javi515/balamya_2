@@ -138,12 +138,53 @@
     transform: translateY(-1px);
 }
 
+/* Tab Submenu */
+.tab-submenu {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0;
+}
+
+.tab-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    border-radius: 6px 6px 0 0;
+    transition: color 0.2s, border-color 0.2s, background-color 0.2s;
+}
+
+.tab-btn:hover {
+    color: #2563eb;
+    background-color: #f1f5f9;
+}
+
+.tab-active {
+    color: #2563eb;
+    border-bottom-color: #2563eb;
+    background-color: transparent;
+}
+
+.tab-icon {
+    font-size: 0.85rem;
+}
+
 /* Tabla Clínica */
 .table-container {
     background-color: transparent;
     border-radius: 0;
     box-shadow: none;
-    overflow-x: auto;
+    overflow-x: hidden;
     width: 100%;
     margin-top: 10px;
     border: none;
@@ -266,8 +307,17 @@
 
 .btn-discharge:hover {
     color: #16a34a;
-    /* Verde para alta */
     background-color: #dcfce7;
+}
+
+.btn-necropsy:hover {
+    color: #7c3aed;
+    background-color: #ede9fe;
+}
+
+.btn-record:hover {
+    color: #d97706;
+    background-color: #fef3c7;
 }
 
 /* Paginación */
@@ -414,7 +464,18 @@
         border-top: 1px solid #f1f5f9;
         padding-top: 10px;
         display: flex;
-        justify-content: space-around;
+        flex-wrap: wrap;
+        gap: 6px;
+        justify-content: flex-start;
+    }
+
+    .card-actions .action-btn {
+        flex: 1 1 auto;
+        min-width: 0;
+        justify-content: center;
+        font-size: 0.8rem;
+        padding: 6px 8px;
+        white-space: nowrap;
     }
 }
 

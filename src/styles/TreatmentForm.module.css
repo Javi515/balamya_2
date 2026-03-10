@@ -383,4 +383,22 @@
     .variant-btn {
         justify-content: center;
     }
+
+    /* Make tables horizontally scrollable on mobile */
+    .form-section {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .treatment-table {
+        min-width: 560px;
+    }
+
+    /* Header compact on mobile */
+    .treatment-header {
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 10px;
+        text-align: center;
+    }
 }

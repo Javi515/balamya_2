@@ -17,8 +17,8 @@ const ReptilesReviewVariant = ({ patient, getTitle, isSaved, handleSave, handleE
             <div className="form-page block bg-white p-8 shadow-lg mb-8 rounded-sm" id="hoja1">
                 {/* Header */}
                 <div className="flex justify-between items-start w-full mb-5" style={{ gap: '20px' }}>
-                    <ImageUploader placeholderText="Logo" className="header-logo-left shrink-0" />
-                    <div className="flex flex-col items-center justify-center text-center flex-1">
+                    <ImageUploader placeholderText="Logo" className="header-logo-left" />
+                    <div className="flex flex-col items-center justify-center text-center flex-1 min-w-0">
                         <h1 className="text-2xl font-bold text-gray-800 m-0 mb-1">
                             Zoológico Regional Miguel Álvarez del Toro
                         </h1>
@@ -30,7 +30,7 @@ const ReptilesReviewVariant = ({ patient, getTitle, isSaved, handleSave, handleE
                             {getTitle()}
                         </h3>
                     </div>
-                    <ImageUploader placeholderText="Logo" className="header-logo-right shrink-0" />
+                    <ImageUploader placeholderText="Logo" className="header-logo-right" />
                 </div>
 
                 {/* Datos Generales */}

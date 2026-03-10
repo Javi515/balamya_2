@@ -1,6 +1,8 @@
 .image-uploader-container {
     width: 140px;
     height: 80px;
+    min-width: 60px;
+    flex-shrink: 1;
     position: relative;
     cursor: pointer;
     display: flex;
@@ -9,6 +11,28 @@
     transition: all 0.2s ease;
     border-radius: 8px;
     overflow: hidden;
+}
+
+@media (max-width: 600px) {
+    .image-uploader-container {
+        width: 80px;
+        height: 55px;
+    }
+}
+
+@media (max-width: 420px) {
+    .image-uploader-container {
+        width: 60px;
+        height: 45px;
+    }
+
+    .upload-icon {
+        font-size: 0.9rem;
+    }
+
+    .upload-text {
+        font-size: 0.6rem;
+    }
 }
 
 .image-uploader-container.empty {

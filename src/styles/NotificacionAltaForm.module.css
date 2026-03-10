@@ -70,6 +70,16 @@
     margin-bottom: 14px;
 }
 
+@media (max-width: 640px) {
+    .form-grid-2 {
+        grid-template-columns: 1fr;
+    }
+
+    .form-grid-3 {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* Form groups */
 .form-group {
     display: flex;
@@ -94,6 +104,9 @@
     font-family: inherit;
     transition: border-color 0.2s;
     background-color: #fff;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
 }
 
 .form-input:focus {
@@ -186,4 +199,17 @@
     font-weight: 700;
     color: #475569;
     text-transform: uppercase;
+}
+
+@media (max-width: 500px) {
+    .signature-section {
+        flex-direction: column;
+        align-items: center;
+        gap: 24px;
+    }
+
+    .signature-block {
+        width: 80%;
+        max-width: 100%;
+    }
 }

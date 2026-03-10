@@ -22,6 +22,11 @@ const useFormsPage = () => {
                 setSelectedAnimal(foundAnimal);
                 setViewState('form');
             }
+        } else if (urlForm && !urlAnimalName) {
+            // New entry without a pre-selected animal (e.g. "Nuevo Ingreso")
+            setTargetForm(urlForm);
+            setSelectedAnimal(null);
+            setViewState('form');
         }
     }, [searchParams]);
 

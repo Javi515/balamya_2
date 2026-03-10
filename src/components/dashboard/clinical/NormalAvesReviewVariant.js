@@ -21,8 +21,8 @@ const NormalAvesReviewVariant = ({
             {/* Hoja 1 */}
             <div className="form-page block bg-white p-8 shadow-lg mb-8 rounded-sm" id="hoja1">
                 <div className="flex justify-between items-start w-full mb-3" style={{ gap: '16px' }}>
-                    <ImageUploader placeholderText="Logo" className="header-logo-left shrink-0" />
-                    <div className="flex flex-col items-center justify-center text-center flex-1">
+                    <ImageUploader placeholderText="Logo" className="header-logo-left" />
+                    <div className="flex flex-col items-center justify-center text-center flex-1 min-w-0">
                         <h1 className="text-xl font-bold text-gray-800 m-0 mb-0.5">
                             Zoológico Regional Miguel Álvarez del Toro
                         </h1>
@@ -34,7 +34,7 @@ const NormalAvesReviewVariant = ({
                             {getTitle()}
                         </h3>
                     </div>
-                    <ImageUploader placeholderText="Logo" className="header-logo-right shrink-0" />
+                    <ImageUploader placeholderText="Logo" className="header-logo-right" />
                 </div>
 
                 {/* Datos Generales */}

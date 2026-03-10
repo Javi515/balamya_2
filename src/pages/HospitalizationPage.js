@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaSearch, FaPlus, FaEye, FaNotesMedical, FaSignOutAlt, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { FaSearch, FaPlus, FaNotesMedical, FaSignOutAlt, FaChevronLeft, FaChevronRight, FaHospital, FaCheckCircle, FaSkull, FaFolder } from 'react-icons/fa';
 import styles from '../styles/HospitalizationPage.module.css';
 import { patients as allPatients } from '../data/mockData';
+import HospitalRecordModal from '../components/dashboard/HospitalRecordModal';
 
 const DEFAULT_PHOTO = 'https://images.unsplash.com/photo-1574158622682-e40e69881006?auto=format&fit=crop&q=80&w=800';
 
@@ -12,51 +13,10 @@ const getPatientPhoto = (scientificName) => {
     return match?.imageUrl || DEFAULT_PHOTO;
 };
 
-const baseMock = [
-    {
-        name: 'Balam',
-        species: 'Panthera onca',
-        commonName: 'Jaguar',
-        area: 'Cuarentena A',
-        admissionDate: '2024-01-15',
-        diagnosis: 'Gastroenteritis moderada con deshidratación leve',
-        responsible: 'Dr. Alejandro Vera',
-    },
-    {
-        name: 'Lola',
-        species: 'Ara macao',
-        commonName: 'Guacamaya Roja',
-        area: 'Hospital Aves',
-        admissionDate: '2024-02-10',
-        diagnosis: 'Fractura de radio derecho en proceso de consolidación',
-        responsible: 'Dra. Sofia Mendez',
-    },
-    {
-        name: 'Godzilla',
-        species: 'Iguana iguana',
-        commonName: 'Iguana Verde',
-        area: 'Terrario UCI',
-        admissionDate: '2024-02-12',
-        diagnosis: 'Hipocalcemia severa y retención de huevos',
-        responsible: 'Dr. Alejandro Vera',
-    },
-    {
-        name: 'Simba',
-        species: 'Puma concolor',
-        commonName: 'Puma',
-        area: 'Cuarentena B',
-        admissionDate: '2024-02-01',
-        diagnosis: 'Chequeo rutinario post-traslado',
-        responsible: 'Dr. Alejandro Vera',
-    },
-];
-
 const MOCK_HOSPITALIZED = Array.from({ length: 12 }, (_, i) => {
-    // Usamos los primeros 12 pacientes de allPatients para que tengan IDs reales
     const base = allPatients[i % allPatients.length];
     return {
         ...base,
-        // Mantener las propiedades base pero agregar/sobrescribir las necesarias para la tabla
         area: base.location || 'Cuarentena A',
         admissionDate: '2024-01-15',
         diagnosis: base.status === 'Crítico' ? 'Atención urgente requerida' : 'Chequeo rutinario',
@@ -64,9 +24,24 @@ const MOCK_HOSPITALIZED = Array.from({ length: 12 }, (_, i) => {
     };
 });
 
+// Mock data for discharged patients (Altas)
+const MOCK_ALTAS = Array.from({ length: 5 }, (_, i) => {
+    const base = allPatients[(i + 3) % allPatients.length];
+    return {
+        ...base,
+        area: base.location || 'Cuarentena A',
+        admissionDate: '2023-11-10',
+        dischargeDate: '2024-01-05',
+        diagnosis: 'Recuperación completa',
+        responsible: 'Dra. Sofia Mendez',
+    };
+});
+
 const HospitalizationPage = () => {
     const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState('');
+    const [activeTab, setActiveTab] = useState('historial');
+    const [recordPatient, setRecordPatient] = useState(null);
 
     const handleOpenForm = (formKey, patient) => {
         const queryParams = new URLSearchParams({
@@ -78,7 +53,14 @@ const HospitalizationPage = () => {
         navigate(`/forms?${queryParams}`);
     };
 
-    const [speciesFilter, setSpeciesFilter] = useState('Todas');
+    const handleNewAdmission = () => {
+        navigate('/forms?form=hospFollowUp&origin=hospitalization');
+    };
+
+    const handleOpenRecord = (patient) => {
+        setRecordPatient(patient);
+    };
+
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
 
@@ -110,13 +92,14 @@ const HospitalizationPage = () => {
         return rangeWithDots;
     };
 
-    // Filter Logic
-    const filteredPatients = MOCK_HOSPITALIZED.filter(patient => {
-        const matchesSearch = patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            patient.commonName.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesSpecies = speciesFilter === 'Todas' || patient.commonName === speciesFilter;
+    const sourceData = activeTab === 'historial' ? MOCK_HOSPITALIZED : MOCK_ALTAS;
 
-        return matchesSearch && matchesSpecies;
+    // Filter Logic
+    const filteredPatients = sourceData.filter(patient => {
+        const term = searchTerm.toLowerCase();
+        return patient.name.toLowerCase().includes(term) ||
+            patient.commonName.toLowerCase().includes(term) ||
+            String(patient.id).toLowerCase().includes(term);
     });
 
     // Pagination Logic
@@ -125,7 +108,10 @@ const HospitalizationPage = () => {
     const currentItems = filteredPatients.slice(indexOfFirstItem, indexOfLastItem);
     const totalPages = Math.ceil(filteredPatients.length / itemsPerPage);
 
-
+    const handleTabChange = (tab) => {
+        setActiveTab(tab);
+        setCurrentPage(1);
+    };
 
     return (
         <div className={styles['hospitalization-container']}>
@@ -135,36 +121,44 @@ const HospitalizationPage = () => {
                     <h1>Pacientes Hospitalizados</h1>
                     <p>Listado de ejemplares en atención clínica activa</p>
                 </div>
-                <button className={styles['btn-new-admission']}>
+                <button className={styles['btn-new-admission']} onClick={handleNewAdmission}>
                     <FaPlus /> Nuevo Ingreso
                 </button>
             </div>
 
-            {/* 2. Controles de Filtro y Búsqueda */}
+            {/* 2. Búsqueda */}
             <div className={styles['controls-bar']}>
                 <div className={styles['search-wrapper']}>
                     <FaSearch className={styles['search-icon']} />
                     <input
                         type="text"
-                        placeholder="Buscar por nombre o especie..."
+                        placeholder="Buscar por nombre, especie o ID..."
                         className={styles['search-input']}
                         value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
+                        onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
                     />
                 </div>
-
-                <select className={styles['filter-select']} defaultValue="avanzados">
-                    <option value="avanzados" disabled>&#128194; Filtros Avanzados</option>
-                    <option value="urgencia">Por nivel de Urgencia</option>
-                    <option value="fecha">Por Fecha de Ingreso</option>
-                    <option value="area">Por Área (Cuarentena, UCI...)</option>
-                    <option value="especie">Por Especie Animal</option>
-                </select>
-
-
             </div>
 
-            {/* 3. Tabla Principal (Desktop) */}
+            {/* 3. Submenu tabs */}
+            <div className={styles['tab-submenu']}>
+                <button
+                    className={`${styles['tab-btn']} ${activeTab === 'historial' ? styles['tab-active'] : ''}`}
+                    onClick={() => handleTabChange('historial')}
+                >
+                    <FaHospital className={styles['tab-icon']} />
+                    Hospitalizados
+                </button>
+                <button
+                    className={`${styles['tab-btn']} ${activeTab === 'altas' ? styles['tab-active'] : ''}`}
+                    onClick={() => handleTabChange('altas')}
+                >
+                    <FaCheckCircle className={styles['tab-icon']} />
+                    Historial / Altas
+                </button>
+            </div>
+
+            {/* 4. Tabla Principal (Desktop) */}
             <div className={styles['table-container']}>
                 <table className={styles['clinical-table']}>
                     <thead>
@@ -172,7 +166,7 @@ const HospitalizationPage = () => {
                             <th>Ejemplar</th>
                             <th>Especie</th>
                             <th>Ubicación</th>
-                            <th>Ingreso</th>
+                            <th>{activeTab === 'altas' ? 'Fecha de Alta' : 'Ingreso'}</th>
                             <th>Diagnóstico Presuntivo</th>
                             <th>Responsable</th>
                             <th>Acciones</th>
@@ -193,7 +187,7 @@ const HospitalizationPage = () => {
                                     </td>
                                     <td>{patient.commonName}</td>
                                     <td>{patient.area}</td>
-                                    <td>{patient.admissionDate}</td>
+                                    <td>{activeTab === 'altas' ? patient.dischargeDate : patient.admissionDate}</td>
                                     <td>
                                         <div className={styles['diagnosis-text']} title={patient.diagnosis}>
                                             {patient.diagnosis}
@@ -202,9 +196,12 @@ const HospitalizationPage = () => {
                                     <td>{patient.responsible}</td>
                                     <td>
                                         <div className={styles['actions-cell']}>
-                                            <button className={styles['action-btn']} title="Seguimiento Hospitalizados" onClick={() => handleOpenForm('hospFollowUp', patient)}><FaEye /></button>
-                                            <button className={styles['action-btn']} title="Revisión Clínica" onClick={() => handleOpenForm('clinicalReview', patient)}><FaNotesMedical /></button>
-                                            <button className={`${styles['action-btn']} ${styles['btn-discharge']}`} title="Notificación de Alta" onClick={() => handleOpenForm('notificacionAlta', patient)}><FaSignOutAlt /></button>
+                                            <button className={`${styles['action-btn']} ${styles['btn-record']}`} title="Expediente Médico" onClick={() => handleOpenRecord(patient)}><FaFolder /></button>
+                                            {activeTab === 'historial' && (<>
+                                                <button className={styles['action-btn']} title="Revisión Clínica" onClick={() => handleOpenForm('clinicalReview', patient)}><FaNotesMedical /></button>
+                                                <button className={`${styles['action-btn']} ${styles['btn-necropsy']}`} title="Reporte de Necropsia" onClick={() => handleOpenForm('necropsy', patient)}><FaSkull /></button>
+                                                <button className={`${styles['action-btn']} ${styles['btn-discharge']}`} title="Notificación de Alta" onClick={() => handleOpenForm('notificacionAlta', patient)}><FaSignOutAlt /></button>
+                                            </>)}
                                         </div>
                                     </td>
                                 </tr>
@@ -252,7 +249,7 @@ const HospitalizationPage = () => {
                 </div>
             </div>
 
-            {/* 4. Vista Móvil (Cards) */}
+            {/* 5. Vista Móvil (Cards) */}
             <div className={styles['mobile-cards-container']}>
                 {currentItems.map(patient => (
                     <div key={patient.id} className={styles['mobile-patient-card']}>
@@ -280,13 +277,27 @@ const HospitalizationPage = () => {
                             </div>
                         </div>
                         <div className={styles['card-actions']}>
-                            <button className={styles['action-btn']} title="Seguimiento Hospitalizados" onClick={() => handleOpenForm('hospFollowUp', patient)}><FaEye /> Seguimiento</button>
-                            <button className={styles['action-btn']} title="Revisión Clínica" onClick={() => handleOpenForm('clinicalReview', patient)}><FaNotesMedical /> Revisión</button>
-                            <button className={`${styles['action-btn']} ${styles['btn-discharge']}`} title="Notificación de Alta" onClick={() => handleOpenForm('notificacionAlta', patient)}><FaSignOutAlt /> Alta</button>
+                            <button className={`${styles['action-btn']} ${styles['btn-record']}`} title="Expediente Médico" onClick={() => handleOpenRecord(patient)}><FaFolder /> Expediente</button>
+                            {activeTab === 'historial' && (<>
+                                <button className={styles['action-btn']} title="Revisión Clínica" onClick={() => handleOpenForm('clinicalReview', patient)}><FaNotesMedical /> Revisión</button>
+                                <button className={`${styles['action-btn']} ${styles['btn-necropsy']}`} title="Reporte de Necropsia" onClick={() => handleOpenForm('necropsy', patient)}><FaSkull /> Necropsia</button>
+                                <button className={`${styles['action-btn']} ${styles['btn-discharge']}`} title="Notificación de Alta" onClick={() => handleOpenForm('notificacionAlta', patient)}><FaSignOutAlt /> Alta</button>
+                            </>)}
                         </div>
                     </div>
                 ))}
             </div>
+
+            {recordPatient && (
+                <HospitalRecordModal
+                    patient={recordPatient}
+                    onClose={() => setRecordPatient(null)}
+                    onOpenForm={(formKey, patient) => {
+                        setRecordPatient(null);
+                        handleOpenForm(formKey, patient);
+                    }}
+                />
+            )}
         </div>
     );
 };

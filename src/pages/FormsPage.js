@@ -107,19 +107,19 @@ const FormsPage = () => {
                         {formCards.map((card) => {
                             const specificClass = `form-card-${card.key}`;
                             return (
-                                <div key={card.key} className={`${styles['form-card']} ${styles[specificClass] || specificClass}`}>
+                                <div key={card.key} className={`${styles['form-card']} ${styles['form-card--tools']} ${styles[specificClass] || specificClass}`}>
                                     <div className={styles['form-card-content']}>
-                                        {card.icon}
+                                        <div className={styles['form-card-icon-wrap']}>
+                                            {card.icon}
+                                        </div>
                                         <div className={styles['form-card-text']}>
                                             <h3 className={styles['form-card-title']}>{card.title}</h3>
                                             <p className={styles['form-card-description']}>{card.description}</p>
                                         </div>
                                     </div>
-                                    <div className={styles['form-card-footer']}>
-                                        <button className={styles['form-card-button']} onClick={() => handleSelectForm(card.key)}>
-                                            <FaArrowRight />
-                                        </button>
-                                    </div>
+                                    <button className={styles['form-card-button']} onClick={() => handleSelectForm(card.key)}>
+                                        Abrir formulario <FaArrowRight />
+                                    </button>
                                 </div>
                             );
                         })}
@@ -141,7 +141,7 @@ const FormsPage = () => {
         }
 
         // View 3: The Form itself
-        if (viewState === 'form' && selectedAnimal) {
+        if (viewState === 'form') {
             const originStr = searchParams.get('origin');
             let backText = 'Volver al menú';
             if (originStr === 'history') backText = 'Volver al Historial';
@@ -157,15 +157,17 @@ const FormsPage = () => {
                             <FaArrowLeft /> {backText}
                         </button>
 
-                        <div className={`${styles['selected-animal-banner']} ${styles.compact}`}>
-                            <div className={styles['animal-banner-info']}>
-                                <span className={styles['banner-label']}>Paciente:</span>
-                                <span className={styles['banner-name']}>{selectedAnimal.commonName || 'Sin Nombre Común'}</span>
+                        {selectedAnimal && (
+                            <div className={`${styles['selected-animal-banner']} ${styles.compact}`}>
+                                <div className={styles['animal-banner-info']}>
+                                    <span className={styles['banner-label']}>Paciente:</span>
+                                    <span className={styles['banner-name']}>{selectedAnimal.commonName || 'Sin Nombre Común'}</span>
+                                </div>
+                                <button onClick={handleChangeAnimal} className={styles['change-animal-btn']}>
+                                    <FaExchangeAlt /> Cambiar
+                                </button>
                             </div>
-                            <button onClick={handleChangeAnimal} className={styles['change-animal-btn']}>
-                                <FaExchangeAlt /> Cambiar
-                            </button>
-                        </div>
+                        )}
                     </div>
 
                     {targetForm === 'deworming' && <DewormingCalendar onBack={backToSelection} patient={selectedAnimal} />}
