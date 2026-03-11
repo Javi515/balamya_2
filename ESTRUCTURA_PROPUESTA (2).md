@@ -33,7 +33,10 @@
 | 16 | MedicalHistoryPage.js importa PatientsPage.module.css (faltaba en v3) | Extraer `patients-page-header-row` y `view-toggle-btn` a styles/shared/PageHeader.module.css |
 | 17 | DewormingPage.js y VaccinationsPage.js importan RecordsTable.module.css directamente (faltaba en v3) | Extraer las clases usadas a styles/shared/ o confirmar si importar desde common/ es aceptable |
 | 18 | Topbar.js importa Modal.module.css para modal de logout (faltaba en v3) | Extraer las clases usadas a Topbar.module.css propio |
-| 19 | GroupTreatmentForm.js importa TreatmentForm.module.css (faltaba en v4) | Crear GroupTreatmentForm.module.css propio, o mover GroupTreatmentForm dentro de TreatmentForm/ si comparten todo el CSS |
+| 19 | GroupTreatmentForm.js importa TreatmentForm.module.css (faltaba en v4) | Mover GroupTreatmentForm.js dentro de TreatmentForm/ para compartir el mismo CSS (misma feature, mismo diseño, cero duplicación) |
+| 20 | DewormingPage.js y VaccinationsPage.js importan RecordsTable.module.css sin usar clases | Borrar esos 2 imports huérfanos |
+| 21 | AuthContext.js llama a localhost:5000 (login roto) | Reemplazar por auth 100% mock/local en Fase 1 |
+| 22 | api.js debe usar fetch nativo, no axios (no instalado) | Usar fetch nativo en services/api.js |
 
 ---
 
@@ -98,7 +101,7 @@ src/
 │   └── useSidebar.js
 │
 ├── services/                            # Capa de comunicación con el backend (APIs)
-│   ├── api.js                           # Instancia centralizada de axios/fetch con baseURL desde .env
+│   ├── api.js                           # Instancia centralizada de fetch nativo con baseURL desde .env (NO axios)
 │   ├── authService.js                   # login(), logout(), getCurrentUser()
 │   ├── patientsService.js               # getPatients(), getPatientById(), createPatient()
 │   ├── treatmentsService.js             # getTreatments(), createTreatment()
@@ -168,13 +171,11 @@ src/
 │   │
 │   ├── treatments/                      # ── Tratamientos ──
 │   │   ├── components/
-│   │   │   ├── TreatmentForm/
-│   │   │   │   ├── TreatmentForm.js
-│   │   │   │   ├── TreatmentForm.module.css
-│   │   │   │   └── FormButtons.module.css  # Solo lo usa TreatmentForm
-│   │   │   └── GroupTreatmentForm/
-│   │   │       ├── GroupTreatmentForm.js
-│   │   │       └── GroupTreatmentForm.module.css  # CREAR: extraer clases de TreatmentForm.module.css, o mover dentro de TreatmentForm/
+│   │   │   └── TreatmentForm/
+│   │   │       ├── TreatmentForm.js
+│   │   │       ├── GroupTreatmentForm.js   # Mismo dominio, comparte CSS con TreatmentForm
+│   │   │       ├── TreatmentForm.module.css
+│   │   │       └── FormButtons.module.css  # Solo lo usa TreatmentForm
 │   │   ├── pages/
 │   │   │   └── TreatmentsPage.js
 │   │   └── utils/
@@ -305,7 +306,9 @@ src/
 | 8 | Resolver `DewormingPage.js` import de RecordsTable.module.css | Hacer grep de qué clases usa, extraer a shared/ si es necesario |
 | 9 | Resolver `VaccinationsPage.js` import de RecordsTable.module.css | Hacer grep de qué clases usa, extraer a shared/ si es necesario |
 | 10 | Resolver `Topbar.js` import de Modal.module.css | Extraer las clases de modal de logout a Topbar.module.css |
-| 11 | Resolver `GroupTreatmentForm.js` import de TreatmentForm.module.css | Crear GroupTreatmentForm.module.css propio con las clases que necesita, o mover GroupTreatmentForm dentro de TreatmentForm/ si comparten todo el CSS |
+| 11 | Resolver `GroupTreatmentForm.js` import de TreatmentForm.module.css | Mover GroupTreatmentForm.js dentro de TreatmentForm/ para compartir el mismo CSS |
+| 12 | Borrar imports huérfanos en DewormingPage.js y VaccinationsPage.js | Eliminar `import ... from 'RecordsTable.module.css'` (no usan ninguna clase) |
+| 13 | Arreglar AuthContext.js | Eliminar fetch a localhost:5000 y reemplazar por auth mock/local |
 
 ---
 

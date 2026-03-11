@@ -94,7 +94,7 @@ BALAMYA-main/
 - No hay backend en este repositorio. El backend será un proyecto separado
 - Toda comunicación con el backend se hará a través de la carpeta `src/services/`
 - Cada feature que necesite datos del backend tendrá su propio archivo de servicio (ej: `services/patientsService.js`)
-- Los servicios usan una instancia centralizada de API client en `services/api.js` (con baseURL configurable por variable de entorno)
+- Los servicios usan una instancia centralizada de API client en `services/api.js` (con baseURL configurable por variable de entorno, usando fetch nativo — NO instalar axios)
 - Mientras no exista el backend, los servicios pueden retornar datos de `mockData.js` como fallback
 - NUNCA hacer fetch() directamente desde un componente o página. Siempre pasar por un servicio
 
@@ -138,7 +138,7 @@ Todos estos imports cruzan boundaries y deben resolverse ANTES de mover archivos
 | DewormingPage.js | RecordsTable.module.css | Clases de tabla directamente | Extraer clases usadas → styles/shared/ o confirmar si es aceptable desde common/ |
 | VaccinationsPage.js | RecordsTable.module.css | Clases de tabla directamente | Extraer clases usadas → styles/shared/ o confirmar si es aceptable desde common/ |
 | Topbar.js | Modal.module.css | Clases de modal para logout | Extraer clases usadas → Topbar.module.css propio |
-| GroupTreatmentForm.js | TreatmentForm.module.css | Estilos principales del formulario | Crear GroupTreatmentForm.module.css propio, o mover ambos a la misma carpeta si comparten todo el CSS |
+| GroupTreatmentForm.js | TreatmentForm.module.css | 18 clases del formulario | Mover GroupTreatmentForm.js dentro de TreatmentForm/ para compartir el mismo CSS |
 
 ---
 
@@ -167,7 +167,8 @@ Todos estos imports cruzan boundaries y deben resolverse ANTES de mover archivos
 - Eliminar dependencias de backend del package.json: express, mongoose, dotenv, nodemon, concurrently, cors
 - Eliminar scripts de backend del package.json: `npm start` (concurrently), `dev:server`
 - Eliminar cualquier import o referencia a endpoints API en el frontend (ej: fetch a localhost:5000 en AuthContext.js)
-- Reemplazar la lógica de auth que llama al backend por auth 100% mock/local
+- CRÍTICO: AuthContext.js tiene un fetch('http://localhost:5000/api/auth/login') activo que rompe el login. Reemplazar por auth 100% mock/local
+- Borrar imports huérfanos de RecordsTable.module.css en DewormingPage.js y VaccinationsPage.js (no usan ninguna clase de ese import)
 - Eliminar archivos basura de la raíz: build.log, build2.log, build3.log, build4.log, build_error.log, build_output.log, build_output.txt, build_utf8.log, build2_utf8.log, build3_utf8.log, build4_utf8.log
 - Eliminar archivos sueltos de la raíz: .git_head_GroupTreatmentForm.js, .git_head_TreatmentForm.js, .git_history_treatment.txt
 - Eliminar eslint_report.txt (vacío)
@@ -186,7 +187,7 @@ Todos estos imports cruzan boundaries y deben resolverse ANTES de mover archivos
 - Extraer `patients-page-header-row` y `view-toggle-btn` de PatientsPage.module.css → styles/shared/PageHeader.module.css. Actualizar import en MedicalHistoryPage.js
 - Resolver DewormingPage.js y VaccinationsPage.js que importan RecordsTable.module.css directamente: extraer las clases a styles/shared/ o decidir si importar desde common/ es aceptable
 - Resolver Topbar.js que importa Modal.module.css: extraer las clases que usa a Topbar.module.css
-- Resolver GroupTreatmentForm.js que importa TreatmentForm.module.css: crear GroupTreatmentForm.module.css propio con las clases que necesita, o mover GroupTreatmentForm dentro de TreatmentForm/ si comparten todo el CSS
+- Resolver GroupTreatmentForm.js que importa TreatmentForm.module.css: mover GroupTreatmentForm.js dentro de la carpeta TreatmentForm/ para compartir el mismo CSS (misma feature, mismo diseño, cero duplicación)
 - Mover FormButtons.module.css → features/treatments/components/TreatmentForm/ (solo lo usa TreatmentForm)
 - Renombrar NecropsyReportForm.css → NecropsyReportForm.module.css y actualizar import en NecropsyReportForm.js
 - Renombrar ErrorBoundary.css → ErrorBoundary.module.css y actualizar import en ErrorBoundary.js de `import './ErrorBoundary.css'` a `import styles from './ErrorBoundary.module.css'`
