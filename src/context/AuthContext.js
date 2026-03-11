@@ -4,57 +4,6 @@ const AuthContext = createContext(null);
 
 export const useAuth = () => useContext(AuthContext);
 
-// Mock Users Database (Solo para Referencia)
-const MOCK_USERS = [
-    {
-        email: 'admin@balamya.org',
-        password: 'admin',
-        name: 'Administrador Principal',
-        role: 'admin',
-        specialty: 'all',
-        avatar: 'admin-avatar.jpg'
-    },
-    {
-        email: 'aves@balamya.org',
-        password: 'aves',
-        name: 'Dr. Ornitólogo',
-        role: 'veterinarian',
-        specialty: 'aves',
-        avatar: 'vet-aves.jpg'
-    },
-    {
-        email: 'mamiferos@balamya.org',
-        password: 'mamiferos',
-        name: 'Dr. Mastozoológo',
-        role: 'veterinarian',
-        specialty: 'mamiferos',
-        avatar: 'vet-mamiferos.jpg'
-    },
-    {
-        email: 'reptiles@balamya.org',
-        password: 'reptiles',
-        name: 'Dr. Herpetólogo (Reptiles)',
-        role: 'veterinarian',
-        specialty: 'reptiles',
-        avatar: 'vet-reptiles.jpg'
-    },
-    {
-        email: 'anfibios@balamya.org',
-        password: 'anfibios',
-        name: 'Dr. Herpetólogo (Anfibios)',
-        role: 'veterinarian',
-        specialty: 'anfibios',
-        avatar: 'vet-anfibios.jpg'
-    },
-    {
-        email: 'asistente@balamya.org',
-        password: 'assist',
-        name: 'Asistente General',
-        role: 'assistant',
-        specialty: 'all',
-        avatar: 'assistant.jpg'
-    }
-];
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);

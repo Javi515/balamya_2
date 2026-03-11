@@ -16,8 +16,10 @@ const FiltersBar = ({
     setSelectedLocation,
     selectedDoctor,
     setSelectedDoctor,
-    selectedDate,
-    setSelectedDate
+    selectedDateFrom,
+    setSelectedDateFrom,
+    selectedDateTo,
+    setSelectedDateTo
 }) => {
     const [showFilters, setShowFilters] = useState(false);
 
@@ -144,9 +146,8 @@ const FiltersBar = ({
                                             { id: 'CALENDARIO DE DESPARASITACIÓN', label: 'Desparasitación' },
                                             { id: 'REPORTE DE NECROPSIA', label: 'Necropsia' },
                                             { id: 'REGISTRO DE ANESTESIA', label: 'Anestesia' },
-                                            { id: 'FORMATO DE TRATAMIENTO', label: 'Tratamiento P.' },
-                                            { id: 'TRATAMIENTO GRUPAL', label: 'Tratamiento G.' },
-                                            { id: 'SEGUIMIENTO HOSPITALIZACIÓN', label: 'Hospitalización' }
+                                            { id: 'SEGUIMIENTO HOSPITALIZACIÓN', label: 'Hospitalización' },
+                                            { id: 'NOTIFICACIÓN DE ALTA', label: 'Notificación Alta' }
                                         ].map(opt => (
                                             <label key={opt.id} className={`${styles['checkbox-item']} ${styles['full-width']} ${selectedType === opt.id ? styles.active : ''}`}>
                                                 <input
@@ -176,9 +177,10 @@ const FiltersBar = ({
                                         {[
                                             { id: 'all', label: 'Todas las Ubicaciones', icon: null },
                                             { id: 'Cuarentena', label: 'Cuarentena', icon: <FaClinicMedical className={styles['filter-icon']} /> },
-                                            { id: 'Aire Libre', label: 'Al aire libre', icon: <FaTree className={styles['filter-icon']} /> },
+                                            { id: 'Aire Libre', label: 'Vida libre', icon: <FaTree className={styles['filter-icon']} /> },
                                             { id: 'Recinto', label: 'En Recinto', icon: <FaMapMarkerAlt className={styles['filter-icon']} /> },
-                                            { id: 'Clínica', label: 'Clínica', icon: <FaClinicMedical className={styles['filter-icon']} /> }
+                                            { id: 'Clínica', label: 'Clínica', icon: <FaClinicMedical className={styles['filter-icon']} /> },
+                                            { id: 'Recién Nacidos', label: 'Recién Nacidos', icon: <FaMapMarkerAlt className={styles['filter-icon']} /> }
                                         ].map((opt) => (
                                             <label key={opt.id} className={`${styles['checkbox-item']} ${selectedLocation === opt.id ? styles.active : ''} ${opt.id === 'all' ? styles['full-width'] : ''}`}>
                                                 <input
@@ -236,19 +238,35 @@ const FiltersBar = ({
                                     <span className={`${styles['collapse-icon']} ${expandedSections.fecha ? styles.expanded : ''}`}>▼</span>
                                 </div>
                                 {expandedSections.fecha && (
-                                    <div style={{ padding: '0 0.5rem 1rem 0.5rem' }}>
-                                        <input
-                                            type="date"
-                                            className="w-full h-11 px-3.5 bg-gray-50 text-gray-700 border border-gray-200 rounded-lg text-sm cursor-pointer outline-none transition-colors hover:bg-white focus:border-[#00E5FF] focus:ring-2 focus:ring-[#00e5ff]/20 font-medium"
-                                            value={selectedDate}
-                                            onChange={(e) => setSelectedDate(e.target.value)}
-                                        />
-                                        {selectedDate && (
+                                    <div style={{ padding: '0 0.5rem 1rem 0.5rem', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                        <div>
+                                            <span style={{ fontSize: '11px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '4px' }}>De</span>
+                                            <input
+                                                type="date"
+                                                className="w-full h-11 px-3.5 bg-gray-50 border border-gray-200 rounded-lg text-sm cursor-pointer outline-none transition-colors hover:bg-white focus:border-[#00E5FF] focus:ring-2 focus:ring-[#00e5ff]/20 font-medium"
+                                                style={{ color: selectedDateFrom ? '#374151' : 'transparent' }}
+                                                value={selectedDateFrom}
+                                                max={selectedDateTo || undefined}
+                                                onChange={(e) => setSelectedDateFrom(e.target.value)}
+                                            />
+                                        </div>
+                                        <div>
+                                            <span style={{ fontSize: '11px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '4px' }}>A</span>
+                                            <input
+                                                type="date"
+                                                className="w-full h-11 px-3.5 bg-gray-50 border border-gray-200 rounded-lg text-sm cursor-pointer outline-none transition-colors hover:bg-white focus:border-[#00E5FF] focus:ring-2 focus:ring-[#00e5ff]/20 font-medium"
+                                                style={{ color: selectedDateTo ? '#374151' : 'transparent' }}
+                                                value={selectedDateTo}
+                                                min={selectedDateFrom || undefined}
+                                                onChange={(e) => setSelectedDateTo(e.target.value)}
+                                            />
+                                        </div>
+                                        {(selectedDateFrom || selectedDateTo) && (
                                             <button
-                                                className="mt-2 text-xs font-semibold text-blue-600 hover:text-blue-800"
-                                                onClick={() => setSelectedDate('')}
+                                                className="text-xs font-semibold text-blue-600 hover:text-blue-800"
+                                                onClick={() => { setSelectedDateFrom(''); setSelectedDateTo(''); }}
                                             >
-                                                Limpiar fecha
+                                                Limpiar fechas
                                             </button>
                                         )}
                                     </div>

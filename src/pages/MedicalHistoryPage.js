@@ -14,7 +14,8 @@ const MedicalHistoryPage = () => {
   const [selectedType, setSelectedType] = useState('all');
   const [selectedLocation, setSelectedLocation] = useState('all');
   const [selectedDoctor, setSelectedDoctor] = useState('all');
-  const [selectedDate, setSelectedDate] = useState('');
+  const [selectedDateFrom, setSelectedDateFrom] = useState('');
+  const [selectedDateTo, setSelectedDateTo] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredRecords, setFilteredRecords] = useState([]);
   const [viewMode, setViewMode] = useState('grid'); // Default to grid
@@ -46,9 +47,12 @@ const MedicalHistoryPage = () => {
       results = results.filter(record => record.type.includes(selectedType));
     }
 
-    // 3. Filter by Date
-    if (selectedDate) {
-      results = results.filter(record => record.date === selectedDate);
+    // 3. Filter by Date Range
+    if (selectedDateFrom) {
+      results = results.filter(record => record.date >= selectedDateFrom);
+    }
+    if (selectedDateTo) {
+      results = results.filter(record => record.date <= selectedDateTo);
     }
 
     // 4. Filter by Location
@@ -73,7 +77,7 @@ const MedicalHistoryPage = () => {
     }
 
     setFilteredRecords(results);
-  }, [selectedCategory, selectedType, selectedDate, selectedLocation, selectedDoctor, searchTerm, user]);
+  }, [selectedCategory, selectedType, selectedDateFrom, selectedDateTo, selectedLocation, selectedDoctor, searchTerm, user]);
 
   return (
     <div className={styles['medical-history-container']}>
@@ -103,8 +107,10 @@ const MedicalHistoryPage = () => {
         setSelectedLocation={setSelectedLocation}
         selectedDoctor={selectedDoctor}
         setSelectedDoctor={setSelectedDoctor}
-        selectedDate={selectedDate}
-        setSelectedDate={setSelectedDate}
+        selectedDateFrom={selectedDateFrom}
+        setSelectedDateFrom={setSelectedDateFrom}
+        selectedDateTo={selectedDateTo}
+        setSelectedDateTo={setSelectedDateTo}
       />
 
       <div className={`transition-all duration-500 ease-in-out overflow-hidden ${viewMode === 'table' ? 'max-h-[500px] opacity-100 mb-6' : 'max-h-0 opacity-0 mb-0'}`}>
