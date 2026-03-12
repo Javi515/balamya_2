@@ -1,0 +1,90 @@
+.main-layout {
+  display: flex;
+  align-items: flex-start;
+  /* Alinea el sidebar y el contenido al inicio */
+  width: 100%;
+  min-height: 100vh;
+  transition: padding-left 0.3s ease-in-out;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  /* Fija la altura a la de la ventana */
+  overflow-y: auto;
+  /* Activa el scroll solo para el contenido */
+  overflow-x: hidden;
+  transition: margin-left 0.3s ease-in-out;
+}
+
+.content-area {
+  padding: 24px;
+  flex-grow: 1;
+}
+
+
+
+
+/* Estilos para escritorio */
+@media (max-width: 1024px) {
+  .content-area {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .content-area {
+    padding: 12px;
+    /* Even less padding on small screens */
+  }
+}
+
+/* Page Transition Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-content-transition {
+  animation: fadeIn 0.4s ease-out forwards;
+  width: 100%;
+}
+
+/* PRINT: Override scroll container so content is not clipped when printing */
+@media print {
+  .main-layout {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .main-content {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    overflow-x: visible !important;
+    overflow-y: visible !important;
+    flex: none !important;
+  }
+
+  .content-area {
+    height: auto !important;
+    overflow: visible !important;
+    padding: 0 !important;
+  }
+
+  .page-content-transition {
+    animation: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}

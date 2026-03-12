@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FaUserMd, FaSignOutAlt, FaBell } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 import Modal from '../common/Modal';
-import modalStyles from '../../styles/Modal.module.css';
 import styles from '../../styles/Topbar.module.css';
 
 const Topbar = ({ toggleSidebar }) => {
@@ -119,10 +118,10 @@ const Topbar = ({ toggleSidebar }) => {
         title="Confirmar Cierre de Sesión"
         footer={
           <>
-            <button className={`${modalStyles['btn-modal']} ${modalStyles['btn-cancel']}`} onClick={() => setIsLogoutModalOpen(false)}>
+            <button className={`${styles['btn-modal']} ${styles['btn-cancel']}`} onClick={() => setIsLogoutModalOpen(false)}>
               Cancelar
             </button>
-            <button className={`${modalStyles['btn-modal']} ${modalStyles['btn-confirm']}`} onClick={confirmLogout}>
+            <button className={`${styles['btn-modal']} ${styles['btn-confirm']}`} onClick={confirmLogout}>
               Cerrar Sesión
             </button>
           </>

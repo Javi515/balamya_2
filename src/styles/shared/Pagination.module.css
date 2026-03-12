@@ -1,0 +1,112 @@
+/* Extraído de PatientGrid.module.css — usado por RecordsTable.js */
+
+.medical-history-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+    animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.no-results {
+    text-align: center;
+    padding: 48px;
+    color: #6b7280;
+    font-size: 1.1rem;
+    background: #f9fafb;
+    border-radius: 12px;
+    border: 2px dashed #e5e7eb;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px 0;
+    margin-bottom: 24px;
+    background-color: transparent;
+    font-size: 0.95rem;
+    color: #64748b;
+}
+
+.pagination-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.pagination-numbers {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.page-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid #e2e8f0;
+    background-color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #334155;
+    font-weight: 500;
+    transition: all 0.2s;
+    padding: 0;
+}
+
+.page-btn.active {
+    background-color: #2563eb;
+    color: white;
+    border-color: #2563eb;
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.page-btn:hover:not(:disabled):not(.active) {
+    background-color: #f1f5f9;
+    border-color: #cbd5e1;
+}
+
+.page-btn.dots {
+    border: none;
+    background: transparent;
+    cursor: default;
+    color: #94a3b8;
+}
+
+.page-btn-nav {
+    border-radius: 20px;
+    padding: 0 14px;
+    height: 32px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    color: #334155;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.page-btn-nav:hover:not(:disabled) {
+    background-color: #f1f5f9;
+    border-color: #cbd5e1;
+}
+
+.page-btn-nav:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #f9fafb;
+}

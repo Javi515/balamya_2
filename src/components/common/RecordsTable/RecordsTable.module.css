@@ -1,0 +1,266 @@
+/* Records Section */
+.records-container {
+    background: transparent;
+    padding: 0;
+}
+
+/* White card wrapper — only for table mode */
+.table-card-wrapper {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(15, 23, 42, 0.06);
+    border: 1px solid #f1f5f9;
+    padding: 20px 20px 16px 20px;
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.records-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #edf0f4;
+}
+
+.records-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+}
+
+.records-count-badge {
+    background: #eef4fb;
+    color: #2563eb;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+/* Table */
+.records-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+    text-align: left;
+    min-width: 700px;
+}
+
+/* Headers */
+.records-table th {
+    text-align: left;
+    padding: 8px 12px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    border-bottom: 2px solid #f1f5f9;
+    white-space: nowrap;
+    background: transparent;
+}
+
+/* Data rows */
+.records-table tbody tr {
+    border-bottom: 1px solid #f3f4f6;
+    transition: background-color 0.15s ease;
+}
+
+.records-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.records-table tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+/* All data cells */
+.records-table td {
+    padding: 11px 12px;
+    color: #1f2937;
+    font-size: 0.85rem;
+    vertical-align: middle;
+    line-height: 1.4;
+}
+
+/* ID column */
+.records-table td:nth-child(1) {
+    white-space: nowrap;
+    font-size: 0.8rem;
+    color: #64748b;
+    font-family: monospace;
+}
+
+/* Date — keep on one line */
+.records-table td:nth-child(5) {
+    white-space: nowrap;
+}
+
+/* Veterinario — allow wrapping but limit width */
+.records-table td:nth-child(6) {
+    max-width: 130px;
+}
+
+/* Action column */
+.records-table td:last-child {
+    text-align: center;
+    white-space: nowrap;
+}
+
+
+/* Action button */
+.view-record-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #2563eb;
+    background: transparent;
+    border: 1px solid #dbeafe;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: inherit;
+}
+
+.view-record-btn:hover {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border-color: #bfdbfe;
+}
+
+/* Empty */
+.empty-state {
+    text-align: center;
+    padding: 48px 20px;
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
+
+/* Status badges (kept for grid view) */
+.status-badge {
+    padding: 3px 8px;
+    border-radius: 5px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    display: inline-block;
+    white-space: nowrap;
+}
+
+.status-normal {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.status-observation {
+    background: #fff3e0;
+    color: #ef6c00;
+}
+
+.status-critical {
+    background: #ffebee;
+    color: #c62828;
+}
+
+.status-recuperacion {
+    background: #fce4ec;
+    color: #c2185b;
+}
+
+.status-alta {
+    background: #e0f2f1;
+    color: #00695c;
+}
+
+.status-tratamiento {
+    background: #ffebee;
+    color: #c62828;
+}
+
+/* Species icon circle (kept for grid view) */
+.species-icon-circle {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    margin-right: 8px;
+    flex-shrink: 0;
+}
+
+.species-info {
+    display: flex;
+    align-items: center;
+}
+
+.common-name {
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.scientific-name {
+    font-style: italic;
+    color: #64748b;
+    font-size: 0.82rem;
+}
+
+.record-location {
+    color: #475569;
+}
+
+.doctor-name {
+    font-weight: 500;
+}
+
+.record-id {
+    font-weight: 500;
+    color: #64748b;
+    font-size: 0.82rem;
+}
+
+.procedure-info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Category colors (grid view) */
+.bg-aves {
+    background: #e1f5fe;
+    color: #0288d1;
+}
+
+.bg-mamiferos {
+    background: #fff3e0;
+    color: #ef6c00;
+}
+
+.bg-reptiles {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.bg-anfibios {
+    background: #f3e5f5;
+    color: #7b1fa2;
+}
+
+/* Icon helpers (grid view) */
+.text-blue-500 {
+    color: #3b82f6;
+}
+
+.text-green-500 {
+    color: #22c55e;
+}
+
+.text-gray-500 {
+    color: #6b7280;
+}

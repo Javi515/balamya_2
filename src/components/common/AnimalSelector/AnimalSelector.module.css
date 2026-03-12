@@ -1,0 +1,274 @@
+.animal-selector-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    animation: fadeIn 0.4s ease-out;
+}
+
+.animal-selector-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.animal-selector-header h2 {
+    font-size: 2rem;
+    color: #2c3e50;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.animal-selector-header p {
+    color: #7f8c8d;
+    font-size: 1.1rem;
+}
+
+.animal-selector-search {
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: center;
+}
+
+.search-input-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #95a5a6;
+    font-size: 1.2rem;
+}
+
+.search-input-wrapper input {
+    width: 100%;
+    padding: 15px 15px 15px 45px;
+    border-radius: 30px;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.search-input-wrapper input:focus {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border-color: #3498db;
+}
+
+/* --- Filter Chips --- */
+.animal-selector-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.filter-chips-row {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.filter-chip-mini {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    color: #495057;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.filter-chip-mini:hover {
+    background: #e9ecef;
+}
+
+.filter-chip-mini.active {
+    background: #e7f1ff;
+    color: #0d6efd;
+    border-color: #b6d4fe;
+    font-weight: 600;
+}
+
+.animal-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 25px;
+}
+
+.animal-card {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.animal-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    border-color: #3498db;
+}
+
+.animal-card-image {
+    height: 180px;
+    position: relative;
+    overflow: hidden;
+}
+
+.animal-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.animal-status-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: white;
+    text-transform: uppercase;
+    background-color: #95a5a6;
+    /* Default */
+}
+
+.animal-status-badge[data-status="Saludable"] {
+    background-color: #2ecc71;
+}
+
+.animal-status-badge[data-status="Estable"] {
+    background-color: #f1c40f;
+    color: #444;
+}
+
+.animal-status-badge[data-status="Crítico"] {
+    background-color: #e74c3c;
+    animation: pulse 2s infinite;
+}
+
+.animal-status-badge[data-status="Observación"] {
+    background-color: #3498db;
+}
+
+.animal-card-details {
+    padding: 15px;
+}
+
+.animal-name-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.animal-name-row h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: #2c3e50;
+    font-weight: 700;
+}
+
+.animal-id {
+    font-size: 0.8rem;
+    color: #95a5a6;
+    background: #f8f9fa;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid #eee;
+}
+
+.animal-common-name {
+    color: #7f8c8d;
+    font-size: 0.95rem;
+    margin: 0 0 2px 0;
+    font-weight: 500;
+}
+
+.animal-scientific-name {
+    color: #bdc3c7;
+    font-style: italic;
+    font-size: 0.85rem;
+    margin: 0 0 15px 0;
+}
+
+.animal-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 5px;
+    margin-bottom: 12px;
+}
+
+.info-item {
+    font-size: 0.8rem;
+    color: #7f8c8d;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.animal-location {
+    font-size: 0.85rem;
+    color: #34495e;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #f0f2f5;
+}
+
+.no-results {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 50px;
+    color: #95a5a6;
+}
+
+.no-results-icon {
+    font-size: 4rem;
+    margin-bottom: 15px;
+    opacity: 0.5;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.7;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}

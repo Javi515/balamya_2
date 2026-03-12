@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaNotesMedical, FaStethoscope, FaSyringe, FaChartBar, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import styles from '../../styles/RecordsTable.module.css';
-import gridStyles from '../../styles/PatientGrid.module.css'; // Import pagination styles
+import gridStyles from '../../styles/shared/Pagination.module.css';
 
 const ITEMS_PER_PAGE = 10;
 
