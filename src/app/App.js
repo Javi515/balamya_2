@@ -13,11 +13,11 @@ import LoginPage from '../features/auth/pages/LoginPage';
 import RegisterPage from '../features/auth/pages/RegisterPage';
 import HospitalizationPage from '../features/hospitalization/pages/HospitalizationPage';
 import TreatmentsPage from '../features/treatments/pages/TreatmentsPage';
-import WelfarePage from '../features/welfare/pages/WelfarePage';
 import DewormingPage from '../features/deworming/pages/DewormingPage';
 import VaccinationsPage from '../features/vaccinations/pages/VaccinationsPage';
 import ClinicalReviewsPage from '../features/clinical/pages/ClinicalReviewsPage';
 import AnesthesiaPage from '../features/anesthesia/pages/AnesthesiaPage';
+import GenerarTokenPage from '../features/tokens/pages/GenerarTokenPage';
 import '../styles/App.css';
 
 import { AuthProvider } from '../context/AuthContext';
@@ -53,11 +53,11 @@ function App() {
                     <Route path="/casualties/:id" element={<PatientDetailsPage />} />
                     <Route path="/hospitalization" element={<HospitalizationPage />} />
                     <Route path="/treatments" element={<TreatmentsPage />} />
-                    <Route path="/welfare" element={<WelfarePage />} />
                     <Route path="/deworming" element={<DewormingPage />} />
                     <Route path="/vaccinations" element={<VaccinationsPage />} />
                     <Route path="/clinical-reviews" element={<ClinicalReviewsPage />} />
                     <Route path="/anesthesia" element={<AnesthesiaPage />} />
+                    <Route path="/tokens" element={<GenerarTokenPage />} />
                   </Routes>
                 </MainLayout>
               }

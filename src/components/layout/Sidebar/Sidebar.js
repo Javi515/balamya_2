@@ -2,15 +2,19 @@ import { NavLink } from 'react-router-dom';
 import React from 'react';
 import { sidebarLinks } from './sidebar.config';
 import { FaPaw, FaTimes } from 'react-icons/fa';
-// import '../../styles/Sidebar.css'; // Removing CSS import
-
 import useSidebar from '../../../hooks/useSidebar';
+import { useAuth } from '../../../context/AuthContext';
 
 const Sidebar = ({ isOpen, toggle }) => {
+  const { user } = useAuth();
   const {
     location,
     handleLinkClick
   } = useSidebar(isOpen, toggle);
+
+  const visibleLinks = sidebarLinks.filter(link =>
+    !link.roles || link.roles.includes(user?.role)
+  );
 
   return (
     <>
@@ -44,7 +48,7 @@ const Sidebar = ({ isOpen, toggle }) => {
         <div className="flex-grow overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           <nav className="px-5 py-4">
             <ul className="flex flex-col">
-              {sidebarLinks.map((link) => {
+              {visibleLinks.map((link) => {
                 const Icon = link.icon;
                 return (
                   <li key={link.path} className="mb-1.5">

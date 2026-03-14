@@ -69,5 +69,13 @@ export const sidebarLinks = [
         label: 'Herramientas',
         icon: FaClipboardList,
         iconClass: 'icon-forms'
+    },
+    {
+        path: '/tokens',
+        label: 'Generar token',
+        icon: FaClipboardList,
+        iconClass: 'icon-forms',
+        roles: ['admin']
     }
+
 ];

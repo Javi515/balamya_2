@@ -1,0 +1,265 @@
+.page {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    padding-bottom: 40px;
+    max-width: 900px;
+}
+
+/* ─── Header ─────────────────────────────────────── */
+.header {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.headerIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #1e40af, #1e3a8a);
+    color: #00E5FF;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+    box-shadow: 0 4px 14px rgba(30, 64, 175, 0.35);
+}
+
+.title {
+    margin: 0 0 4px 0;
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.4px;
+}
+
+.subtitle {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #64748b;
+    font-weight: 400;
+}
+
+/* ─── Grid ───────────────────────────────────────── */
+.grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+}
+
+@media (min-width: 900px) {
+    .grid {
+        grid-template-columns: 1.4fr 1fr;
+        align-items: start;
+    }
+}
+
+/* ─── Token Card ─────────────────────────────────── */
+.tokenCard {
+    background: #ffffff;
+    border-radius: 18px;
+    border: 1px solid #e2e8f0;
+    padding: 28px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.tokenCardHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.tokenCardLabel {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #1e3a8a;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.labelIcon {
+    font-size: 0.8rem;
+    color: #1e40af;
+}
+
+.expiryBadge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #64748b;
+    font-size: 0.82rem;
+    font-weight: 500;
+}
+
+.badgeIcon {
+    font-size: 0.75rem;
+}
+
+/* ─── Token Display ──────────────────────────────── */
+.tokenDisplay {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 14px 16px;
+    overflow: hidden;
+}
+
+.tokenText {
+    flex: 1;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.78rem;
+    color: #334155;
+    word-break: break-all;
+    line-height: 1.5;
+    letter-spacing: 0.5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ─── Botón visibilidad ─────────────────────────── */
+.visibilityBtn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #94a3b8;
+    font-size: 1rem;
+    padding: 4px 6px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    transition: color 0.15s, background 0.15s;
+}
+
+.visibilityBtn:hover {
+    color: #1e40af;
+    background: #e2e8f0;
+}
+
+/* ─── Nota renovación ───────────────────────────── */
+.renewNote {
+    margin: 0;
+    font-size: 0.82rem;
+    color: #64748b;
+    font-style: italic;
+}
+
+.btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.btnCopy {
+    background: linear-gradient(135deg, #1e40af, #1e3a8a);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
+}
+
+.btnCopy:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(30, 64, 175, 0.4);
+}
+
+.btnCopied {
+    background: linear-gradient(135deg, #16a34a, #15803d);
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+}
+
+/* ─── Info Card ──────────────────────────────────── */
+.infoCard {
+    background: #f8fafc;
+    border-radius: 18px;
+    border: 1px solid #e2e8f0;
+    padding: 24px;
+}
+
+.infoTitle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 20px 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.infoIcon {
+    color: #1e40af;
+    font-size: 0.95rem;
+}
+
+.infoList {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.infoItem {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+}
+
+.infoStep {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1e40af, #1e3a8a);
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 800;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.infoItem strong {
+    display: block;
+    font-size: 0.9rem;
+    color: #1e293b;
+    margin-bottom: 3px;
+}
+
+.infoItem p {
+    margin: 0;
+    font-size: 0.82rem;
+    color: #64748b;
+    line-height: 1.5;
+}
+
+.infoItem code {
+    font-family: 'Courier New', monospace;
+    font-size: 0.78rem;
+    background: #e2e8f0;
+    color: #1e3a8a;
+    padding: 1px 5px;
+    border-radius: 4px;
+}
