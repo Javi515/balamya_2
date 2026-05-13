@@ -1,30 +1,78 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { FaKey, FaCopy, FaClock, FaCheckCircle, FaInfoCircle, FaShieldAlt, FaEye, FaEyeSlash } from 'react-icons/fa';
 import styles from './GenerarTokenPage.module.css';
-
-// TODO: reemplazar con fetch al backend
-const MOCK_TOKEN = 'BLM-X7K2P9';
-const MOCK_EXPIRES = new Date(Date.now() + 24 * 60 * 60 * 1000);
+import { getVerificationCode } from '../../../services/verificationCodeService';
 
 const GenerarTokenPage = () => {
     const [copied, setCopied] = useState(false);
     const [tokenVisible, setTokenVisible] = useState(false);
+    const [code, setCode] = useState(null);
+    const [countdown, setCountdown] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
 
-    // TODO: const { token, expiresAt } = await fetch('/api/tokens/current', { headers: { Authorization: ... } })
-    const token = MOCK_TOKEN;
-    const expiresAt = MOCK_EXPIRES;
+    const refreshTimerRef = useRef(null);
+    const countdownTimerRef = useRef(null);
+
+    const clearTimers = () => {
+        clearTimeout(refreshTimerRef.current);
+        clearInterval(countdownTimerRef.current);
+        refreshTimerRef.current = null;
+        countdownTimerRef.current = null;
+    };
+
+    useEffect(() => {
+        let active = true;
+
+        const doFetch = async () => {
+            clearTimers();
+            setLoading(true);
+            setError('');
+            try {
+                const response = await getVerificationCode();
+                if (!active) return;
+
+                const newCode = response?.codigoVerificacion ?? null;
+                const segundos = Math.max(response?.expiraEnSegundos ?? 60, 1);
+
+                setCode(newCode);
+                setCountdown(segundos);
+
+                countdownTimerRef.current = setInterval(() => {
+                    setCountdown((prev) => {
+                        if (prev <= 1) {
+                            clearInterval(countdownTimerRef.current);
+                            return 0;
+                        }
+                        return prev - 1;
+                    });
+                }, 1000);
+
+                refreshTimerRef.current = setTimeout(doFetch, segundos * 1000 + 500);
+            } catch (err) {
+                if (!active) return;
+                setError(err.message || 'No se pudo obtener el código de verificación.');
+                refreshTimerRef.current = setTimeout(doFetch, 10000);
+            } finally {
+                if (active) setLoading(false);
+            }
+        };
+
+        doFetch();
+
+        return () => {
+            active = false;
+            clearTimers();
+        };
+    }, []);
 
     const handleCopy = () => {
-        // TODO: descomentar cuando el token sea real
-        // navigator.clipboard.writeText(token);
+        if (code) navigator.clipboard.writeText(code);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
 
-    const expiresFormatted = expiresAt.toLocaleString('es-MX', {
-        day: '2-digit', month: 'short', year: 'numeric',
-        hour: '2-digit', minute: '2-digit'
-    });
+    const countdownColor = countdown !== null && countdown <= 10 ? '#ef4444' : '#6366f1';
 
     return (
         <div className={styles.page}>
@@ -34,47 +82,60 @@ const GenerarTokenPage = () => {
                     <FaKey />
                 </div>
                 <div>
-                    <h2 className={styles.title}>Token de Acceso</h2>
-                    <p className={styles.subtitle}>Gestiona el token de autenticación para integraciones externas con BALAMYA</p>
+                    <h2 className={styles.title}>Código de Verificación</h2>
+                    <p className={styles.subtitle}>Genera y comparte el código que necesitan los nuevos usuarios para registrarse en BALAMYA</p>
                 </div>
             </div>
 
             <div className={styles.grid}>
-                {/* Card principal — token */}
+                {/* Card principal — código */}
                 <div className={styles.tokenCard}>
                     <div className={styles.tokenCardHeader}>
                         <span className={styles.tokenCardLabel}>
                             <FaShieldAlt className={styles.labelIcon} />
-                            Token activo
+                            Código activo
                         </span>
-                        <span className={styles.expiryBadge}>
-                            <FaClock className={styles.badgeIcon} />
-                            Expira: {expiresFormatted}
-                        </span>
+                        {countdown !== null && !loading && (
+                            <span className={styles.expiryBadge} style={{ color: countdownColor }}>
+                                <FaClock className={styles.badgeIcon} />
+                                Rota en {countdown}s
+                            </span>
+                        )}
                     </div>
 
-                    <div className={styles.tokenDisplay}>
-                        <code className={styles.tokenText}>
-                            {tokenVisible ? token : '••••••••••'}
-                        </code>
-                        <button
-                            className={styles.visibilityBtn}
-                            onClick={() => setTokenVisible(v => !v)}
-                            title={tokenVisible ? 'Ocultar token' : 'Mostrar token'}
-                        >
-                            {tokenVisible ? <FaEyeSlash /> : <FaEye />}
-                        </button>
-                    </div>
+                    {loading && (
+                        <p className={styles.renewNote}>Cargando código...</p>
+                    )}
 
-                    <p className={styles.renewNote}>El token se renueva automáticamente cada 24 horas.</p>
+                    {error && !loading && (
+                        <p style={{ color: '#ef4444', fontSize: '0.875rem', margin: '1rem 0' }}>{error}</p>
+                    )}
 
-                    <button
-                        className={`${styles.btn} ${styles.btnCopy} ${copied ? styles.btnCopied : ''}`}
-                        onClick={handleCopy}
-                    >
-                        {copied ? <FaCheckCircle /> : <FaCopy />}
-                        {copied ? 'Copiado' : 'Copiar token'}
-                    </button>
+                    {!loading && !error && (
+                        <>
+                            <div className={styles.tokenDisplay}>
+                                <code className={styles.tokenText}>
+                                    {tokenVisible ? (code || '—') : '••••••'}
+                                </code>
+                                <button
+                                    className={styles.visibilityBtn}
+                                    onClick={() => setTokenVisible(v => !v)}
+                                    title={tokenVisible ? 'Ocultar código' : 'Mostrar código'}
+                                >
+                                    {tokenVisible ? <FaEyeSlash /> : <FaEye />}
+                                </button>
+                            </div>
+
+                            <button
+                                className={`${styles.btn} ${styles.btnCopy} ${copied ? styles.btnCopied : ''}`}
+                                onClick={handleCopy}
+                                disabled={!code}
+                            >
+                                {copied ? <FaCheckCircle /> : <FaCopy />}
+                                {copied ? 'Copiado' : 'Copiar código'}
+                            </button>
+                        </>
+                    )}
                 </div>
 
                 {/* Card informativa */}
@@ -87,22 +148,22 @@ const GenerarTokenPage = () => {
                         <li className={styles.infoItem}>
                             <span className={styles.infoStep}>1</span>
                             <div>
-                                <strong>Copia el token</strong>
-                                <p>Úsalo en el header de tus peticiones como <code>Authorization: Bearer &lt;token&gt;</code></p>
+                                <strong>Obtén el código</strong>
+                                <p>Como administrador puedes ver y copiar el código de verificación actual desde esta pantalla.</p>
                             </div>
                         </li>
                         <li className={styles.infoItem}>
                             <span className={styles.infoStep}>2</span>
                             <div>
-                                <strong>Vigencia de 24 horas</strong>
-                                <p>El token expira automáticamente y se genera uno nuevo cada día.</p>
+                                <strong>Compártelo con el nuevo usuario</strong>
+                                <p>El nuevo usuario necesita este código para poder completar su registro en la plataforma.</p>
                             </div>
                         </li>
                         <li className={styles.infoItem}>
                             <span className={styles.infoStep}>3</span>
                             <div>
                                 <strong>Solo para administradores</strong>
-                                <p>Este módulo es exclusivo del rol <code>Administradores</code>. No compartas el token.</p>
+                                <p>Este módulo es exclusivo del rol <code>Administrador</code>. Comparte el código únicamente con personal autorizado.</p>
                             </div>
                         </li>
                     </ul>

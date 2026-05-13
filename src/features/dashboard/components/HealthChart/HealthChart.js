@@ -20,12 +20,11 @@ const HealthChart = ({ data }) => {
   const stop2 = (pHealthy + pInTreatment).toFixed(2);
   const stop3 = (pHealthy + pInTreatment + pQuarantine).toFixed(2);
 
-  // Colores: Emerald (Sanos), Blue (En Tratamiento), Amber (Cuarentena/Hospital), Rose (Fallecidos)
   const conicGradient = `conic-gradient(
-    #10b981 0% ${stop1}%,
-    #3b82f6 ${stop1}% ${stop2}%,
-    #f59e0b ${stop2}% ${stop3}%,
-    #ef4444 ${stop3}% 100%
+    #2f9e44 0% ${stop1}%,
+    #1971c2 ${stop1}% ${stop2}%,
+    #e67700 ${stop2}% ${stop3}%,
+    #c92a2a ${stop3}% 100%
   )`;
 
   return (

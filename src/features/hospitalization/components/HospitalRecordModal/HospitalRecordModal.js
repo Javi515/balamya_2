@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { FaTimes, FaHospital, FaNotesMedical, FaPills, FaSignOutAlt, FaCalendarAlt, FaUserMd, FaExternalLinkAlt, FaFolderOpen } from 'react-icons/fa';
+import { FaTimes, FaHospital, FaNotesMedical, FaSignOutAlt, FaCalendarAlt, FaUserMd, FaExternalLinkAlt, FaFolderOpen } from 'react-icons/fa';
 import styles from './HospitalRecordModal.module.css';
 
 const DEFAULT_PHOTO = 'https://images.unsplash.com/photo-1574158622682-e40e69881006?auto=format&fit=crop&q=80&w=800';
@@ -68,7 +68,6 @@ const generateMockRecords = (patient) => ({
 const TABS = [
     { key: 'seguimiento', label: 'Seguimiento',  icon: <FaHospital />,    iconClass: 'icon-follow', formKey: 'hospFollowUp' },
     { key: 'revisiones',  label: 'Revisiones',   icon: <FaNotesMedical />, iconClass: 'icon-review', formKey: 'clinicalReview' },
-    { key: 'tratamientos',label: 'Tratamientos', icon: <FaPills />,        iconClass: 'icon-treat',  formKey: 'treatment' },
     { key: 'altas',       label: 'Altas',         icon: <FaSignOutAlt />,   iconClass: 'icon-alta',   formKey: 'notificacionAlta' },
 ];
 

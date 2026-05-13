@@ -1,26 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { FaPlus, FaEye, FaArrowLeft, FaExchangeAlt, FaBed, FaListAlt, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import AnimalSelector from '../../../components/common/AnimalSelector/AnimalSelector';
 import AnesthesiaForm from '../components/AnesthesiaForm/AnesthesiaForm';
-import { patients } from '../../../data/mockData';
 import styles from '../components/AnesthesiaForm/AnesthesiaForm.module.css';
 import formStyles from '../../forms/pages/FormsPage.module.css';
 import customStyles from '../../../styles/shared/CustomTable.module.css';
 import hospStyles from '../../../styles/shared/ModulePage.module.css';
 import '../../../styles/FloatingActions.css';
+import {
+    getAnesthesiaPatients,
+    getAnesthesiaRecords,
+    saveAnesthesiaRecords,
+} from '../../../services/anesthesiaService';
 
 const AnesthesiaPage = () => {
     const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
     // viewState: 'menu' | 'selection' | 'summary' | 'anesthesia-form'
-    const [viewState, setViewState] = useState('menu');
-    const [selectedAnimal, setSelectedAnimal] = useState(null);
-    const [allRecords, setAllRecords] = useState(() => {
-        try {
-            const saved = localStorage.getItem('balamya_anesthesia_records');
-            return saved ? JSON.parse(saved) : {};
-        } catch { return {}; }
+    const [viewState, setViewState] = useState(() => {
+        const v = searchParams.get('view');
+        return ['selection', 'summary'].includes(v) ? v : 'menu';
     });
+    const [selectedAnimal, setSelectedAnimal] = useState(null);
+    const [allRecords, setAllRecords] = useState(() => getAnesthesiaRecords());
 
     // Summary pagination
     const [summaryPage, setSummaryPage] = useState(1);
@@ -29,22 +32,25 @@ const AnesthesiaPage = () => {
     const [editingIndex, setEditingIndex] = useState(null);
 
     useEffect(() => {
-        localStorage.setItem('balamya_anesthesia_records', JSON.stringify(allRecords));
+        saveAnesthesiaRecords(allRecords);
     }, [allRecords]);
 
     const records = selectedAnimal ? (allRecords[selectedAnimal.id] || []) : [];
 
     // --- Navigation ---
     const goToMenu = () => {
+        setSearchParams({});
         setViewState('menu');
         setSelectedAnimal(null);
     };
 
     const goToRegister = () => {
+        setSearchParams({ view: 'selection' });
         setViewState('selection');
     };
 
     const goToSummary = () => {
+        setSearchParams({ view: 'summary' });
         setViewState('summary');
     };
 
@@ -83,7 +89,7 @@ const AnesthesiaPage = () => {
 
     // --- Summary data ---
     const getSummaryData = () => {
-        return patients.map(p => {
+        return getAnesthesiaPatients().map(p => {
             const recs = allRecords[p.id] || [];
             const lastRecord = recs.length > 0 ? recs[recs.length - 1] : null;
             return {

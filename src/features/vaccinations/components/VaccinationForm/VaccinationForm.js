@@ -1,26 +1,27 @@
-import React, { useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import styles from './VaccinationForm.module.css';
 
 import '../../../../styles/FloatingActions.css';
-import { FaPlus, FaFilePdf, FaSave } from 'react-icons/fa';
+import { FaPlus, FaFilePdf, FaSave, FaEdit } from 'react-icons/fa';
 import ImageUploader from '../../../../components/common/ImageUploader/ImageUploader';
 import { generateVaccinationPDF } from '../../utils/exportVaccinationPDF';
+import { updateVaccinationApi } from '../../../../services/vaccinationsService';
 
-const VaccinationForm = () => {
+const VaccinationForm = ({ patient, existingRecord, viewOnly = false }) => {
     const formRef = useRef(null);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [patientData, setPatientData] = useState({
-        nombreCientifico: '',
-        nombreComun: '',
-        nombreIndividual: '',
-        sexo: '',
-        edad: '',
-        ubicacion: '',
-        identificacion: ''
+        nombreCientifico: patient?.scientificName || patient?.species || '',
+        nombreComun: patient?.commonName || '',
+        nombreIndividual: patient?.name || '',
+        sexo: patient?.sex || '',
+        edad: patient?.ageText || (patient?.age ? `${patient.age} años` : ''),
+        ubicacion: patient?.location || '',
+        identificacion: patient?.id || '',
     });
-    const [records, setRecords] = useState([]);
+    const [records, setRecords] = useState(existingRecord ? [existingRecord] : []);
     const [newRecord, setNewRecord] = useState({
         fecha: '',
         viaAdministracion: '',
@@ -53,20 +54,42 @@ const VaccinationForm = () => {
         setNewRecord(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSaveRecord = () => {
+    const handleSaveRecord = async () => {
         if (!newRecord.fecha || !newRecord.vacunaAplicada) {
             alert('Por favor, complete al menos la fecha y la vacuna aplicada.');
             return;
         }
-        setRecords([...records, { ...newRecord, id: Date.now() }]);
+        if (isEditingRecord && existingRecord) {
+            try {
+                setIsSaving(true);
+                await updateVaccinationApi(existingRecord.id, newRecord);
+                setRecords([{ ...newRecord }]);
+                alert('Vacunación actualizada correctamente.');
+            } catch (err) {
+                alert(`Error al actualizar: ${err.message}`);
+                return;
+            } finally {
+                setIsSaving(false);
+                setIsEditingRecord(false);
+            }
+        } else {
+            setRecords([...records, { ...newRecord, id: Date.now() }]);
+        }
         closeModal();
     };
 
-    const [isSaved, setIsSaved] = useState(false);
+    const [isSaved, setIsSaved] = useState(!!existingRecord);
+    const [isSaving, setIsSaving] = useState(false);
+    const [isEditingRecord, setIsEditingRecord] = useState(false);
 
-    const handleSave = () => {
-        alert('Datos guardados (simulación).');
+    const handleSave = async () => {
         setIsSaved(true);
+    };
+
+    const openEditModal = () => {
+        setNewRecord({ ...records[0] });
+        setIsEditingRecord(true);
+        setIsModalOpen(true);
     };
 
     const handleExportPDF = () => {
@@ -119,12 +142,13 @@ const VaccinationForm = () => {
                 <div className={styles['vaccination-form-field']}><label className={styles['vaccination-form-label']}>Identificación</label><input type="text" className={styles['vaccination-form-input']} name="identificacion" value={patientData.identificacion} onChange={handlePatientDataChange} /></div>
             </div>
 
-            {/* Action Button to show the modal */}
+            {!existingRecord && (
             <div className={`${styles['add-record-button-container']}`}>
                 <button onClick={openModal} className={styles['add-record-button']}>
                     <FaPlus /> Agregar Registro
                 </button>
             </div>
+            )}
 
             {/* Records Table */}
             <div className={styles['table-container']}>
@@ -137,20 +161,28 @@ const VaccinationForm = () => {
                             <th>MVZ RESPONSABLE</th>
                             <th>PRÓXIMA VACUNACIÓN</th>
                             <th>OBSERVACIONES</th>
+                            {existingRecord && !viewOnly && <th></th>}
                         </tr>
                     </thead>
                     <tbody>
                         {records.length === 0 ? (
                             <tr><td colSpan="6" className={styles['no-records-cell']}>No hay registros</td></tr>
                         ) : (
-                            records.map((rec) => (
-                                <tr key={rec.id}>
+                            records.map((rec, index) => (
+                                <tr key={rec.id || index}>
                                     <td>{rec.fecha}</td>
                                     <td>{rec.viaAdministracion}</td>
                                     <td>{rec.vacunaAplicada}</td>
                                     <td>{rec.mvzResponsable}</td>
                                     <td>{rec.proximaVacunacion}</td>
                                     <td>{rec.observaciones}</td>
+                                    {existingRecord && !viewOnly && (
+                                        <td>
+                                            <button type="button" onClick={openEditModal} title="Editar registro" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#4a7c59' }}>
+                                                <FaEdit />
+                                            </button>
+                                        </td>
+                                    )}
                                 </tr>
                             ))
                         )}
@@ -161,7 +193,7 @@ const VaccinationForm = () => {
             {/* Floating action buttons */}
             <div className="floating-actions ">
                 {!isSaved ? (
-                    <button className="floating-btn save-btn" onClick={handleSave} title="Guardar">
+                    <button className="floating-btn save-btn" onClick={handleSave} disabled={isSaving} title="Guardar">
                         <FaSave />
                     </button>
                 ) : (
@@ -186,7 +218,7 @@ const VaccinationForm = () => {
                         </div>
                         <div className={styles['modal-actions']}>
                             <button onClick={closeModal} className={`${styles['footer-button']} ${styles['cancel-button']}`}>Cancelar</button>
-                            <button onClick={handleSaveRecord} className={`${styles['footer-button']} ${styles['save-button']}`}>Guardar</button>
+                            <button onClick={handleSaveRecord} className={`${styles['footer-button']} ${styles['save-button']}`}>Aceptar</button>
                         </div>
                     </div>
                 </div>,

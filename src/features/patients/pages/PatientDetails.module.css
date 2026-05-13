@@ -1,5 +1,9 @@
 /* src/styles/PatientDetails.css */
 
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
 .patient-details-container {
     padding: 0 30px 30px;
     margin-top: -24px;
@@ -164,25 +168,6 @@
     min-width: 160px;
 }
 
-.btn-new {
-    background-color: #2563eb;
-    color: white;
-}
-
-.btn-new:hover {
-    background-color: #1d4ed8;
-}
-
-.btn-edit {
-    background-color: #f1f5f9;
-    color: #334155;
-    border: 1px solid #cbd5e1;
-}
-
-.btn-edit:hover {
-    background-color: #e2e8f0;
-}
-
 .btn-danger {
     background-color: #dc2626;
     color: white;
@@ -287,10 +272,54 @@
 
 /* Tab Content */
 .tab-content {
-    background-color: white;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    padding: 20px 0;
+}
+
+/* History sub-tabs */
+.history-subtabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.subtab-btn {
+    padding: 6px 16px;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.subtab-btn:hover {
+    background: #e2e8f0;
+    color: #334155;
+}
+
+.subtab-disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.subtab-disabled:hover {
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+.subtab-active {
+    background: #1e88e5;
+    border-color: #1e88e5;
+    color: #fff;
+}
+
+.subtab-active:hover {
+    background: #1565c0;
+    border-color: #1565c0;
+    color: #fff;
 }
 
 .info-grid {

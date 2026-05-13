@@ -4,7 +4,7 @@ import autoTable from 'jspdf-autotable';
 // Vector-based PDF generation for Notificación de Alta
 export const generateNotificacionAltaPDF = (formRefs) => {
     const pdf = new jsPDF({
-        orientation: 'portrait',
+        orientation: 'landscape',
         unit: 'mm',
         format: 'letter'
     });
@@ -129,9 +129,8 @@ export const generateNotificacionAltaPDF = (formRefs) => {
     const row3 = [
         { label: 'No. de Albergue / Jaula / Terrario', value: formRefs.albergue },
         { label: 'Edad', value: formRefs.edad },
-        { label: 'Sexo', value: formRefs.sexo },
     ];
-    currentY = drawGridOfFields(row3, currentY, 3);
+    currentY = drawGridOfFields(row3, currentY, 2);
 
     // DESCRIPCIÓN DEL ALTA
     addSectionHeader('Descripción del Alta');

@@ -1,32 +1,21 @@
 import React, { useState, useRef } from 'react';
-import { FaSave, FaPrint, FaDove, FaFileAlt, FaFilePdf } from 'react-icons/fa';
+import { FaSave, FaPrint, FaFilePdf } from 'react-icons/fa';
 import { generateTreatmentPDF } from '../../utils/exportTreatmentPDF';
 import styles from './TreatmentForm.module.css';
 
 import buttonStyles from './FormButtons.module.css';
 import cardStyles from '../../../../styles/shared/Card.module.css';
-import { useAuth } from '../../../../context/AuthContext';
-
 import useFormState from '../../../../hooks/useFormState';
 import ImageUploader from '../../../../components/common/ImageUploader/ImageUploader';
+import { useAuth } from '../../../../context/AuthContext';
 
 const TreatmentForm = ({ onBack, patient }) => {
-    const { isSaved, handleSave } = useFormState();
     const { user } = useAuth();
+    const isAdmin = user?.role === 'admin';
+    const { isSaved, handleSave } = useFormState();
 
-    // Determine which variant(s) the user can see
-    const userRole = user?.role || '';
-    const isAdmin = userRole === 'admin';
-    const isAves = userRole === 'aves';
-
-    // Default variant based on role
-    const getDefaultVariant = () => {
-        if (isAves) return 'aves';
-        if (isAdmin) return 'normal'; // Admin starts on general
-        return 'normal'; // All other roles default to normal
-    };
-
-    const [variant, setVariant] = useState(getDefaultVariant);
+    const animalCategory = (patient?.category || patient?.taxonomicGroup || '').toLowerCase();
+    const variant = animalCategory.includes('ave') ? 'aves' : 'normal';
 
     // Dynamic Rows for Protocolo de Tratamiento (defaults to 6 rows)
     const [protocolRows, setProtocolRows] = useState([
@@ -135,26 +124,6 @@ const TreatmentForm = ({ onBack, patient }) => {
 
     return (
         <div className="flex flex-col gap-6">
-            {/* Premium Floating Variant Selector (only for admin) */}
-            {canToggle && (
-                <div className="flex justify-center w-full ">
-                    <div className="flex gap-2 p-1.5 bg-white/80 backdrop-blur-md rounded-full shadow-md border border-gray-100">
-                        <button
-                            className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 ${variant === 'normal' ? 'bg-blue-600 text-white shadow-md transform scale-105' : 'text-gray-500 hover:text-gray-800 hover:bg-gray-100'}`}
-                            onClick={() => setVariant('normal')}
-                        >
-                            <FaFileAlt /> General
-                        </button>
-                        <button
-                            className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 ${variant === 'aves' ? 'bg-blue-600 text-white shadow-md transform scale-105' : 'text-gray-500 hover:text-gray-800 hover:bg-gray-100'}`}
-                            onClick={() => setVariant('aves')}
-                        >
-                            <FaDove /> Aves
-                        </button>
-                    </div>
-                </div>
-            )}
-
             {/* Main Document Card */}
             <div className={`${cardStyles['card']} form-container-standard`} ref={formRef}>
                 <div className={styles['treatment-form']}>

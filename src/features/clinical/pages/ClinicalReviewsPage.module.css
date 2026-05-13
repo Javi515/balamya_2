@@ -1,0 +1,491 @@
+/* Tabla */
+.custom-table-container {
+    background: white;
+    border-radius: 10px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+    border: 1px solid #e8edf2;
+}
+
+@media (max-width: 768px) {
+    .custom-table-container {
+        overflow-x: auto;
+    }
+}
+
+.custom-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    table-layout: auto;
+}
+
+.custom-table th {
+    text-align: left;
+    padding: 10px 8px;
+    color: #6b7a8d;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: 0;
+    border-bottom: 1px solid #dde3ea;
+    background-color: transparent;
+}
+
+.custom-table td {
+    padding: 11px 8px;
+    border-bottom: 1px solid #f0f3f7;
+    color: #2d3748;
+    font-size: 0.82rem;
+    vertical-align: middle;
+    line-height: 1.4;
+    transition: background-color 0.15s ease;
+}
+
+.custom-table tr:last-child td {
+    border-bottom: none;
+}
+
+.custom-table tr:hover td {
+    background-color: #f7f9fc;
+}
+
+.custom-table th:first-child,
+.custom-table td:first-child {
+    padding-left: 12px;
+}
+
+.custom-table th:last-child,
+.custom-table td:last-child {
+    padding-right: 12px;
+    text-align: center;
+}
+
+.action-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: #3b82f6;
+    background: transparent;
+    padding: 5px 10px;
+    border-radius: 6px;
+    border: 1px solid #dbeafe;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 500;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    letter-spacing: 0;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.action-button:hover {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border-color: #bfdbfe;
+}
+
+.highlight-text {
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 0.9rem;
+}
+
+.id-text {
+    color: #869ab0;
+    font-size: 0.82rem;
+    font-weight: 400;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+}
+
+.empty-value {
+    color: #b0bac7;
+    font-size: 0.82rem;
+    font-style: italic;
+}
+
+.species-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+/* Paginación */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px 0;
+    margin-bottom: 24px;
+    background-color: transparent;
+    font-size: 0.95rem;
+    color: #64748b;
+}
+
+.pagination-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.page-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid #e2e8f0;
+    background-color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #334155;
+    font-weight: 500;
+    transition: all 0.2s;
+    padding: 0;
+}
+
+.page-btn.active {
+    background-color: #2563eb;
+    color: white;
+    border-color: #2563eb;
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.page-btn:hover:not(:disabled):not(.active) {
+    background-color: #f1f5f9;
+    border-color: #cbd5e1;
+}
+
+.page-btn.dots {
+    border: none;
+    background: transparent;
+    cursor: default;
+    color: #94a3b8;
+}
+
+.page-btn-nav {
+    border-radius: 20px;
+    padding: 0 14px;
+    height: 32px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    color: #334155;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.page-btn-nav:hover:not(:disabled) {
+    background-color: #f1f5f9;
+    border-color: #cbd5e1;
+}
+
+.page-btn-nav:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #f8fafc;
+}
+
+/* Loading */
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 32px;
+    gap: 20px;
+}
+
+.loading-spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid #e2e8f0;
+    border-top-color: #8b5cf6;
+    border-radius: 50%;
+    animation: spin 0.75s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-text {
+    font-size: 0.9rem;
+    color: #64748b;
+    font-weight: 500;
+    margin: 0;
+    letter-spacing: 0.02em;
+}
+
+/* Buscador */
+.search-wrapper {
+    position: relative;
+    margin-bottom: 16px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 0.85rem;
+    pointer-events: none;
+}
+
+.search-input {
+    width: 100%;
+    padding: 10px 38px 10px 38px;
+    border-radius: 10px;
+    border: 1.5px solid #e2e8f0;
+    font-size: 0.88rem;
+    color: #334155;
+    background: #f8fafc;
+    box-sizing: border-box;
+    transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+    outline: none;
+}
+
+.search-input:focus {
+    border-color: #8b5cf6;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.search-input::placeholder {
+    color: #b0bac7;
+}
+
+.search-clear {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #b0bac7;
+    font-size: 0.85rem;
+    line-height: 1;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: color 0.15s;
+}
+
+.search-clear:hover {
+    color: #64748b;
+}
+
+/* Header animal-reviews */
+.reviews-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    gap: 12px;
+}
+
+.reviews-header-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.reviews-header-subtitle {
+    margin: 3px 0 0;
+    font-size: 0.85rem;
+    color: #64748b;
+    font-style: italic;
+}
+
+.reviews-header-badge {
+    flex-shrink: 0;
+    background: #f0fdf4;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    white-space: nowrap;
+    margin-top: 2px;
+}
+
+/* Toolbar filtro/orden */
+.reviews-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 6px;
+    padding: 8px 12px;
+    background: #f8fafc;
+    border: 1px solid #e8edf2;
+    border-radius: 8px;
+    flex-wrap: wrap;
+    row-gap: 8px;
+}
+
+.reviews-toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.reviews-toolbar-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    margin-right: 2px;
+}
+
+.reviews-toolbar-sep {
+    color: #cbd5e1;
+    font-size: 0.85rem;
+}
+
+.reviews-date-input {
+    padding: 5px 8px;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    font-size: 0.8rem;
+    color: #334155;
+    background: #fff;
+    cursor: pointer;
+    outline: none;
+    width: 128px;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.reviews-date-input:focus {
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.1);
+}
+
+.reviews-clear-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: none;
+    background: #e2e8f0;
+    color: #64748b;
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    flex-shrink: 0;
+}
+
+.reviews-clear-btn:hover {
+    background: #fecaca;
+    color: #dc2626;
+}
+
+.reviews-sort-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    color: #64748b;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.reviews-sort-btn:hover {
+    border-color: #c4b5fd;
+    color: #7c3aed;
+    background: #faf5ff;
+}
+
+.reviews-sort-btn-active {
+    border-color: #c4b5fd;
+    background: #f5f3ff;
+    color: #7c3aed;
+}
+
+.reviews-filter-info {
+    font-size: 0.75rem;
+    color: #8b5cf6;
+    margin: 6px 0 14px;
+    padding-left: 2px;
+}
+
+/* Tarjetas de revisiones */
+.reviews-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.review-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.review-card:hover {
+    border-color: #bfdbfe;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.07);
+}
+
+.review-card-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.review-card-icon {
+    color: #8b5cf6;
+    font-size: 1rem;
+}
+
+.review-card-title {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.review-card-meta {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin-top: 2px;
+}
+
+.review-card-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: #3b82f6;
+    background: transparent;
+    padding: 5px 14px;
+    border-radius: 6px;
+    border: 1px solid #dbeafe;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 500;
+    transition: background 0.15s, color 0.15s;
+}
+
+.review-card-btn:hover {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border-color: #bfdbfe;
+}

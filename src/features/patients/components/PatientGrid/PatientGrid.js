@@ -1,71 +1,98 @@
-import React, { useState, useEffect } from 'react';
-import PatientCard from '../PatientCard/PatientCard';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaChevronLeft, FaChevronRight, FaAngleDoubleLeft, FaAngleDoubleRight, FaIdCard, FaClipboardList } from 'react-icons/fa';
+import { FaChevronLeft, FaChevronRight, FaIdCard, FaClipboardList } from 'react-icons/fa';
+import PatientCard from '../PatientCard/PatientCard';
 import styles from './PatientGrid.module.css';
 
-const ITEMS_PER_PAGE = 10;
+const ITEMS_PER_PAGE = 30;
+const FALLBACK_IMAGE =
+    'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&q=80&w=800';
 
-const PatientGrid = ({ patients, searchTerm, category, location, group, casualtyType, viewMode = 'grid', isCasualties = false }) => {
+const getSearchableValues = (patient) => [
+    patient.id,
+    patient.grouping,
+    patient.commonName,
+    patient.scientificName,
+    patient.name,
+    patient.species,
+    patient.specimenCount,
+    patient.taxonomicGroup,
+]
+    .filter(Boolean)
+    .map((value) => String(value).toLowerCase());
+
+const getAgeLabel = (patient) => patient.ageText || (patient.age ? `${patient.age} anios` : 'N/A');
+
+const PatientGrid = ({
+    patients,
+    searchTerm,
+    category,
+    location,
+    procedencia,
+    group,
+    casualtyType,
+    viewMode = 'grid',
+    isCasualties = false,
+    apiMode = false,
+    detailsEnabled = true,
+}) => {
     const navigate = useNavigate();
     const [currentPage, setCurrentPage] = useState(1);
     const [filteredPatients, setFilteredPatients] = useState([]);
 
-    // reset to page 1 when filters change
     useEffect(() => {
         setCurrentPage(1);
-    }, [searchTerm, category, location, group, casualtyType]);
+    }, [searchTerm, category, location, procedencia, group, casualtyType, apiMode]);
 
     useEffect(() => {
-        let result = patients;
+        let result = (Array.isArray(patients) ? [...patients] : [])
+            .filter(p => (p.taxonomicGroup || '').toLowerCase() !== 'invertebrados');
 
-        // Filter by search term
         if (searchTerm) {
             const term = searchTerm.toLowerCase();
-            result = result.filter(p =>
-                p.name.toLowerCase().includes(term) ||
-                p.id.toLowerCase().includes(term) ||
-                (p.species && p.species.toLowerCase().includes(term))
+            result = result.filter((patient) =>
+                getSearchableValues(patient).some((value) => value.includes(term))
             );
         }
 
-        // Filter by Category (if not "todos")
         if (category && category.length > 0 && !category.includes('todos')) {
-            result = result.filter(p => p.category && category.includes(p.category.toLowerCase()));
-        }
-
-        // Filter by Location
-        if (location && location.length > 0 && !location.includes('Todas')) {
-            result = result.filter(p =>
-                location.some(loc => {
-                    if (loc === 'Abandono') return p.origin === 'Abandono';
-                    if (loc === 'Recién Nacidos') return p.age <= 1;
-                    return p.locationType === loc;
-                })
+            result = result.filter(
+                (patient) => patient.category && category.includes(String(patient.category).toLowerCase())
             );
         }
 
-        // Filter by Group
-        if (group && group !== 'Todos') {
-            // Assuming 'group' or logic exists in patient data.
-            // If not present in mock data, this might be a placeholder or need adaptation.
-            // For now checking if a 'group' property exists or ignoring if data incomplete.
-            if (group === 'Grupal') {
-                result = result.filter(p => p.isGroup === true);
-            } else if (group === 'Individual') {
-                result = result.filter(p => !p.isGroup);
-            }
+        if (procedencia && procedencia.length > 0 && !procedencia.includes('Todas')) {
+            result = result.filter((patient) =>
+                procedencia.some((p) => patient.procedencia === p)
+            );
         }
 
-        // Filter by Casualty Type (only relevant on casualties page)
+        if (location && location.length > 0 && !location.includes('Todas')) {
+            const normalizeLocation = (v) =>
+                String(v || '').trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+            result = result.filter((patient) =>
+                location.some((selectedLocation) =>
+                    normalizeLocation(patient.locationType) === normalizeLocation(selectedLocation)
+                )
+            );
+        }
+
+        if (group && group.length > 0 && !group.includes('Todos')) {
+            result = result.filter((patient) => {
+                const patientGrouping = String(patient.grouping || '').toLowerCase();
+                return group.some((g) => g.toLowerCase() === patientGrouping);
+            });
+        }
+
         if (isCasualties && casualtyType && casualtyType.length > 0 && !casualtyType.includes('Todas')) {
-            result = result.filter(p => p.casualtyType && casualtyType.includes(p.casualtyType));
+            result = result.filter(
+                (patient) => patient.casualtyType && casualtyType.includes(patient.casualtyType)
+            );
         }
 
         setFilteredPatients(result);
-    }, [patients, searchTerm, category, location, group, casualtyType, isCasualties]);
+    }, [patients, searchTerm, category, location, procedencia, group, casualtyType, isCasualties, apiMode]);
 
-    // Pagination Logic
     const totalPages = Math.ceil(filteredPatients.length / ITEMS_PER_PAGE);
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     const currentItems = filteredPatients.slice(startIndex, startIndex + ITEMS_PER_PAGE);
@@ -77,6 +104,37 @@ const PatientGrid = ({ patients, searchTerm, category, location, group, casualty
         }
     };
 
+    const getPageNumbers = (activePage, pageCount) => {
+        const delta = 1;
+        const range = [];
+        const rangeWithDots = [];
+        let previousPage;
+
+        for (let pageNumber = 1; pageNumber <= pageCount; pageNumber += 1) {
+            if (
+                pageNumber === 1 ||
+                pageNumber === pageCount ||
+                (pageNumber >= activePage - delta && pageNumber <= activePage + delta)
+            ) {
+                range.push(pageNumber);
+            }
+        }
+
+        for (const pageNumber of range) {
+            if (previousPage) {
+                if (pageNumber - previousPage === 2) {
+                    rangeWithDots.push(previousPage + 1);
+                } else if (pageNumber - previousPage !== 1) {
+                    rangeWithDots.push('...');
+                }
+            }
+            rangeWithDots.push(pageNumber);
+            previousPage = pageNumber;
+        }
+
+        return rangeWithDots;
+    };
+
     if (filteredPatients.length === 0) {
         return (
             <div className={styles['no-results']}>
@@ -85,106 +143,205 @@ const PatientGrid = ({ patients, searchTerm, category, location, group, casualty
         );
     }
 
-    const getPageNumbers = (currentPage, totalPages) => {
-        const delta = 1;
-        const range = [];
-        const rangeWithDots = [];
-        let l;
-
-        for (let i = 1; i <= totalPages; i++) {
-            if (i === 1 || i === totalPages || (i >= currentPage - delta && i <= currentPage + delta)) {
-                range.push(i);
-            }
-        }
-
-        for (let i of range) {
-            if (l) {
-                if (i - l === 2) {
-                    rangeWithDots.push(l + 1);
-                } else if (i - l !== 1) {
-                    rangeWithDots.push('...');
-                }
-            }
-            rangeWithDots.push(i);
-            l = i;
-        }
-
-        return rangeWithDots;
-    };
-
     return (
         <div className={styles['patient-grid-container']}>
             {viewMode === 'grid' ? (
                 <div className={styles['patient-grid']}>
                     {currentItems.map((patient) => (
-                        <PatientCard key={patient.id} patient={patient} isCasualties={isCasualties} />
+                        <PatientCard
+                            key={patient.id}
+                            patient={patient}
+                            isCasualties={isCasualties}
+                            detailsEnabled={detailsEnabled}
+                            apiMode={apiMode}
+                        />
                     ))}
                 </div>
             ) : (
-                <div className={`${styles['table-responsive-container']} ${styles['list-view-container']}`}>
+                <div className={`${styles['list-view-container']} ${styles['table-responsive-container']}`}>
                     <table className={styles['patient-table']}>
+                        <colgroup>
+                            {!apiMode && <col className={styles['col-foto']} />}
+                            <col className={apiMode ? styles['col-id-api'] : styles['col-id']} />
+                            <col className={apiMode ? styles['col-nombre-api'] : styles['col-nombre']} />
+                            {apiMode ? (
+                                <>
+                                    <col className={styles['col-cientifico']} />
+                                    <col className={styles['col-grupo']} />
+                                    <col className={styles['col-edad-api']} />
+                                    <col className={styles['col-sexo']} />
+                                    <col className={styles['col-proc']} />
+                                    <col className={styles['col-recinto']} />
+                                    {detailsEnabled && <col className={styles['col-acc']} />}
+                                </>
+                            ) : (
+                                <>
+                                    <col className={styles['col-especie']} />
+                                    <col className={styles['col-peso']} />
+                                    <col className={styles['col-edad']} />
+                                    <col className={styles['col-ubi']} />
+                                    {detailsEnabled && <col className={styles['col-acc']} />}
+                                </>
+                            )}
+                        </colgroup>
                         <thead>
                             <tr>
-                                <th>Foto</th>
+                                {!apiMode && <th>Foto</th>}
                                 <th>ID</th>
-                                <th>Nombre</th>
-                                <th>Especie / Categoría</th>
-                                <th>Peso</th>
-                                <th>Edad / Sexo</th>
-                                <th>Ubicación</th>
-                                <th className="text-center">Acciones</th>
+                                {apiMode ? (
+                                    <>
+                                        <th>Nombre</th>
+                                        <th>Nombre cientifico</th>
+                                        <th>Grupo Taxonomico</th>
+                                        <th>Edad</th>
+                                        <th>Sexo</th>
+                                        <th>Procedencia</th>
+                                        <th>Ubicacion</th>
+                                        {detailsEnabled && <th>Acciones</th>}
+                                    </>
+                                ) : (
+                                    <>
+                                        <th>Nombre</th>
+                                        <th>Especie</th>
+                                        <th>Peso</th>
+                                        <th>Edad / Sexo</th>
+                                        <th>Ubicacion</th>
+                                        {detailsEnabled && <th>Acciones</th>}
+                                    </>
+                                )}
                             </tr>
                         </thead>
                         <tbody>
                             {currentItems.map((patient) => (
                                 <tr key={patient.id} className={styles['patient-table-row']}>
-                                    <td className={styles['table-img-cell']}>
-                                        <div className={styles['table-img-wrapper']}>
-                                            <img
-                                                src={patient.imageUrl || "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&q=80&w=800"}
-                                                alt={patient.name}
-                                            />
-                                        </div>
-                                    </td>
+                                    {!apiMode && (
+                                        <td className={styles['table-img-cell']}>
+                                            <div className={styles['table-img-wrapper']}>
+                                                <img
+                                                    src={patient.imageUrl || FALLBACK_IMAGE}
+                                                    alt={patient.commonName || patient.name || 'Paciente'}
+                                                />
+                                            </div>
+                                        </td>
+                                    )}
                                     <td className={styles['table-id-cell']}>{patient.id}</td>
-                                    <td>
-                                        <div className={styles['table-name']}>{patient.name}</div>
-                                        <div className={styles['table-subtext']}>{patient.commonName}</div>
-                                    </td>
-                                    <td>
-                                        <div className={styles['table-species']}>{patient.species}</div>
-                                        <div className={styles['table-subtext']} style={{ textTransform: 'capitalize' }}>{patient.category}</div>
-                                    </td>
-                                    <td>
-                                        <div className={styles['table-weight']}>{patient.weight ? `${patient.weight} kg` : 'N/A'}</div>
-                                    </td>
-                                    <td>
-                                        <div className={styles['table-age']}>{patient.age} años</div>
-                                        <div className={styles['table-subtext']}>{patient.sex}</div>
-                                    </td>
-                                    <td>
-                                        <span className={`${styles['table-badge']} ${styles[`badge-${patient.locationType === 'Cuarentena' ? 'quarantine' : 'normal'}`]}`}>
-                                            {patient.location}
-                                        </span>
-                                    </td>
-                                    <td className={styles['table-actions-cell']}>
-                                        <div className="flex justify-center flex-row gap-2">
-                                            <button
-                                                className="bg-transparent border-none cursor-pointer p-2 rounded-lg text-gray-500 transition-all duration-200 hover:bg-gray-100 hover:text-gray-900"
-                                                title="Expediente"
-                                                onClick={() => navigate(`/${isCasualties ? 'casualties' : 'patients'}/${patient.id}`)}
-                                            >
-                                                <FaIdCard size={18} />
-                                            </button>
-                                            <button
-                                                className="bg-transparent border-none cursor-pointer p-2 rounded-lg text-gray-500 transition-all duration-200 hover:bg-gray-100 hover:text-gray-900"
-                                                title="Historia Clínica"
-                                                onClick={() => navigate(`/${isCasualties ? 'casualties' : 'patients'}/${patient.id}`, { state: { initialTab: 'history' } })}
-                                            >
-                                                <FaClipboardList size={18} />
-                                            </button>
-                                        </div>
-                                    </td>
+                                    {apiMode ? (
+                                        <>
+                                            <td className={styles['table-cell-main']}>
+                                                <div className={styles['table-name']}>
+                                                    {patient.name || patient.commonName || 'Sin nombre'}
+                                                </div>
+                                                {patient.name && patient.commonName && patient.name !== patient.commonName && (
+                                                    <div className={styles['table-subtext']}>{patient.commonName}</div>
+                                                )}
+                                            </td>
+                                            <td>
+                                                <div className={styles['table-species']}>{patient.scientificName || '—'}</div>
+                                                {patient.family && <div className={styles['table-subtext']}>{patient.family}</div>}
+                                            </td>
+                                            <td>
+                                                <div className={styles['table-species']}>{patient.taxonomicGroup || '—'}</div>
+                                                {patient.grouping && (
+                                                    <div className={styles['table-subtext']}>
+                                                        {patient.grouping}{patient.specimenCount ? ` (${patient.specimenCount})` : ''}
+                                                    </div>
+                                                )}
+                                            </td>
+                                            <td>
+                                                <div className={styles['table-age']}>{getAgeLabel(patient)}</div>
+                                            </td>
+                                            <td>
+                                                <div className={styles['table-subtext']}>{patient.sex || '—'}</div>
+                                            </td>
+                                            <td>
+                                                <div className={styles['table-subtext']}>{patient.procedencia || '—'}</div>
+                                            </td>
+                                            <td>
+                                                <span className={styles['table-badge']}>{patient.location || 'Sin recinto'}</span>
+                                            </td>
+                                            {detailsEnabled && (
+                                                <td className={styles['table-actions-cell']}>
+                                                    <div className={styles['table-actions-group']}>
+                                                        <button
+                                                            className={styles['table-action-btn']}
+                                                            title="Expediente"
+                                                            onClick={() =>
+                                                                navigate(`/${isCasualties ? 'casualties' : 'patients'}/${patient.id}`, { state: { patient } })
+                                                            }
+                                                        >
+                                                            <FaIdCard size={16} />
+                                                        </button>
+                                                        <button
+                                                            className={styles['table-action-btn']}
+                                                            title="Historia Clinica"
+                                                            onClick={() =>
+                                                                navigate(`/${isCasualties ? 'casualties' : 'patients'}/${patient.id}`, {
+                                                                    state: { patient, initialTab: 'history' },
+                                                                })
+                                                            }
+                                                        >
+                                                            <FaClipboardList size={16} />
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            )}
+                                        </>
+                                    ) : (
+                                        <>
+                                            <td className={styles['table-cell-main']}>
+                                                <div className={styles['table-name']}>{patient.name || patient.commonName}</div>
+                                                {patient.name && patient.commonName && patient.name !== patient.commonName && (
+                                                    <div className={styles['table-species']}>{patient.commonName}</div>
+                                                )}
+                                            </td>
+                                            <td>
+                                                <div className={styles['table-species']}>{patient.species || patient.scientificName || '—'}</div>
+                                                <div className={styles['table-subtext']} style={{ textTransform: 'capitalize' }}>
+                                                    {patient.category}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div className={styles['table-weight']}>{patient.weight ? `${patient.weight} kg` : '—'}</div>
+                                            </td>
+                                            <td>
+                                                <div className={styles['table-age']}>{getAgeLabel(patient)}</div>
+                                                <div className={styles['table-subtext']}>{patient.sex || '—'}</div>
+                                            </td>
+                                            <td>
+                                                <span
+                                                    className={`${styles['table-badge']} ${patient.locationType === 'Cuarentena' ? styles['badge-quarantine'] : ''}`}
+                                                >
+                                                    {patient.location || '—'}
+                                                </span>
+                                            </td>
+                                            {detailsEnabled && (
+                                                <td className={styles['table-actions-cell']}>
+                                                    <div className={styles['table-actions-group']}>
+                                                        <button
+                                                            className={styles['table-action-btn']}
+                                                            title="Expediente"
+                                                            onClick={() =>
+                                                                navigate(`/${isCasualties ? 'casualties' : 'patients'}/${patient.id}`, { state: { patient } })
+                                                            }
+                                                        >
+                                                            <FaIdCard size={16} />
+                                                        </button>
+                                                        <button
+                                                            className={styles['table-action-btn']}
+                                                            title="Historia Clinica"
+                                                            onClick={() =>
+                                                                navigate(`/${isCasualties ? 'casualties' : 'patients'}/${patient.id}`, {
+                                                                    state: { patient, initialTab: 'history' },
+                                                                })
+                                                            }
+                                                        >
+                                                            <FaClipboardList size={16} />
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            )}
+                                        </>
+                                    )}
                                 </tr>
                             ))}
                         </tbody>

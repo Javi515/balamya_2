@@ -1,3 +1,35 @@
+.animals-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 32px;
+    gap: 20px;
+    width: 100%;
+    grid-column: 1 / -1;
+}
+
+.loading-spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid #e2e8f0;
+    border-top-color: #1e40af;
+    border-radius: 50%;
+    animation: spin 0.75s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-text {
+    font-size: 0.9rem;
+    color: #64748b;
+    font-weight: 500;
+    margin: 0;
+    letter-spacing: 0.02em;
+}
+
 .animal-selector-container {
     padding: 20px;
     max-width: 1200px;
@@ -122,6 +154,11 @@
     border-color: #3498db;
 }
 
+.animal-card.selected {
+    border-color: #16a34a;
+    box-shadow: 0 15px 30px rgba(22, 163, 74, 0.16);
+}
+
 .animal-card-image {
     height: 180px;
     position: relative;
@@ -135,36 +172,89 @@
     display: block;
 }
 
-.animal-status-badge {
+.animal-image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+    color: #94a3b8;
+    font-size: 3rem;
+}
+
+.selection-check {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    padding: 4px 10px;
+    top: 12px;
+    right: 12px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #16a34a;
+    color: #ffffff;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.18);
+}
+
+.multi-selection-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 20px;
+    margin-bottom: 24px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: #ffffff;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06);
+}
+
+.selection-counter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #475569;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.selection-counter-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 28px;
+    padding: 0 8px;
     border-radius: 20px;
-    font-size: 0.75rem;
+    background: #0f172a;
+    color: #ffffff;
+    font-size: 0.8rem;
     font-weight: 700;
-    color: white;
-    text-transform: uppercase;
-    background-color: #95a5a6;
-    /* Default */
 }
 
-.animal-status-badge[data-status="Saludable"] {
-    background-color: #2ecc71;
+.confirm-selection-btn {
+    border: none;
+    border-radius: 8px;
+    padding: 9px 22px;
+    background: #0f172a;
+    color: #ffffff;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.1s ease;
+    letter-spacing: 0.01em;
 }
 
-.animal-status-badge[data-status="Estable"] {
-    background-color: #f1c40f;
-    color: #444;
+.confirm-selection-btn:hover:not(:disabled) {
+    background: #1e293b;
+    transform: translateY(-1px);
 }
 
-.animal-status-badge[data-status="Crítico"] {
-    background-color: #e74c3c;
-    animation: pulse 2s infinite;
-}
-
-.animal-status-badge[data-status="Observación"] {
-    background-color: #3498db;
+.confirm-selection-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
 }
 
 .animal-card-details {
@@ -208,6 +298,32 @@
     margin: 0 0 15px 0;
 }
 
+.animal-name-labels {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 4px 0 12px 0;
+}
+
+.animal-name-label-row {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin: 0;
+    font-size: 0.85rem;
+    color: #475569;
+}
+
+.animal-label-tag {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #94a3b8;
+    white-space: nowrap;
+    min-width: 80px;
+}
+
 .animal-info-grid {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
@@ -242,8 +358,9 @@
 }
 
 .no-results-icon {
+    display: block;
+    margin: 0 auto 15px;
     font-size: 4rem;
-    margin-bottom: 15px;
     opacity: 0.5;
 }
 
@@ -256,19 +373,5 @@
     to {
         opacity: 1;
         transform: translateY(0);
-    }
-}
-
-@keyframes pulse {
-    0% {
-        opacity: 1;
-    }
-
-    50% {
-        opacity: 0.7;
-    }
-
-    100% {
-        opacity: 1;
     }
 }

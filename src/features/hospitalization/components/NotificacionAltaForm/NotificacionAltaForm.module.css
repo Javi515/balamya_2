@@ -176,6 +176,7 @@
 .signature-section {
     display: flex;
     justify-content: space-around;
+    align-items: flex-start;
     gap: 30px;
     margin-top: 40px;
     padding-top: 20px;
@@ -190,7 +191,7 @@
 
 .signature-line {
     border-bottom: 1px solid #333;
-    height: 50px;
+    height: 10px;
     margin-bottom: 8px;
 }
 

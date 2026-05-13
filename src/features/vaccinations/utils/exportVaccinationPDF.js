@@ -120,7 +120,7 @@ export const generateVaccinationPDF = (patientData, records, formRefs) => {
         headStyles: { fillColor: [230, 230, 230], textColor: [0, 0, 0], fontSize: 7, fontStyle: 'bold', halign: 'center' },
         bodyStyles: { fontSize: 8, textColor: [0, 0, 0], halign: 'center' },
         margin: { left: margin, right: margin },
-        styles: { cellPadding: 2, lineColor: [0, 0, 0], lineWidth: 0.2 },
+        styles: { cellPadding: 3, lineColor: [0, 0, 0], lineWidth: 0.2, minCellHeight: 18 },
     });
 
     pdf.save('Formato_Vacunacion.pdf');

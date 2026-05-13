@@ -1,16 +1,41 @@
-import React, { useState, useRef, useEffect } from 'react';
-import ReactDOM from 'react-dom';
-import { useNavigate } from 'react-router-dom';
-import { FaPlus, FaEdit, FaTrash, FaArrowLeft, FaExchangeAlt, FaSave, FaFilePdf, FaBug, FaListAlt, FaEye, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { FaArrowLeft } from 'react-icons/fa';
 import AnimalSelector from '../../../components/common/AnimalSelector/AnimalSelector';
-import ImageUploader from '../../../components/common/ImageUploader/ImageUploader';
 import { generateDewormingPDF } from '../utils/exportDewormingPDF';
-import { patients } from '../../../data/mockData';
-import styles from '../components/DewormingCalendar/DewormingCalendar.module.css';
 import formStyles from '../../forms/pages/FormsPage.module.css';
-import customStyles from '../../../styles/shared/CustomTable.module.css';
-import hospStyles from '../../../styles/shared/ModulePage.module.css';
-import '../../../styles/FloatingActions.css';
+import {
+    createDewormingApi,
+    getDewormingsByAnimal,
+    updateDewormingApi,
+} from '../../../services/dewormingService';
+import { useAuth } from '../../../context/AuthContext';
+import { fetchPatientById } from '../../../services/patientsService';
+import DewormingMenu from '../components/DewormingMenu/DewormingMenu';
+import DewormingSearch from '../components/DewormingSearch/DewormingSearch';
+import DewormingCalendarView from '../components/DewormingCalendarView/DewormingCalendarView';
+import Modal from '../../../components/common/Modal/Modal';
+import modalStyles from '../../../components/common/Modal/Modal.module.css';
+
+const MAX_RECORDS_PER_SHEET = 12;
+
+const normalizeRecord = (r, patientId) => ({
+    fecha:            r.fecha                   || '',
+    principioActivo:  r.principio_activo        || '',
+    productoComercial:r.producto_comercial       || '',
+    dosisMgKg:        r.dosis_mg_kg             || '',
+    dosisTotal:       r.dosis_total             || '',
+    via:              r.via_administracion       || '',
+    frecuencia:       r.frecuencia              || '',
+    proxima:          r.proxima_desparasitacion  || '',
+    peso:             r.peso != null ? String(r.peso) : '',
+    estadoFisiologico:r.estado_fisiologico       || '',
+    idCalendario:     r.id_calendario            || r.id || null,
+    registradoPor:    r.nombre_usuario           || '',
+    idUsuario:        r.id_usuario               || null,
+    patientId,
+    _saved: true,
+});
 
 const emptyRecord = {
     fecha: '',
@@ -25,80 +50,170 @@ const emptyRecord = {
 
 const DewormingPage = () => {
     const formRef = useRef(null);
-    const navigate = useNavigate();
-    const [viewState, setViewState] = useState('menu');
-    const [selectedAnimal, setSelectedAnimal] = useState(null);
-    const [allRecords, setAllRecords] = useState(() => {
-        try {
-            const saved = localStorage.getItem('balamya_deworming_records');
-            return saved ? JSON.parse(saved) : {};
-        } catch { return {}; }
+    const { user } = useAuth();
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [viewState, setViewState] = useState(() => {
+        const v = searchParams.get('view');
+        return ['selection', 'summary', 'form'].includes(v) ? v : 'menu';
     });
+    const [selectedAnimal, setSelectedAnimal] = useState(null);
+    const [allRecords, setAllRecords] = useState({});
+    const [currentSheetIndex, setCurrentSheetIndex] = useState(0);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentRecord, setCurrentRecord] = useState({ ...emptyRecord });
     const [editingIndex, setEditingIndex] = useState(null);
     const [isSaved, setIsSaved] = useState(false);
-    const [summaryPage, setSummaryPage] = useState(1);
-    const summaryItemsPerPage = 10;
+    const [editableGrupo, setEditableGrupo] = useState('');
+    const [editablePeso, setEditablePeso] = useState('');
+    const [editableEstadoFisiologico, setEditableEstadoFisiologico] = useState('');
+    const [isViewMode, setIsViewMode] = useState(false);
+    const [previousView, setPreviousView] = useState('menu');
+    const [selectedRow, setSelectedRow] = useState(null);
+    const [isEditingSaved, setIsEditingSaved] = useState(false);
+    const [warningModal, setWarningModal] = useState({ isOpen: false, message: '' });
+    const [isOpeningCalendar, setIsOpeningCalendar] = useState(false);
+    const [isLoadingRecords, setIsLoadingRecords] = useState(false);
 
-    const getPageNumbers = (current, total) => {
-        const delta = 1;
-        const range = [];
-        const rangeWithDots = [];
-        let l;
-        for (let i = 1; i <= total; i++) {
-            if (i === 1 || i === total || (i >= current - delta && i <= current + delta)) {
-                range.push(i);
-            }
-        }
-        for (let i of range) {
-            if (l) {
-                if (i - l === 2) rangeWithDots.push(l + 1);
-                else if (i - l !== 1) rangeWithDots.push('...');
-            }
-            rangeWithDots.push(i);
-            l = i;
-        }
-        return rangeWithDots;
-    };
-    // Persist allRecords to localStorage whenever it changes
+    const sheets = selectedAnimal ? (allRecords[selectedAnimal.id] || [[]]) : [[]];
+    const records = sheets[currentSheetIndex] || [];
+
     useEffect(() => {
-        localStorage.setItem('balamya_deworming_records', JSON.stringify(allRecords));
-    }, [allRecords]);
+        if (!isViewMode || !selectedRow) return;
 
-    const records = selectedAnimal ? (allRecords[selectedAnimal.id] || []) : [];
+        if (selectedRow.sheetIndex !== currentSheetIndex) return;
+
+        const selectedRecord = records[selectedRow.recordIndex];
+        if (!selectedRecord) {
+            setSelectedRow(null);
+            return;
+        }
+
+        setEditablePeso(selectedRecord.peso || '');
+        setEditableEstadoFisiologico(selectedRecord.estadoFisiologico || '');
+    }, [currentSheetIndex, isViewMode, records, selectedRow]);
+
+    useEffect(() => {
+        const v = searchParams.get('view');
+        const animalId = searchParams.get('animalId');
+        if (v === 'form' && animalId) {
+            const mode = searchParams.get('mode');
+            const restore = (animal) => mode === 'view' ? viewCalendarFor(animal, 0) : handleAnimalSelect(animal);
+            const cached = sessionStorage.getItem('balamya_animal_' + animalId);
+            if (cached) { restore(JSON.parse(cached)); return; }
+            fetchPatientById(animalId)
+                .then(animal => {
+                    if (animal) restore(animal);
+                    else { setSearchParams({ view: 'selection' }); setViewState('selection'); }
+                })
+                .catch(() => { setSearchParams({ view: 'selection' }); setViewState('selection'); });
+        }
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     // --- Navigation ---
     const goToMenu = () => {
+        setSearchParams({});
         setViewState('menu');
         setSelectedAnimal(null);
         setIsSaved(false);
+        setSelectedRow(null);
     };
 
     const goToRegister = () => {
+        setSearchParams({ view: 'selection' });
         setViewState('selection');
     };
 
-    const goToSummary = () => {
-        setViewState('summary');
-    };
+    const goToSummary = () => { setSearchParams({ view: 'summary' }); setViewState('summary'); };
 
-    const handleAnimalSelect = (animal) => {
+    const handleAnimalSelect = async (animal) => {
         setSelectedAnimal(animal);
+        sessionStorage.setItem('balamya_animal_' + animal.id, JSON.stringify(animal));
+        setSearchParams({ view: 'form', animalId: animal.id });
+        setEditableGrupo(animal.category || '');
+        setEditablePeso(animal.weight ? String(animal.weight) : '');
+        setEditableEstadoFisiologico('');
+        setSelectedRow(null);
+        setCurrentSheetIndex(0);
+        setAllRecords(prev => ({ ...prev, [animal.id]: [[]] }));
+        setPreviousView('selection');
         setViewState('form');
         setIsSaved(false);
+        setIsViewMode(false);
+        setIsLoadingRecords(true);
+        try {
+            const idEjemplar = animal.idEjemplar || animal.id;
+            const existing = await getDewormingsByAnimal(idEjemplar);
+            if (existing.length > 0) {
+                const sheetsMap = {};
+                existing.forEach(r => {
+                    const idx = (r.num_calendario || 1) - 1;
+                    if (!sheetsMap[idx]) sheetsMap[idx] = [];
+                    sheetsMap[idx].push(normalizeRecord(r, animal.id));
+                });
+                const loadedSheets = Object.keys(sheetsMap)
+                    .sort((a, b) => a - b)
+                    .map(k => sheetsMap[k]);
+                const lastSheet = loadedSheets[loadedSheets.length - 1];
+                if (lastSheet.length < MAX_RECORDS_PER_SHEET) {
+                    setAllRecords(prev => ({ ...prev, [animal.id]: loadedSheets }));
+                    setCurrentSheetIndex(loadedSheets.length - 1);
+                } else {
+                    setAllRecords(prev => ({ ...prev, [animal.id]: [...loadedSheets, []] }));
+                    setCurrentSheetIndex(loadedSheets.length);
+                }
+            }
+        } catch (err) {
+            console.warn('No se pudieron cargar registros existentes:', err.message);
+        } finally {
+            setIsLoadingRecords(false);
+        }
     };
 
     const handleChangeAnimal = () => {
         setSelectedAnimal(null);
+        setSearchParams({ view: 'selection' });
         setViewState('selection');
         setIsSaved(false);
+        setSelectedRow(null);
     };
 
-    const viewHistoryFor = (patient) => {
+
+    const viewCalendarFor = async (patient, calendarIndex) => {
+        sessionStorage.setItem('balamya_animal_' + patient.id, JSON.stringify(patient));
+        setSearchParams({ view: 'form', animalId: patient.id, mode: 'view' });
         setSelectedAnimal(patient);
+        setEditableGrupo(patient.category || '');
+        setEditablePeso(patient.weight ? `${patient.weight} kg` : '');
+        setEditableEstadoFisiologico('');
+        setSelectedRow(null);
+        setCurrentSheetIndex(0);
+        setAllRecords(prev => ({ ...prev, [patient.id]: [[]] }));
+        setPreviousView('summary');
         setViewState('form');
-        setIsSaved(false);
+        setIsSaved(true);
+        setIsViewMode(true);
+        setIsLoadingRecords(true);
+        try {
+            const idEjemplar = patient.idEjemplar || patient.id;
+            const existing = await getDewormingsByAnimal(idEjemplar);
+            if (existing.length > 0) {
+                const sheetsMap = {};
+                existing.forEach(r => {
+                    const idx = (r.num_calendario || 1) - 1;
+                    if (!sheetsMap[idx]) sheetsMap[idx] = [];
+                    sheetsMap[idx].push(normalizeRecord(r, patient.id));
+                });
+                const loadedSheets = Object.keys(sheetsMap)
+                    .sort((a, b) => a - b)
+                    .map(k => sheetsMap[k]);
+                setAllRecords(prev => ({ ...prev, [patient.id]: loadedSheets }));
+                setCurrentSheetIndex(Math.min(calendarIndex, loadedSheets.length - 1));
+            }
+        } catch (err) {
+            console.warn('No se pudieron cargar registros:', err.message);
+        } finally {
+            setIsLoadingRecords(false);
+        }
     };
 
     // --- Record CRUD ---
@@ -107,15 +222,27 @@ const DewormingPage = () => {
         setCurrentRecord(prev => ({ ...prev, [name]: value }));
     };
 
-    const openAddModal = () => {
-        setCurrentRecord({ ...emptyRecord });
-        setEditingIndex(null);
-        setIsModalOpen(true);
+    const handleRowSelect = (recordIndex) => {
+        const selectedRecord = records[recordIndex];
+        if (!selectedRecord) return;
+
+        setSelectedRow({ sheetIndex: currentSheetIndex, recordIndex });
+        setEditablePeso(selectedRecord.peso || '');
+        setEditableEstadoFisiologico(selectedRecord.estadoFisiologico || '');
     };
 
-    const openEditModal = (index) => {
-        setCurrentRecord({ ...records[index] });
-        setEditingIndex(index);
+    const openAddModal = async () => {
+        if (!editablePeso || !editableEstadoFisiologico) {
+            alert('Completa el Peso y el Estado Fisiológico antes de agregar un registro.');
+            return;
+        }
+        const hasUnsaved = records.some(r => !r._saved);
+        if (hasUnsaved) {
+            setWarningModal({ isOpen: true, message: 'Por favor guarda el registro que acabas de crear, antes de crear un nuevo registro.' });
+            return;
+        }
+        setCurrentRecord({ ...emptyRecord });
+        setEditingIndex(null);
         setIsModalOpen(true);
     };
 
@@ -123,51 +250,167 @@ const DewormingPage = () => {
         setIsModalOpen(false);
         setCurrentRecord({ ...emptyRecord });
         setEditingIndex(null);
+        setIsEditingSaved(false);
     };
 
-    const handleSaveRecord = () => {
-        if (!currentRecord.fecha || !currentRecord.principioActivo) {
-            alert('Por favor, complete al menos la fecha y el principio activo.');
+    const openEditModalForSaved = (recordIndex) => {
+        const rec = records[recordIndex];
+        if (!rec) return;
+        setCurrentRecord({
+            fecha: rec.fecha || '',
+            principioActivo: rec.principioActivo || '',
+            productoComercial: rec.productoComercial || '',
+            dosisMgKg: rec.dosisMgKg || '',
+            dosisTotal: rec.dosisTotal || '',
+            via: rec.via || '',
+            frecuencia: rec.frecuencia || '',
+            proxima: rec.proxima || '',
+            peso: rec.peso || '',
+            estadoFisiologico: rec.estadoFisiologico || '',
+            idCalendario: rec.idCalendario,
+            numCalendario: currentSheetIndex + 1,
+        });
+        setEditingIndex(recordIndex);
+        setIsEditingSaved(true);
+        setIsModalOpen(true);
+    };
+
+    const handleSaveRecord = async () => {
+        const missing = [];
+        if (!currentRecord.fecha) missing.push('Fecha');
+        if (!currentRecord.principioActivo) missing.push('Principio Activo');
+        if (!currentRecord.productoComercial) missing.push('Producto Comercial');
+        if (!currentRecord.dosisMgKg) missing.push('Dosis mg/kg');
+        if (!currentRecord.dosisTotal) missing.push('Dosis Total');
+        if (!currentRecord.via) missing.push('Vía de Administración');
+        if (!currentRecord.frecuencia) missing.push('Frecuencia');
+        if (missing.length > 0) {
+            alert('Los siguientes campos son obligatorios:\n- ' + missing.join('\n- '));
             return;
         }
-        const recordWithPatient = { ...currentRecord, patientId: selectedAnimal.id };
-        const patientRecords = [...records];
 
-        if (editingIndex !== null) {
-            patientRecords[editingIndex] = recordWithPatient;
-        } else {
-            patientRecords.push(recordWithPatient);
+        if (isEditingSaved) {
+            try {
+                const payload = {
+                    fecha: currentRecord.fecha,
+                    principioActivo: currentRecord.principioActivo,
+                    productoComercial: currentRecord.productoComercial,
+                    dosisMgKg: currentRecord.dosisMgKg,
+                    dosisTotal: currentRecord.dosisTotal,
+                    viaAdministracion: currentRecord.via,
+                    frecuencia: currentRecord.frecuencia,
+                    grupo: editableGrupo,
+                    peso: currentRecord.peso ? Number(currentRecord.peso) : undefined,
+                    ubicacion: selectedAnimal.location,
+                    estadoFisiologico: currentRecord.estadoFisiologico,
+                    proximaDesparasitacion: currentRecord.proxima,
+                    numCalendario: currentSheetIndex + 1,
+                };
+                await updateDewormingApi(currentRecord.idCalendario, payload);
+                const updatedSheets = sheets.map((sheet, idx) => {
+                    if (idx !== currentSheetIndex) return sheet;
+                    return sheet.map((r, i) => {
+                        if (i !== editingIndex) return r;
+                        return {
+                            ...r,
+                            fecha: currentRecord.fecha,
+                            principioActivo: currentRecord.principioActivo,
+                            productoComercial: currentRecord.productoComercial,
+                            dosisMgKg: currentRecord.dosisMgKg,
+                            dosisTotal: currentRecord.dosisTotal,
+                            via: currentRecord.via,
+                            frecuencia: currentRecord.frecuencia,
+                            proxima: currentRecord.proxima,
+                            peso: currentRecord.peso,
+                            estadoFisiologico: currentRecord.estadoFisiologico,
+                        };
+                    });
+                });
+                setAllRecords(prev => ({ ...prev, [selectedAnimal.id]: updatedSheets }));
+                closeModal();
+                alert('Registro actualizado correctamente.');
+            } catch (error) {
+                if (error.status === 403) {
+                    alert('No tienes permiso para editar este registro.');
+                } else {
+                    alert(error.message);
+                }
+            }
+            return;
         }
 
-        setAllRecords(prev => ({ ...prev, [selectedAnimal.id]: patientRecords }));
+        const recordWithPatient = { ...currentRecord, patientId: selectedAnimal.id };
+        const updatedSheets = sheets.map((sheet, idx) => {
+            if (idx !== currentSheetIndex) return sheet;
+            const updated = [...sheet];
+            if (editingIndex !== null) {
+                updated[editingIndex] = recordWithPatient;
+            } else {
+                updated.push(recordWithPatient);
+            }
+            return updated;
+        });
+        setAllRecords(prev => ({ ...prev, [selectedAnimal.id]: updatedSheets }));
+        setIsSaved(false);
         closeModal();
     };
 
-    const handleDeleteRecord = (index) => {
-        if (window.confirm('¿Está seguro de eliminar este registro?')) {
-            const patientRecords = records.filter((_, i) => i !== index);
-            setAllRecords(prev => ({ ...prev, [selectedAnimal.id]: patientRecords }));
+    // --- Save & PDF ---
+    const handleSave = async () => {
+        if (editablePeso !== '' && isNaN(Number(editablePeso))) {
+            alert('El campo Peso (kg) solo acepta números.\nEjemplo: 12.5');
+            return;
+        }
+        const missingGeneral = [];
+        if (!editablePeso) missingGeneral.push('Peso');
+        if (!editableEstadoFisiologico) missingGeneral.push('Estado Fisiológico');
+        if (missingGeneral.length > 0) {
+            alert('Los siguientes campos son obligatorios:\n- ' + missingGeneral.join('\n- '));
+            return;
+        }
+        const newRecords = records.filter(r => !r._saved);
+        if (newRecords.length === 0) {
+            alert('No hay registros nuevos que guardar.');
+            return;
+        }
+        try {
+            const numCalendario = currentSheetIndex + 1;
+            for (const record of newRecords) {
+                await createDewormingApi(selectedAnimal, record, {
+                    grupo: editableGrupo,
+                    peso: editablePeso,
+                    ubicacion: selectedAnimal.location,
+                    estadoFisiologico: editableEstadoFisiologico,
+                    idUsuario: user?.id,
+                }, numCalendario);
+            }
+            const savedSheets = sheets.map((sheet, idx) => {
+                if (idx !== currentSheetIndex) return sheet;
+                return sheet.map(r => ({ ...r, _saved: true }));
+            });
+            setAllRecords(prev => ({ ...prev, [selectedAnimal.id]: savedSheets }));
+            setIsSaved(true);
+            setEditablePeso('');
+            setEditableEstadoFisiologico('');
+            if (records.length >= MAX_RECORDS_PER_SHEET) {
+                setIsOpeningCalendar(true);
+                setTimeout(() => {
+                    setAllRecords(prev => {
+                        const currentSheets = prev[selectedAnimal.id] || [[]];
+                        return { ...prev, [selectedAnimal.id]: [...currentSheets, []] };
+                    });
+                    setCurrentSheetIndex(prev => prev + 1);
+                    setIsSaved(false);
+                    setIsOpeningCalendar(false);
+                }, 1800);
+            } else {
+                alert('Registros guardados y enviados al servidor correctamente.');
+            }
+        } catch (error) {
+            console.error('Error al enviar al servidor:', error);
+            alert(`⚠️ No se pudo enviar al servidor: ${error.message}`);
         }
     };
-
-    // --- Save & PDF ---
-    const handleSave = () => {
-        localStorage.setItem('balamya_deworming_records', JSON.stringify(allRecords));
-        setIsSaved(true);
-        alert('✅ Registros guardados correctamente.');
-    };
-
-    const getGeneralData = () => ({
-        grupo: selectedAnimal.category || '',
-        nombreCientifico: selectedAnimal.scientificName || '',
-        nombreComun: selectedAnimal.commonName || '',
-        peso: selectedAnimal.weight ? `${selectedAnimal.weight} kg` : '',
-        edad: selectedAnimal.age ? `${selectedAnimal.age} años` : '',
-        identificacion: selectedAnimal.id || '',
-        ubicacion: selectedAnimal.location || '',
-        sexo: selectedAnimal.sex || '',
-        estadoFisiologico: ''
-    });
 
     const handleExportPDF = () => {
         const el = formRef.current;
@@ -180,64 +423,27 @@ const DewormingPage = () => {
             logoLeft: getLogoSrc('.header-logo-left'),
             logoRight: getLogoSrc('.header-logo-right'),
         };
-        generateDewormingPDF(getGeneralData(), records, formRefs);
-    };
-
-
-
-    // --- Summary data ---
-    const getSummaryData = () => {
-        return patients.map(p => {
-            const recs = allRecords[p.id] || [];
-            const lastRecord = recs.length > 0 ? recs[recs.length - 1] : null;
-            return {
-                patient: p,
-                totalRecords: recs.length,
-                lastDeworming: lastRecord ? (lastRecord.fecha || null) : null,
-                nextDeworming: lastRecord ? (lastRecord.proxima || null) : null
-            };
-        });
+        const generalData = {
+            grupo: editableGrupo,
+            nombreCientifico: selectedAnimal.scientificName || '',
+            nombreComun: selectedAnimal.commonName || '',
+            peso: editablePeso,
+            edad: selectedAnimal.age ? `${selectedAnimal.age} años` : '',
+            identificacion: selectedAnimal.id || '',
+            ubicacion: selectedAnimal.location || '',
+            sexo: selectedAnimal.sex || '',
+            estadoFisiologico: editableEstadoFisiologico,
+        };
+        generateDewormingPDF(generalData, records, formRefs);
     };
 
     // ==========================================
-    // VIEW: MENU
+    // RENDER
     // ==========================================
     if (viewState === 'menu') {
-        return (
-            <div className={`${formStyles['forms-page-wrapper']} ${formStyles['module-menu-wrapper']}`}>
-                <div className={formStyles['forms-page-container']}>
-                    <div className={formStyles['forms-page-header']} style={{ textAlign: 'center', marginBottom: '40px' }}>
-                        <h1 className={formStyles['forms-page-title']} style={{ fontSize: '2.5rem' }}>Desparasitaciones</h1>
-                        <p className={formStyles['forms-page-subtitle']}>¿Qué deseas hacer?</p>
-                    </div>
-                    <div className={formStyles['module-menu-grid']}>
-                        <div className={`${formStyles['form-card']} ${formStyles['form-card-deworming']} ${formStyles['module-menu-card']}`} onClick={goToRegister}>
-                            <div className={`${formStyles['form-card-content']} ${formStyles['module-menu-card-content']}`}>
-                                <FaBug className={`${formStyles['form-card-icon']} ${formStyles['module-menu-icon']}`} style={{ color: '#28a745' }} />
-                                <div className={formStyles['form-card-text']}>
-                                    <h3 className={`${formStyles['form-card-title']} ${formStyles['module-menu-title']}`}>REGISTRAR DESPARASITACIÓN</h3>
-                                    <p className={`${formStyles['form-card-description']} ${formStyles['module-menu-desc']}`}>Selecciona un ejemplar y registra una nueva desparasitación en su historial clínico.</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div className={`${formStyles['form-card']} ${formStyles['form-card-deworming']} ${formStyles['module-menu-card']}`} onClick={goToSummary}>
-                            <div className={`${formStyles['form-card-content']} ${formStyles['module-menu-card-content']}`}>
-                                <FaListAlt className={`${formStyles['form-card-icon']} ${formStyles['module-menu-icon']}`} style={{ color: '#28a745' }} />
-                                <div className={formStyles['form-card-text']}>
-                                    <h3 className={`${formStyles['form-card-title']} ${formStyles['module-menu-title']}`}>VER DESPARASITACIONES</h3>
-                                    <p className={`${formStyles['form-card-description']} ${formStyles['module-menu-desc']}`}>Consulta el resumen de desparasitaciones de todos los pacientes y accede a su historial.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
+        return <DewormingMenu onRegister={goToRegister} onViewSummary={goToSummary} />;
     }
 
-    // ==========================================
-    // VIEW: ANIMAL SELECTION
-    // ==========================================
     if (viewState === 'selection') {
         return (
             <div className={formStyles['forms-page-wrapper']}>
@@ -251,236 +457,86 @@ const DewormingPage = () => {
         );
     }
 
-    // ==========================================
-    // VIEW: SUMMARY TABLE
-    // ==========================================
     if (viewState === 'summary') {
-        const summaryData = getSummaryData();
+        const handleSummaryPatientSelect = (patient) => {
+            if (patient) {
+                sessionStorage.setItem('balamya_animal_' + patient.id, JSON.stringify(patient));
+                setSearchParams({ view: 'summary', patientId: patient.id });
+            } else setSearchParams({ view: 'summary' });
+        };
         return (
-            <div className={formStyles['forms-page-wrapper']}>
-                <div className={formStyles['form-entry-animation']}>
-                    <button onClick={goToMenu} className={formStyles['back-to-menu-btn']}>
-                        <FaArrowLeft /> Volver al menú
-                    </button>
-                    <div className={customStyles['custom-table-container']}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-                            <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, color: '#1e293b' }}>Resumen de Desparasitaciones</h3>
-                            <span style={{ background: '#e0f2fe', color: '#0369a1', padding: '6px 12px', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 'bold' }}>{summaryData.length} PACIENTES</span>
-                        </div>
-                        <table className={customStyles['custom-table']}>
-                            <thead>
-                                <tr>
-                                    <th>Animal</th>
-                                    <th>Identificación</th>
-                                    <th>Última Desparasitación</th>
-                                    <th>Próxima Desparasitación</th>
-                                    <th>Total Registros</th>
-                                    <th>Acción</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {(() => {
-                                    const totalSummaryPages = Math.ceil(summaryData.length / summaryItemsPerPage);
-                                    const startIdx = (summaryPage - 1) * summaryItemsPerPage;
-                                    const paginatedData = summaryData.slice(startIdx, startIdx + summaryItemsPerPage);
-                                    return paginatedData.map((item) => (
-                                        <tr key={item.patient.id}>
-                                            <td>
-                                                <div className={customStyles['species-info']}>
-                                                    <div className={customStyles['highlight-text']}>{item.patient.commonName}</div>
-                                                </div>
-                                            </td>
-                                            <td><span className={customStyles['id-text']}>{item.patient.id}</span></td>
-                                            <td>{item.lastDeworming ? item.lastDeworming : <span className={customStyles['empty-value']}>Sin registro</span>}</td>
-                                            <td>{item.nextDeworming ? item.nextDeworming : <span className={customStyles['empty-value']}>Pendiente</span>}</td>
-                                            <td style={{ textAlign: 'center' }}>{item.totalRecords}</td>
-                                            <td>
-                                                <button
-                                                    className={customStyles['action-button']}
-                                                    onClick={() => viewHistoryFor(item.patient)}
-                                                >
-                                                    <FaEye /> Ver
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ));
-                                })()}
-                            </tbody>
-                        </table>
-                        {(() => {
-                            const totalSummaryPages = Math.ceil(summaryData.length / summaryItemsPerPage);
-                            if (totalSummaryPages <= 1) return null;
-                            return (
-                                <div className={hospStyles['pagination']}>
-                                    <div className={hospStyles['pagination-controls']}>
-                                        <button
-                                            className={hospStyles['page-btn-nav']}
-                                            disabled={summaryPage === 1}
-                                            onClick={() => setSummaryPage(prev => Math.max(prev - 1, 1))}
-                                        >
-                                            <FaChevronLeft /> Anterior
-                                        </button>
-                                        {getPageNumbers(summaryPage, totalSummaryPages).map((pageNumber, index) => (
-                                            <button
-                                                key={index}
-                                                className={`${hospStyles['page-btn']} ${pageNumber === summaryPage ? hospStyles['active'] : ''} ${pageNumber === '...' ? hospStyles['dots'] : ''}`}
-                                                disabled={pageNumber === '...'}
-                                                onClick={() => pageNumber !== '...' && setSummaryPage(pageNumber)}
-                                            >
-                                                {pageNumber}
-                                            </button>
-                                        ))}
-                                        <button
-                                            className={hospStyles['page-btn-nav']}
-                                            disabled={summaryPage === totalSummaryPages}
-                                            onClick={() => setSummaryPage(prev => Math.min(prev + 1, totalSummaryPages))}
-                                        >
-                                            Siguiente <FaChevronRight />
-                                        </button>
-                                    </div>
-                                </div>
-                            );
-                        })()}
-                    </div>
-                </div>
-            </div>
+            <DewormingSearch
+                onBack={goToMenu}
+                onViewCalendar={viewCalendarFor}
+                initialPatientId={searchParams.get('patientId')}
+                onPatientSelect={handleSummaryPatientSelect}
+            />
         );
     }
 
-    // ==========================================
-    // VIEW: DEWORMING FORM
-    // ==========================================
+    if (!selectedAnimal) return null;
+
+    const registradoresActuales = [...new Set(records.map(r => r.registradoPor).filter(Boolean))];
+
     return (
-        <div className={formStyles['forms-page-wrapper']}>
-            <div className={formStyles['form-entry-animation']}>
-                <div className={formStyles['form-header-controls']}>
-                    <button onClick={goToMenu} className={formStyles['back-to-menu-btn']}>
-                        <FaArrowLeft /> Volver al menú
+        <>
+            <DewormingCalendarView
+                selectedAnimal={selectedAnimal}
+                onBack={previousView === 'summary' ? goToSummary : goToMenu}
+                onChangeAnimal={handleChangeAnimal}
+                formRef={formRef}
+                editableGrupo={editableGrupo}
+                editablePeso={editablePeso}
+                onPesoChange={setEditablePeso}
+                editableEstadoFisiologico={editableEstadoFisiologico}
+                onEstadoChange={setEditableEstadoFisiologico}
+                sheets={sheets}
+                currentSheetIndex={currentSheetIndex}
+                onSheetIndexChange={setCurrentSheetIndex}
+                onSetSaved={setIsSaved}
+                isViewMode={isViewMode}
+                isSaved={isSaved}
+                records={records}
+                registradoresActuales={registradoresActuales}
+                onAddRecord={openAddModal}
+                isModalOpen={isModalOpen}
+                currentRecord={currentRecord}
+                onRecordChange={handleRecordChange}
+                onSaveRecord={handleSaveRecord}
+                onCloseModal={closeModal}
+                editingIndex={editingIndex}
+                onSave={handleSave}
+                onExportPDF={handleExportPDF}
+                selectedRow={selectedRow}
+                onSelectRow={handleRowSelect}
+                onEditRecord={openEditModalForSaved}
+                isEditingSaved={isEditingSaved}
+                currentUserId={user?.idUsuario ?? user?.id}
+                isAdmin={user?.role === 'admin'}
+                isLoadingRecords={isLoadingRecords}
+            />
+            <Modal
+                isOpen={warningModal.isOpen}
+                onClose={() => setWarningModal({ isOpen: false, message: '' })}
+                title="Atención"
+                footer={
+                    <button
+                        className={`${modalStyles['btn-modal']} ${modalStyles['btn-confirm']}`}
+                        onClick={() => setWarningModal({ isOpen: false, message: '' })}
+                    >
+                        Entendido
                     </button>
-                    <div className={`${formStyles['selected-animal-banner']} ${formStyles.compact}`}>
-                        <div className={formStyles['animal-banner-info']}>
-                            <span className={formStyles['banner-label']}>Paciente:</span>
-                            <span className={formStyles['banner-name']}>{selectedAnimal.commonName || 'Sin Nombre Común'}</span>
-                            <span className={formStyles['banner-id']}>{selectedAnimal.id}</span>
-                        </div>
-                        <button onClick={handleChangeAnimal} className={formStyles['change-animal-btn']}>
-                            <FaExchangeAlt /> Cambiar
-                        </button>
-                    </div>
+                }
+            >
+                {warningModal.message}
+            </Modal>
+            <Modal isOpen={isOpeningCalendar} onClose={null} title="Registro guardado">
+                <div className={modalStyles['loading-body']}>
+                    <div className={modalStyles['loading-spinner']} />
+                    <p className={modalStyles['loading-text']}>Espere un momento, estamos abriendo el nuevo calendario.</p>
                 </div>
-
-                <div className={`${styles['deworming-card']} global-form-width`} ref={formRef}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', width: '100%' }}>
-                        <ImageUploader placeholderText="Logo" className="header-logo-left" />
-                        <div className={styles['deworming-header']} style={{ flex: 1, textAlign: 'center' }}>
-                            <div className={styles['deworming-header-subtitle']} style={{ marginBottom: '5px' }}>MANTENIMIENTO PREVENTIVO</div>
-                            <div className={styles['deworming-header-title']}>CALENDARIO DE DESPARASITACIÓN</div>
-                        </div>
-                        <ImageUploader placeholderText="Logo" className="header-logo-right" />
-                    </div>
-
-                    <h4>DATOS GENERALES</h4>
-                    <div className={styles['deworming-form-grid']}>
-                        <div className={styles['deworming-form-field']}><label className={styles['deworming-form-label']}>GRUPO</label><input type="text" className={styles['deworming-form-input']} value={selectedAnimal.category || ''} readOnly /></div>
-                        <div className={styles['deworming-form-field']}><label className={styles['deworming-form-label']}>NOMBRE CIENTÍFICO</label><input type="text" className={styles['deworming-form-input']} value={selectedAnimal.scientificName || ''} readOnly /></div>
-                        <div className={styles['deworming-form-field']}><label className={styles['deworming-form-label']}>NOMBRE COMÚN</label><input type="text" className={styles['deworming-form-input']} value={selectedAnimal.commonName || ''} readOnly /></div>
-                        <div className={styles['deworming-form-field']}><label className={styles['deworming-form-label']}>SEXO</label><input type="text" className={styles['deworming-form-input']} value={selectedAnimal.sex || ''} readOnly /></div>
-                        <div className={styles['deworming-form-field']}><label className={styles['deworming-form-label']}>EDAD</label><input type="text" className={styles['deworming-form-input']} value={selectedAnimal.age ? `${selectedAnimal.age} años` : ''} readOnly /></div>
-                        <div className={styles['deworming-form-field']}><label className={styles['deworming-form-label']}>IDENTIFICACIÓN</label><input type="text" className={styles['deworming-form-input']} value={selectedAnimal.id || ''} readOnly /></div>
-                        <div className={styles['deworming-form-field']}><label className={styles['deworming-form-label']}>PESO</label><input type="text" className={styles['deworming-form-input']} value={selectedAnimal.weight ? `${selectedAnimal.weight} kg` : ''} readOnly /></div>
-                        <div className={styles['deworming-form-field']}><label className={styles['deworming-form-label']}>UBICACIÓN</label><input type="text" className={styles['deworming-form-input']} value={selectedAnimal.location || ''} readOnly /></div>
-                        <div className={styles['deworming-form-field']}><label className={styles['deworming-form-label']}>ESTADO FISIOLÓGICO</label><input type="text" className={styles['deworming-form-input']} value={''} readOnly /></div>
-                    </div>
-
-                    <div className={styles['add-record-button-container']}>
-                        <button onClick={openAddModal} className={styles['add-record-button']}>
-                            <FaPlus /> Agregar Registro
-                        </button>
-                    </div>
-
-                    <div className={styles['table-container']}>
-                        <table className={styles['deworming-table']}>
-                            <thead>
-                                <tr>
-                                    <th>FECHA</th>
-                                    <th>PRINCIPIO ACTIVO</th>
-                                    <th>DOSIS MG/KG</th>
-                                    <th>PRODUCTO COMERCIAL</th>
-                                    <th>DOSIS TOTAL (ml o tabletas)</th>
-                                    <th>VÍA DE ADMINISTRACIÓN</th>
-                                    <th>FRECUENCIA</th>
-                                    <th>PRÓXIMA DESPARASITACIÓN</th>
-                                    <th>ACCIONES</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {records.length === 0 ? (
-                                    <tr><td colSpan="9" style={{ textAlign: 'center', fontStyle: 'italic', color: '#777' }}>No hay registros.</td></tr>
-                                ) : (
-                                    records.map((rec, index) => (
-                                        <tr key={index}>
-                                            <td>{rec.fecha}</td>
-                                            <td>{rec.principioActivo}</td>
-                                            <td>{rec.dosisMgKg}</td>
-                                            <td>{rec.productoComercial}</td>
-                                            <td>{rec.dosisTotal}</td>
-                                            <td>{rec.via}</td>
-                                            <td>{rec.frecuencia}</td>
-                                            <td>{rec.proxima}</td>
-                                            <td>
-                                                <div className={styles['action-buttons']}>
-                                                    <button className={styles['btn-edit']} onClick={() => openEditModal(index)} title="Editar"><FaEdit /></button>
-                                                    <button className={styles['btn-delete']} onClick={() => handleDeleteRecord(index)} title="Eliminar"><FaTrash /></button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div className="floating-actions">
-                        {!isSaved ? (
-                            <button className="floating-btn save-btn" onClick={handleSave} title="Guardar"><FaSave /></button>
-                        ) : (
-                            <button className="floating-btn pdf-btn" onClick={handleExportPDF} title="Descargar PDF"><FaFilePdf /></button>
-                        )}
-                    </div>
-                </div>
-
-                {/* Modal */}
-                {isModalOpen && ReactDOM.createPortal(
-                    <div className={styles['modal-overlay']} onClick={closeModal}>
-                        <div className={styles['modal-content']} onClick={(e) => e.stopPropagation()}>
-                            <h3 className={styles['modal-title']}>
-                                {editingIndex !== null ? 'Editar Registro de Desparasitación' : 'Agregar Registro de Desparasitación'}
-                            </h3>
-                            <form onSubmit={(e) => { e.preventDefault(); handleSaveRecord(); }}>
-                                <div className={styles['modal-form-grid']}>
-                                    <div className={styles['deworming-form-field']}><label className={styles['deworming-form-label']}>FECHA</label><input type="date" className={styles['deworming-form-input']} name="fecha" value={currentRecord.fecha} onChange={handleRecordChange} /></div>
-                                    <div className={styles['deworming-form-field']}><label className={styles['deworming-form-label']}>PRINCIPIO ACTIVO</label><input type="text" className={styles['deworming-form-input']} name="principioActivo" value={currentRecord.principioActivo} onChange={handleRecordChange} /></div>
-                                    <div className={styles['deworming-form-field']}><label className={styles['deworming-form-label']}>DOSIS MG/KG</label><input type="text" className={styles['deworming-form-input']} name="dosisMgKg" value={currentRecord.dosisMgKg} onChange={handleRecordChange} /></div>
-                                    <div className={styles['deworming-form-field']}><label className={styles['deworming-form-label']}>PRODUCTO COMERCIAL</label><input type="text" className={styles['deworming-form-input']} name="productoComercial" value={currentRecord.productoComercial} onChange={handleRecordChange} /></div>
-                                    <div className={styles['deworming-form-field']}><label className={styles['deworming-form-label']}>DOSIS TOTAL (ml o tabletas)</label><input type="text" className={styles['deworming-form-input']} name="dosisTotal" value={currentRecord.dosisTotal} onChange={handleRecordChange} /></div>
-                                    <div className={styles['deworming-form-field']}><label className={styles['deworming-form-label']}>VÍA DE ADMINISTRACIÓN</label><input type="text" className={styles['deworming-form-input']} name="via" value={currentRecord.via} onChange={handleRecordChange} /></div>
-                                    <div className={styles['deworming-form-field']}><label className={styles['deworming-form-label']}>FRECUENCIA</label><input type="text" className={styles['deworming-form-input']} name="frecuencia" value={currentRecord.frecuencia} onChange={handleRecordChange} /></div>
-                                    <div className={styles['deworming-form-field']}><label className={styles['deworming-form-label']}>PRÓXIMA DESPARASITACIÓN</label><input type="date" className={styles['deworming-form-input']} name="proxima" value={currentRecord.proxima} onChange={handleRecordChange} /></div>
-                                </div>
-
-                                <div className={styles['modal-actions']}>
-                                    <button type="button" className={`${styles['footer-button']} ${styles['cancel-button']}`} onClick={closeModal}>Cancelar</button>
-                                    <button type="submit" className={`${styles['footer-button']} ${styles['save-button']}`}>
-                                        {editingIndex !== null ? 'Actualizar' : 'Guardar Registro'}
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>,
-                    document.body
-                )}
-            </div>
-        </div>
+            </Modal>
+        </>
     );
 };
 

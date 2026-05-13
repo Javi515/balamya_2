@@ -1,106 +1,158 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import ReactDOM from 'react-dom';
-import { useNavigate } from 'react-router-dom';
-import { FaPlus, FaEdit, FaTrash, FaArrowLeft, FaExchangeAlt, FaSave, FaFilePdf, FaSyringe, FaListAlt, FaEye, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { FaPlus, FaArrowLeft, FaExchangeAlt, FaSave, FaFilePdf, FaSyringe, FaListAlt, FaEdit } from 'react-icons/fa';
 import AnimalSelector from '../../../components/common/AnimalSelector/AnimalSelector';
 import ImageUploader from '../../../components/common/ImageUploader/ImageUploader';
 import { generateVaccinationPDF } from '../utils/exportVaccinationPDF';
-import { patients } from '../../../data/mockData';
 import styles from '../components/VaccinationForm/VaccinationForm.module.css';
 import formStyles from '../../forms/pages/FormsPage.module.css';
-import customStyles from '../../../styles/shared/CustomTable.module.css';
-import hospStyles from '../../../styles/shared/ModulePage.module.css';
 import '../../../styles/FloatingActions.css';
+import { useAuth } from '../../../context/AuthContext';
+import { createVaccinationApi, getVaccinationsForPatient, updateVaccinationApi } from '../../../services/vaccinationsService';
+import { fetchPatientById } from '../../../services/patientsService';
+import VaccinationSearch from '../components/VaccinationSearch/VaccinationSearch';
+import Modal from '../../../components/common/Modal/Modal';
+import modalStyles from '../../../components/common/Modal/Modal.module.css';
+
+const MAX_RECORDS_PER_SHEET = 6;
 
 const emptyRecord = {
     fecha: '',
     viaAdministracion: '',
     vacunaAplicada: '',
-    mvzResponsable: '',
     proximaVacunacion: '',
-    observaciones: ''
+    observaciones: '',
 };
 
 const VaccinationsPage = () => {
+    const { user } = useAuth();
     const formRef = useRef(null);
-    const navigate = useNavigate();
-    // viewState: 'menu' | 'selection' | 'form' | 'summary'
-    const [viewState, setViewState] = useState('menu');
-    const [selectedAnimal, setSelectedAnimal] = useState(null);
-    // Records stored per patient: { 'M-2034': [...], 'A-1055': [...] }
-    const [allRecords, setAllRecords] = useState(() => {
-        try {
-            const saved = localStorage.getItem('balamya_vaccination_records');
-            return saved ? JSON.parse(saved) : {};
-        } catch { return {}; }
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [viewState, setViewState] = useState(() => {
+        const v = searchParams.get('view');
+        return ['selection', 'summary', 'form'].includes(v) ? v : 'menu';
     });
+    const [selectedAnimal, setSelectedAnimal] = useState(null);
+    const [allRecords, setAllRecords] = useState({});
+    const [currentSheetIndex, setCurrentSheetIndex] = useState(0);
+    const [, setRecordsLoading] = useState(false);
+    const [recordsError, setRecordsError] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentRecord, setCurrentRecord] = useState({ ...emptyRecord });
-    const [editingIndex, setEditingIndex] = useState(null);
+    const [isSaving, setIsSaving] = useState(false);
     const [isSaved, setIsSaved] = useState(false);
-    const [summaryPage, setSummaryPage] = useState(1);
-    const summaryItemsPerPage = 10;
+    const [isViewMode, setIsViewMode] = useState(false);
+    const [editingId, setEditingId] = useState(null);
+    const [warningModal, setWarningModal] = useState({ isOpen: false, message: '' });
+    const [isOpeningCalendar, setIsOpeningCalendar] = useState(false);
 
-    const getPageNumbers = (current, total) => {
-        const delta = 1;
-        const range = [];
-        const rangeWithDots = [];
-        let l;
-        for (let i = 1; i <= total; i++) {
-            if (i === 1 || i === total || (i >= current - delta && i <= current + delta)) {
-                range.push(i);
+    const sheets = selectedAnimal ? (allRecords[selectedAnimal.id] || [[]]) : [[]];
+    const records = sheets[currentSheetIndex] || [];
+
+    const loadRecordsForAnimal = async (animal, targetSheetIndex = null) => {
+        setRecordsLoading(true);
+        setRecordsError('');
+        try {
+            const data = await getVaccinationsForPatient(animal);
+            if (data.length > 0) {
+                // Group by numCalendario (same pattern as deworming)
+                const sheetsMap = {};
+                data.forEach(r => {
+                    const idx = (r.numCalendario || 1) - 1;
+                    if (!sheetsMap[idx]) sheetsMap[idx] = [];
+                    sheetsMap[idx].push({ ...r, _saved: true });
+                });
+                const loadedSheets = Object.keys(sheetsMap)
+                    .sort((a, b) => a - b)
+                    .map(k => sheetsMap[k]);
+
+                if (targetSheetIndex !== null) {
+                    // Navigate to a specific calendar (from VaccinationSearch)
+                    setAllRecords(prev => ({ ...prev, [animal.id]: loadedSheets }));
+                    setCurrentSheetIndex(Math.min(targetSheetIndex, loadedSheets.length - 1));
+                } else {
+                    const lastSheet = loadedSheets[loadedSheets.length - 1];
+                    if (lastSheet.length >= MAX_RECORDS_PER_SHEET) {
+                        // Last calendar is full — add a new empty one
+                        setAllRecords(prev => ({ ...prev, [animal.id]: [...loadedSheets, []] }));
+                        setCurrentSheetIndex(loadedSheets.length);
+                    } else {
+                        setAllRecords(prev => ({ ...prev, [animal.id]: loadedSheets }));
+                        setCurrentSheetIndex(loadedSheets.length - 1);
+                    }
+                }
+            } else {
+                setAllRecords(prev => ({ ...prev, [animal.id]: [[]] }));
+                setCurrentSheetIndex(0);
             }
+        } catch (err) {
+            setRecordsError(err?.message || 'Error al cargar registros');
+            setAllRecords(prev => ({ ...prev, [animal.id]: [[]] }));
+            setCurrentSheetIndex(0);
+        } finally {
+            setRecordsLoading(false);
         }
-        for (let i of range) {
-            if (l) {
-                if (i - l === 2) rangeWithDots.push(l + 1);
-                else if (i - l !== 1) rangeWithDots.push('...');
-            }
-            rangeWithDots.push(i);
-            l = i;
-        }
-        return rangeWithDots;
     };
 
-    // Persist allRecords to localStorage whenever it changes
     useEffect(() => {
-        localStorage.setItem('balamya_vaccination_records', JSON.stringify(allRecords));
-    }, [allRecords]);
-
-    // Get records for current patient
-    const records = selectedAnimal ? (allRecords[selectedAnimal.id] || []) : [];
+        const v = searchParams.get('view');
+        const animalId = searchParams.get('animalId');
+        if (v === 'form' && animalId) {
+            const mode = searchParams.get('mode');
+            const restore = (animal) => mode === 'view' ? viewHistoryFor(animal) : handleAnimalSelect(animal);
+            const cached = sessionStorage.getItem('balamya_animal_' + animalId);
+            if (cached) { restore(JSON.parse(cached)); return; }
+            fetchPatientById(animalId)
+                .then(animal => {
+                    if (animal) restore(animal);
+                    else { setSearchParams({ view: 'selection' }); setViewState('selection'); }
+                })
+                .catch(() => { setSearchParams({ view: 'selection' }); setViewState('selection'); });
+        }
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     // --- Navigation ---
     const goToMenu = () => {
+        setSearchParams({});
         setViewState('menu');
         setSelectedAnimal(null);
         setIsSaved(false);
     };
 
-    const goToRegister = () => {
-        setViewState('selection');
-    };
+    const goToRegister = () => { setSearchParams({ view: 'selection' }); setViewState('selection'); };
 
-    const goToSummary = () => {
-        setViewState('summary');
-    };
+    const goToSummary = () => { setSearchParams({ view: 'summary' }); setViewState('summary'); };
 
-    const handleAnimalSelect = (animal) => {
+    const handleAnimalSelect = async (animal) => {
         setSelectedAnimal(animal);
+        sessionStorage.setItem('balamya_animal_' + animal.id, JSON.stringify(animal));
+        setSearchParams({ view: 'form', animalId: animal.id });
         setViewState('form');
         setIsSaved(false);
+        setIsViewMode(false);
+        setAllRecords(prev => ({ ...prev, [animal.id]: [[]] }));
+        setCurrentSheetIndex(0);
+        await loadRecordsForAnimal(animal);
     };
 
     const handleChangeAnimal = () => {
         setSelectedAnimal(null);
-        setViewState('selection');
         setIsSaved(false);
+        setSearchParams({ view: 'selection' });
+        setViewState('selection');
     };
 
-    const viewHistoryFor = (patient) => {
+    const viewHistoryFor = async (patient, calendarIndex = null) => {
+        sessionStorage.setItem('balamya_animal_' + patient.id, JSON.stringify(patient));
+        setSearchParams({ view: 'form', animalId: patient.id, mode: 'view' });
         setSelectedAnimal(patient);
         setViewState('form');
-        setIsSaved(false);
+        setIsSaved(true);
+        setIsViewMode(true);
+        setAllRecords(prev => ({ ...prev, [patient.id]: [[]] }));
+        setCurrentSheetIndex(0);
+        await loadRecordsForAnimal(patient, calendarIndex);
     };
 
     // --- Record CRUD ---
@@ -110,55 +162,107 @@ const VaccinationsPage = () => {
     };
 
     const openAddModal = () => {
+        const hasPending = records.some(r => r._pending);
+        if (hasPending) {
+            setWarningModal({ isOpen: true, message: 'Por favor guarda el registro que acabas de crear, antes de crear un nuevo registro.' });
+            return;
+        }
         setCurrentRecord({ ...emptyRecord });
-        setEditingIndex(null);
-        setIsModalOpen(true);
-    };
-
-    const openEditModal = (index) => {
-        setCurrentRecord({ ...records[index] });
-        setEditingIndex(index);
         setIsModalOpen(true);
     };
 
     const closeModal = () => {
         setIsModalOpen(false);
         setCurrentRecord({ ...emptyRecord });
-        setEditingIndex(null);
+        setEditingId(null);
     };
 
+    const openEditModal = (rec) => {
+        setCurrentRecord({
+            fecha: rec.fecha || '',
+            viaAdministracion: rec.viaAdministracion || '',
+            vacunaAplicada: rec.vacunaAplicada || '',
+            proximaVacunacion: rec.proximaVacunacion || '',
+            observaciones: rec.observaciones || '',
+            ubicacion: rec.ubicacion || '',
+            mvzResponsable: rec.mvzResponsable || '',
+        });
+        setEditingId(rec.id);
+        setIsModalOpen(true);
+    };
+
+    // Crear: agrega a la tabla local, NO llama al API aún
     const handleSaveRecord = () => {
-        if (!currentRecord.fecha || !currentRecord.vacunaAplicada) {
-            alert('Por favor, complete al menos la fecha y la vacuna aplicada.');
+        if (!currentRecord.fecha || !currentRecord.vacunaAplicada || !currentRecord.viaAdministracion) {
+            alert('Por favor, completa la Fecha, Vacuna Aplicada y Vía de Administración.');
             return;
         }
-        const recordWithPatient = { ...currentRecord, patientId: selectedAnimal.id };
-        const patientRecords = [...records];
-
-        if (editingIndex !== null) {
-            patientRecords[editingIndex] = recordWithPatient;
-        } else {
-            patientRecords.push(recordWithPatient);
-        }
-
-        setAllRecords(prev => ({ ...prev, [selectedAnimal.id]: patientRecords }));
+        const newRecord = { ...currentRecord, _pending: true, mvzResponsable: user?.name || '' };
+        const updatedSheets = sheets.map((sheet, idx) => {
+            if (idx !== currentSheetIndex) return sheet;
+            return [...sheet, newRecord];
+        });
+        setAllRecords(prev => ({ ...prev, [selectedAnimal.id]: updatedSheets }));
+        setIsSaved(false);
         closeModal();
     };
 
-    const handleDeleteRecord = (index) => {
-        if (window.confirm('¿Está seguro de eliminar este registro?')) {
-            const patientRecords = records.filter((_, i) => i !== index);
-            setAllRecords(prev => ({ ...prev, [selectedAnimal.id]: patientRecords }));
+    // Editar: llama directamente al PUT API
+    const handleUpdateRecord = async () => {
+        if (!currentRecord.fecha || !currentRecord.vacunaAplicada) {
+            alert('Fecha y Vacuna Aplicada son obligatorios.');
+            return;
+        }
+        setIsSaving(true);
+        try {
+            await updateVaccinationApi(editingId, currentRecord);
+            await loadRecordsForAnimal(selectedAnimal, currentSheetIndex);
+            closeModal();
+        } catch (err) {
+            if (err.status === 403) {
+                alert('No tienes permiso para editar este registro.');
+            } else {
+                alert('No se pudo actualizar: ' + (err?.message || 'Error desconocido'));
+            }
+        } finally {
+            setIsSaving(false);
         }
     };
 
-    // --- Save & PDF ---
-    const handleSave = () => {
-        // Records are already persisted via useEffect+localStorage
-        // This button confirms the save and enables PDF/clinical review actions
-        localStorage.setItem('balamya_vaccination_records', JSON.stringify(allRecords));
-        setIsSaved(true);
-        alert('✅ Registros guardados correctamente.');
+    // Botón flotante: guarda todos los registros pendientes al servidor
+    const handleSave = async () => {
+        const pending = records.filter(r => r._pending);
+        if (pending.length === 0) {
+            alert('No hay registros nuevos por guardar.');
+            return;
+        }
+        setIsSaving(true);
+        try {
+            const numCalendario = currentSheetIndex + 1;
+            for (const record of pending) {
+                await createVaccinationApi(selectedAnimal, record, numCalendario);
+            }
+            await loadRecordsForAnimal(selectedAnimal);
+            setIsSaved(true);
+            if (records.length >= MAX_RECORDS_PER_SHEET) {
+                setIsOpeningCalendar(true);
+                setTimeout(() => {
+                    setAllRecords(prev => {
+                        const currentSheets = prev[selectedAnimal.id] || [[]];
+                        return { ...prev, [selectedAnimal.id]: [...currentSheets, []] };
+                    });
+                    setCurrentSheetIndex(prev => prev + 1);
+                    setIsSaved(false);
+                    setIsOpeningCalendar(false);
+                }, 1800);
+            } else {
+                alert('Registros guardados correctamente.');
+            }
+        } catch (error) {
+            alert('No se pudo guardar: ' + (error?.message || 'Error desconocido'));
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     const getPatientData = () => ({
@@ -168,7 +272,7 @@ const VaccinationsPage = () => {
         sexo: selectedAnimal.sex || '',
         edad: selectedAnimal.age ? `${selectedAnimal.age} años` : '',
         ubicacion: selectedAnimal.location || '',
-        identificacion: selectedAnimal.id || ''
+        identificacion: selectedAnimal.id || '',
     });
 
     const handleExportPDF = () => {
@@ -178,26 +282,9 @@ const VaccinationsPage = () => {
             const img = el.querySelector(`${selector} img[class*="uploaded-image"]`);
             return img ? img.src : null;
         };
-        const formRefs = {
+        generateVaccinationPDF(getPatientData(), records, {
             logoLeft: getLogoSrc('.header-logo-left'),
             logoRight: getLogoSrc('.header-logo-right'),
-        };
-        generateVaccinationPDF(getPatientData(), records, formRefs);
-    };
-
-
-
-    // --- Summary data ---
-    const getSummaryData = () => {
-        return patients.map(p => {
-            const recs = allRecords[p.id] || [];
-            const lastRecord = recs.length > 0 ? recs[recs.length - 1] : null;
-            return {
-                patient: p,
-                totalRecords: recs.length,
-                lastVaccination: lastRecord ? (lastRecord.fecha || null) : null,
-                nextVaccination: lastRecord ? (lastRecord.proximaVacunacion || null) : null
-            };
         });
     };
 
@@ -254,108 +341,36 @@ const VaccinationsPage = () => {
     }
 
     // ==========================================
-    // VIEW: SUMMARY TABLE
+    // VIEW: SUMMARY
     // ==========================================
     if (viewState === 'summary') {
-        const summaryData = getSummaryData();
+        const handleSummaryPatientSelect = (patient) => {
+            if (patient) {
+                sessionStorage.setItem('balamya_animal_' + patient.id, JSON.stringify(patient));
+                setSearchParams({ view: 'summary', patientId: patient.id });
+            } else setSearchParams({ view: 'summary' });
+        };
         return (
-            <div className={formStyles['forms-page-wrapper']}>
-                <div className={formStyles['form-entry-animation']}>
-                    <button onClick={goToMenu} className={formStyles['back-to-menu-btn']}>
-                        <FaArrowLeft /> Volver al menú
-                    </button>
-                    <div className={customStyles['custom-table-container']}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-                            <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, color: '#1e293b' }}>Resumen de Vacunaciones</h3>
-                            <span style={{ background: '#e0f2fe', color: '#0369a1', padding: '6px 12px', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 'bold' }}>{summaryData.length} PACIENTES</span>
-                        </div>
-                        <table className={customStyles['custom-table']}>
-                            <thead>
-                                <tr>
-                                    <th>Animal</th>
-                                    <th>Identificación</th>
-                                    <th>Última Vacunación</th>
-                                    <th>Próxima Vacunación</th>
-                                    <th>Total Registros</th>
-                                    <th>Acción</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {(() => {
-                                    const totalSummaryPages = Math.ceil(summaryData.length / summaryItemsPerPage);
-                                    const startIdx = (summaryPage - 1) * summaryItemsPerPage;
-                                    const paginatedData = summaryData.slice(startIdx, startIdx + summaryItemsPerPage);
-                                    return paginatedData.map((item) => (
-                                        <tr key={item.patient.id}>
-                                            <td>
-                                                <div className={customStyles['species-info']}>
-                                                    <div className={customStyles['highlight-text']}>{item.patient.commonName}</div>
-                                                </div>
-                                            </td>
-                                            <td><span className={customStyles['id-text']}>{item.patient.id}</span></td>
-                                            <td>{item.lastVaccination ? item.lastVaccination : <span className={customStyles['empty-value']}>Sin registro</span>}</td>
-                                            <td>{item.nextVaccination ? item.nextVaccination : <span className={customStyles['empty-value']}>Pendiente</span>}</td>
-                                            <td style={{ textAlign: 'center' }}>{item.totalRecords}</td>
-                                            <td>
-                                                <button
-                                                    className={customStyles['action-button']}
-                                                    onClick={() => viewHistoryFor(item.patient)}
-                                                >
-                                                    <FaEye /> Ver
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ));
-                                })()}
-                            </tbody>
-                        </table>
-                        {(() => {
-                            const totalSummaryPages = Math.ceil(summaryData.length / summaryItemsPerPage);
-                            if (totalSummaryPages <= 1) return null;
-                            return (
-                                <div className={hospStyles['pagination']}>
-                                    <div className={hospStyles['pagination-controls']}>
-                                        <button
-                                            className={hospStyles['page-btn-nav']}
-                                            disabled={summaryPage === 1}
-                                            onClick={() => setSummaryPage(prev => Math.max(prev - 1, 1))}
-                                        >
-                                            <FaChevronLeft /> Anterior
-                                        </button>
-                                        {getPageNumbers(summaryPage, totalSummaryPages).map((pageNumber, index) => (
-                                            <button
-                                                key={index}
-                                                className={`${hospStyles['page-btn']} ${pageNumber === summaryPage ? hospStyles['active'] : ''} ${pageNumber === '...' ? hospStyles['dots'] : ''}`}
-                                                disabled={pageNumber === '...'}
-                                                onClick={() => pageNumber !== '...' && setSummaryPage(pageNumber)}
-                                            >
-                                                {pageNumber}
-                                            </button>
-                                        ))}
-                                        <button
-                                            className={hospStyles['page-btn-nav']}
-                                            disabled={summaryPage === totalSummaryPages}
-                                            onClick={() => setSummaryPage(prev => Math.min(prev + 1, totalSummaryPages))}
-                                        >
-                                            Siguiente <FaChevronRight />
-                                        </button>
-                                    </div>
-                                </div>
-                            );
-                        })()}
-                    </div>
-                </div>
-            </div>
+            <VaccinationSearch
+                onBack={goToMenu}
+                onViewVaccinations={viewHistoryFor}
+                initialPatientId={searchParams.get('patientId')}
+                onPatientSelect={handleSummaryPatientSelect}
+            />
         );
     }
 
     // ==========================================
     // VIEW: VACCINATION FORM
     // ==========================================
+    if (!selectedAnimal) return null;
+
+    const hasPending = records.some(r => r._pending);
+
     return (
+        <>
         <div className={formStyles['forms-page-wrapper']}>
             <div className={formStyles['form-entry-animation']}>
-                {/* Header controls */}
                 <div className={formStyles['form-header-controls']}>
                     <button onClick={goToMenu} className={formStyles['back-to-menu-btn']}>
                         <FaArrowLeft /> Volver al menú
@@ -372,7 +387,6 @@ const VaccinationsPage = () => {
                     </div>
                 </div>
 
-                {/* Vaccination Card */}
                 <div className={`${styles['vaccination-card']} global-form-width`} ref={formRef}>
                     <div className={styles['vaccination-header']}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', width: '100%' }}>
@@ -396,79 +410,102 @@ const VaccinationsPage = () => {
                         <div className={styles['vaccination-form-field']}><label className={styles['vaccination-form-label']}>Ubicación</label><input type="text" className={styles['vaccination-form-input']} value={selectedAnimal.location || ''} readOnly /></div>
                     </div>
 
-                    <div className={styles['add-record-button-container']}>
-                        <button onClick={openAddModal} className={styles['add-record-button']}>
-                            <FaPlus /> Agregar Registro
-                        </button>
-                    </div>
+                    {!isViewMode && (
+                        <div className={styles['add-record-button-container']}>
+                            <button onClick={openAddModal} className={styles['add-record-button']}>
+                                <FaPlus /> Agregar Registro
+                            </button>
+                        </div>
+                    )}
+
 
                     <div className={styles['table-container']}>
-                        <table className={styles['vaccination-table']}>
-                            <thead>
-                                <tr>
-                                    <th>FECHA</th>
-                                    <th>VÍA DE ADMINISTRACIÓN</th>
-                                    <th>VACUNA APLICADA (o producto biológico)</th>
-                                    <th>MVZ RESPONSABLE</th>
-                                    <th>PRÓXIMA VACUNACIÓN</th>
-                                    <th>OBSERVACIONES</th>
-                                    <th>ACCIONES</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {records.length === 0 ? (
-                                    <tr><td colSpan="7" className={styles['no-records-cell']}>No hay registros</td></tr>
-                                ) : (
-                                    records.map((rec, index) => (
-                                        <tr key={index}>
-                                            <td>{rec.fecha}</td>
-                                            <td>{rec.viaAdministracion}</td>
-                                            <td>{rec.vacunaAplicada}</td>
-                                            <td>{rec.mvzResponsable}</td>
-                                            <td>{rec.proximaVacunacion}</td>
-                                            <td>{rec.observaciones}</td>
-                                            <td>
-                                                <div className={styles['action-buttons']}>
-                                                    <button className={styles['btn-edit']} onClick={() => openEditModal(index)} title="Editar"><FaEdit /></button>
-                                                    <button className={styles['btn-delete']} onClick={() => handleDeleteRecord(index)} title="Eliminar"><FaTrash /></button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
+                        {recordsError ? (
+                            <p style={{ textAlign: 'center', padding: '30px', color: '#ef4444' }}>Error: {recordsError}</p>
+                        ) : (
+                            <table className={styles['vaccination-table']}>
+                                <thead>
+                                    <tr>
+                                        <th>FECHA</th>
+                                        <th>VÍA DE ADMINISTRACIÓN</th>
+                                        <th>VACUNA APLICADA (o producto biológico)</th>
+                                        <th>PRÓXIMA VACUNACIÓN</th>
+                                        <th>OBSERVACIONES</th>
+                                        {isViewMode && <th>MVZ RESPONSABLE</th>}
+                                        {isViewMode && <th>ACCIONES</th>}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {records.length === 0 ? (
+                                        <tr><td colSpan={isViewMode ? 7 : 5} className={styles['no-records-cell']}>No hay registros</td></tr>
+                                    ) : (
+                                        records.map((rec, index) => (
+                                            <tr key={rec.id || index}>
+                                                <td>{rec.fecha}</td>
+                                                <td>{rec.viaAdministracion}</td>
+                                                <td>{rec.vacunaAplicada}</td>
+                                                <td>{rec.proximaVacunacion}</td>
+                                                <td>{rec.observaciones}</td>
+                                                {isViewMode && <td>{rec.mvzResponsable}</td>}
+                                                {isViewMode && (
+                                                    <td onClick={(e) => e.stopPropagation()}>
+                                                        {(user?.role === 'admin' || (rec.idUsuario != null && user?.idUsuario != null && String(rec.idUsuario) === String(user.idUsuario))) && (
+                                                            <button
+                                                                className={styles['edit-record-btn']}
+                                                                onClick={() => openEditModal(rec)}
+                                                                title="Editar registro"
+                                                            >
+                                                                <FaEdit />
+                                                            </button>
+                                                        )}
+                                                    </td>
+                                                )}
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        )}
                     </div>
 
                     <div className="floating-actions">
-                        {!isSaved ? (
-                            <button className="floating-btn save-btn" onClick={handleSave} title="Guardar"><FaSave /></button>
+                        {isViewMode ? (
+                            <button className="floating-btn pdf-btn" onClick={handleExportPDF} title="Descargar PDF">
+                                <FaFilePdf />
+                            </button>
+                        ) : !isSaved || hasPending ? (
+                            <button className="floating-btn save-btn" onClick={handleSave} title="Guardar" disabled={isSaving}>
+                                <FaSave />
+                            </button>
                         ) : (
-                            <button className="floating-btn pdf-btn" onClick={handleExportPDF} title="Descargar PDF"><FaFilePdf /></button>
+                            <button className="floating-btn pdf-btn" onClick={handleExportPDF} title="Descargar PDF">
+                                <FaFilePdf />
+                            </button>
                         )}
                     </div>
                 </div>
 
-                {/* Modal */}
                 {isModalOpen && ReactDOM.createPortal(
                     <div className={styles['modal-overlay']} onClick={closeModal}>
                         <div className={styles['modal-content']} onClick={(e) => e.stopPropagation()}>
                             <h3 className={styles['modal-title']}>
-                                {editingIndex !== null ? 'Editar Registro de Vacunación' : 'Nuevo Registro de Vacunación'}
+                                {editingId ? 'Editar Registro de Vacunación' : 'Nuevo Registro de Vacunación'}
                             </h3>
                             <div className={styles['modal-form-grid']}>
-                                <div className={styles['vaccination-form-field']}><label className={styles['vaccination-form-label']}>Fecha</label><input type="date" className={styles['vaccination-form-input']} name="fecha" value={currentRecord.fecha} onChange={handleRecordChange} /></div>
-                                <div className={styles['vaccination-form-field']}><label className={styles['vaccination-form-label']}>Vía de Administración</label><input type="text" className={styles['vaccination-form-input']} name="viaAdministracion" value={currentRecord.viaAdministracion} onChange={handleRecordChange} /></div>
-                                <div className={styles['vaccination-form-field']}><label className={styles['vaccination-form-label']}>Vacuna Aplicada (o Producto)</label><input type="text" className={styles['vaccination-form-input']} name="vacunaAplicada" value={currentRecord.vacunaAplicada} onChange={handleRecordChange} /></div>
-                                <div className={styles['vaccination-form-field']}><label className={styles['vaccination-form-label']}>MVZ Responsable</label><input type="text" className={styles['vaccination-form-input']} name="mvzResponsable" value={currentRecord.mvzResponsable} onChange={handleRecordChange} /></div>
-                                <div className={styles['vaccination-form-field']}><label className={styles['vaccination-form-label']}>Próxima Vacunación</label><input type="date" className={styles['vaccination-form-input']} name="proximaVacunacion" value={currentRecord.proximaVacunacion} onChange={handleRecordChange} /></div>
+                                <div className={styles['vaccination-form-field']}><label className={styles['vaccination-form-label']}>Fecha *</label><input type="date" className={styles['vaccination-form-input']} style={{ color: currentRecord.fecha ? 'inherit' : 'transparent', textAlign: 'center', textAlignLast: 'center' }} name="fecha" value={currentRecord.fecha} onChange={handleRecordChange} /></div>
+                                <div className={styles['vaccination-form-field']}><label className={styles['vaccination-form-label']}>Vía de Administración *</label><input type="text" className={styles['vaccination-form-input']} name="viaAdministracion" value={currentRecord.viaAdministracion} onChange={handleRecordChange} /></div>
+                                <div className={styles['vaccination-form-field']}><label className={styles['vaccination-form-label']}>Vacuna Aplicada *</label><input type="text" className={styles['vaccination-form-input']} name="vacunaAplicada" value={currentRecord.vacunaAplicada} onChange={handleRecordChange} /></div>
+                                <div className={styles['vaccination-form-field']}><label className={styles['vaccination-form-label']}>Próxima Vacunación</label><input type="date" className={styles['vaccination-form-input']} style={{ color: currentRecord.proximaVacunacion ? 'inherit' : 'transparent', textAlign: 'center', textAlignLast: 'center' }} name="proximaVacunacion" value={currentRecord.proximaVacunacion} onChange={handleRecordChange} /></div>
                                 <div className={styles['vaccination-form-field']}><label className={styles['vaccination-form-label']}>Observaciones</label><input type="text" className={styles['vaccination-form-input']} name="observaciones" value={currentRecord.observaciones} onChange={handleRecordChange} /></div>
                             </div>
-
                             <div className={styles['modal-actions']}>
                                 <button onClick={closeModal} className={`${styles['footer-button']} ${styles['cancel-button']}`}>Cancelar</button>
-                                <button onClick={handleSaveRecord} className={`${styles['footer-button']} ${styles['save-button']}`}>
-                                    {editingIndex !== null ? 'Actualizar' : 'Guardar'}
+                                <button
+                                    onClick={editingId ? handleUpdateRecord : handleSaveRecord}
+                                    className={`${styles['footer-button']} ${styles['save-button']}`}
+                                    disabled={isSaving}
+                                >
+                                    {editingId ? 'Actualizar' : 'Aceptar'}
                                 </button>
                             </div>
                         </div>
@@ -477,6 +514,28 @@ const VaccinationsPage = () => {
                 )}
             </div>
         </div>
+        <Modal
+            isOpen={warningModal.isOpen}
+            onClose={() => setWarningModal({ isOpen: false, message: '' })}
+            title="Atención"
+            footer={
+                <button
+                    className={`${modalStyles['btn-modal']} ${modalStyles['btn-confirm']}`}
+                    onClick={() => setWarningModal({ isOpen: false, message: '' })}
+                >
+                    Entendido
+                </button>
+            }
+        >
+            {warningModal.message}
+        </Modal>
+        <Modal isOpen={isOpeningCalendar} onClose={null} title="Registro guardado">
+            <div className={modalStyles['loading-body']}>
+                <div className={modalStyles['loading-spinner']} />
+                <p className={modalStyles['loading-text']}>Espere un momento, estamos abriendo el nuevo calendario.</p>
+            </div>
+        </Modal>
+        </>
     );
 };
 

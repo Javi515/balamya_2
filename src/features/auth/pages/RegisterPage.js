@@ -1,7 +1,27 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MdPets, MdLock, MdMedicalServices, MdMail, MdVisibility, MdVisibilityOff, MdPerson, MdBadge, MdPhone, MdVpnKey } from 'react-icons/md';
+import {
+    MdBadge,
+    MdLock,
+    MdMail,
+    MdPerson,
+    MdPets,
+    MdPhone,
+    MdVisibility,
+    MdVisibilityOff,
+    MdVpnKey,
+} from 'react-icons/md';
 import jaguarImg from '../../../assets/unnamed.png';
+import logoZoomat from '../../../assets/Logo_zoomat.png';
+import { register } from '../../../services/auth/RegistroServices';
+
+const roleOptions = [
+    { value: '1', label: 'Medico Aves' },
+    { value: '2', label: 'Medico Reptiles' },
+    { value: '3', label: 'Medico Mamiferos' },
+    { value: '4', label: 'Medico Anfibios' },
+    { value: '5', label: 'Administrador' },
+];
 
 const RegisterPage = () => {
     const navigate = useNavigate();
@@ -12,30 +32,34 @@ const RegisterPage = () => {
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [verificationCode, setVerificationCode] = useState('');
-    const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    const handleRegister = async (e) => {
-        e.preventDefault();
-        setError('');
+    const handleRegister = async (event) => {
+        event.preventDefault();
         setIsLoading(true);
 
         try {
-            // Mock registration - logic here would usually interact with a backend
-            setTimeout(() => {
-                alert('Cuenta creada exitosamente. Por favor, inicie sesión.');
-                navigate('/login');
-            }, 1000);
+            await register({
+                idRol: role,
+                nombreCompleto: name,
+                telefono: phone,
+                email,
+                password,
+                codigoVerificacion: verificationCode,
+            });
+
+            alert('Cuenta creada exitosamente. Por favor, inicie sesión.');
+            navigate('/login');
         } catch (err) {
             console.error(err);
-            setError(err.message || 'Error al crear la cuenta');
+            alert(err.message || 'Error al crear la cuenta');
+        } finally {
             setIsLoading(false);
         }
     };
 
     return (
         <div className="h-screen w-full bg-white dark:bg-[#0f172a] text-slate-800 dark:text-slate-100 flex overflow-hidden font-sans">
-            {/* Left Column - Image & Branding */}
             <div className="hidden lg:flex lg:w-1/2 relative flex-col justify-between p-12 overflow-hidden bg-slate-900">
                 <div className="absolute inset-0 z-0">
                     <img
@@ -71,32 +95,28 @@ const RegisterPage = () => {
                 </div>
             </div>
 
-            {/* Right Column - Register Form */}
-            <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-6 lg:p-10 bg-white dark:bg-[#0f172a] relative overflow-y-auto">
-                <div className="lg:hidden absolute top-6 left-6 flex items-center space-x-2 text-[#1e293b] dark:text-white">
+            <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-6 lg:p-10 bg-white dark:bg-[#0f172a] overflow-y-auto">
+                <div className="lg:hidden w-full max-w-lg mx-auto flex items-center space-x-2 text-[#1e293b] dark:text-white mb-8">
                     <MdPets className="text-2xl" />
                     <span className="text-lg font-bold">ZOOMAT</span>
                 </div>
 
-                <div className="w-full max-w-lg mx-auto flex flex-col justify-center my-auto pt-8 lg:pt-0">
+                <div className="w-full max-w-lg mx-auto flex flex-col justify-center my-auto">
                     <div className="mb-6">
-                        <div className="w-16 h-16 bg-[#17468d] rounded-full flex items-center justify-center shadow-lg mb-6">
-                            <MdMedicalServices className="text-white text-4xl" />
+                        <div className="mb-6">
+                            <img src={logoZoomat} alt="Logo ZOOMAT" className="h-20 w-auto object-contain" />
                         </div>
                         <h2 className="text-4xl font-bold text-slate-900 dark:text-white mb-2 tracking-tight">Crear una cuenta</h2>
-                        <p className="text-slate-500 dark:text-slate-400 text-sm">Complete sus datos para solicitar acceso al sistema clínico departamental.</p>
+                        <p className="text-slate-500 dark:text-slate-400 text-sm">
+                            Complete sus datos para solicitar acceso al sistema clínico departamental.
+                        </p>
                     </div>
-
-                    {error && (
-                        <div className="mb-4 p-3 rounded bg-red-50 border border-red-200 text-red-600 text-sm flex items-center gap-2">
-                            <MdLock className="text-lg" />
-                            {error}
-                        </div>
-                    )}
 
                     <form onSubmit={handleRegister} className="space-y-4">
                         <div className="space-y-1.5">
-                            <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide" htmlFor="name">Nombre Completo</label>
+                            <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide" htmlFor="name">
+                                Nombre Completo
+                            </label>
                             <div className="relative group">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <MdPerson className="text-slate-400 group-focus-within:text-[#17468d] transition-colors text-xl" />
@@ -105,10 +125,10 @@ const RegisterPage = () => {
                                     className="block w-full pl-12 pr-4 py-2.5 text-base border border-slate-300 dark:border-slate-600 rounded bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17468d] focus:border-transparent transition-all duration-200 shadow-sm"
                                     id="name"
                                     name="name"
-                                    placeholder="Ej. Dr. Juan Pérez"
+                                    placeholder="Ej. Dr. Juan Perez"
                                     type="text"
                                     value={name}
-                                    onChange={(e) => setName(e.target.value)}
+                                    onChange={(event) => setName(event.target.value)}
                                     required
                                 />
                             </div>
@@ -116,7 +136,9 @@ const RegisterPage = () => {
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-1.5">
-                                <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide" htmlFor="phone">Teléfono Móvil</label>
+                                <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide" htmlFor="phone">
+                                    Telefono Movil
+                                </label>
                                 <div className="relative group">
                                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                         <MdPhone className="text-slate-400 group-focus-within:text-[#17468d] transition-colors text-xl" />
@@ -125,19 +147,22 @@ const RegisterPage = () => {
                                         className="block w-full pl-11 pr-3 py-2.5 text-base border border-slate-300 dark:border-slate-600 rounded bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17468d] focus:border-transparent transition-all duration-200 shadow-sm"
                                         id="phone"
                                         name="phone"
-                                        placeholder="10 dígitos"
+                                        placeholder="10 digitos"
                                         type="tel"
+                                        inputMode="numeric"
                                         pattern="[0-9]{10}"
                                         maxLength="10"
                                         value={phone}
-                                        onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
+                                        onChange={(event) => setPhone(event.target.value.replace(/\D/g, ''))}
                                         required
                                     />
                                 </div>
                             </div>
 
                             <div className="space-y-1.5">
-                                <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide" htmlFor="role">Rol</label>
+                                <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide" htmlFor="role">
+                                    Rol
+                                </label>
                                 <div className="relative group">
                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                         <MdBadge className="text-slate-400 group-focus-within:text-[#17468d] transition-colors text-xl" />
@@ -147,24 +172,29 @@ const RegisterPage = () => {
                                         id="role"
                                         name="role"
                                         value={role}
-                                        onChange={(e) => setRole(e.target.value)}
+                                        onChange={(event) => setRole(event.target.value)}
                                         required
                                     >
                                         <option value="" disabled hidden>Seleccionar</option>
-                                        <option value="aves">Medico Aves</option>
-                                        <option value="reptiles">Medico Reptiles</option>
-                                        <option value="anfibios">Medico Anfibios</option>
-                                        <option value="mamiferos">Medico Mamíferos</option>
+                                        {roleOptions.map((option) => (
+                                            <option key={option.value} value={option.value}>
+                                                {option.label}
+                                            </option>
+                                        ))}
                                     </select>
                                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
-                                        <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" /></svg>
+                                        <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                                        </svg>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         <div className="space-y-1.5">
-                            <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide" htmlFor="email">Correo Institucional</label>
+                            <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide" htmlFor="email">
+                                Correo Institucional
+                            </label>
                             <div className="relative group">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <MdMail className="text-slate-400 group-focus-within:text-[#17468d] transition-colors text-xl" />
@@ -173,29 +203,33 @@ const RegisterPage = () => {
                                     className="block w-full pl-12 pr-4 py-2.5 text-base border border-slate-300 dark:border-slate-600 rounded bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17468d] focus:border-transparent transition-all duration-200 shadow-sm"
                                     id="email"
                                     name="email"
-                                    placeholder="nombre@zoomat.gob.mx"
+                                    placeholder="correo@zoomat.gob.mx"
                                     type="email"
                                     value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
+                                    onChange={(event) => setEmail(event.target.value)}
+                                    autoComplete="off"
                                     required
                                 />
                             </div>
                         </div>
 
                         <div className="space-y-1.5">
-                            <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide" htmlFor="password">Contraseña</label>
+                            <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide" htmlFor="password">
+                                Contrasena
+                            </label>
                             <div className="relative group">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <MdLock className="text-slate-400 group-focus-within:text-[#17468d] transition-colors text-xl" />
                                 </div>
                                 <input
-                                    className="block w-full pl-12 pr-12 py-2.5 text-base border border-slate-300 dark:border-slate-600 rounded bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17468d] focus:border-transparent transition-all duration-200 shadow-sm"
+                                    className="block w-full pl-12 pr-12 py-2.5 text-base border border-slate-300 dark:border-slate-600 rounded bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17468d] focus:border-transparent transition-all duration-200 shadow-sm [&::-webkit-password-toggle-button]:hidden [&::-ms-reveal]:hidden [&::-ms-clear]:hidden"
                                     id="password"
                                     name="password"
-                                    placeholder="Mínimo 8 caracteres"
-                                    type={showPassword ? "text" : "password"}
+                                    placeholder="Minimo 8 caracteres"
+                                    type={showPassword ? 'text' : 'password'}
                                     value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
+                                    onChange={(event) => setPassword(event.target.value)}
+                                    autoComplete="new-password"
                                     required
                                     minLength={8}
                                 />
@@ -210,7 +244,9 @@ const RegisterPage = () => {
                         </div>
 
                         <div className="space-y-1.5">
-                            <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide" htmlFor="verificationCode">Código de Verificación</label>
+                            <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wide" htmlFor="verificationCode">
+                                Codigo de Verificacion
+                            </label>
                             <div className="relative group">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <MdVpnKey className="text-slate-400 group-focus-within:text-[#17468d] transition-colors text-xl" />
@@ -219,13 +255,19 @@ const RegisterPage = () => {
                                     className="block w-full pl-12 pr-4 py-2.5 text-base border border-slate-300 dark:border-slate-600 rounded bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17468d] focus:border-transparent transition-all duration-200 shadow-sm"
                                     id="verificationCode"
                                     name="verificationCode"
-                                    placeholder="Ingrese su código"
+                                    placeholder="Ingrese su codigo"
                                     type="text"
+                                    inputMode="numeric"
+                                    pattern="[0-9]{6}"
+                                    maxLength="6"
                                     value={verificationCode}
-                                    onChange={(e) => setVerificationCode(e.target.value)}
+                                    onChange={(event) => setVerificationCode(event.target.value.replace(/\D/g, ''))}
                                     required
                                 />
                             </div>
+                            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                                Solicita este código al administrador del sistema antes de registrarte.
+                            </p>
                         </div>
 
                         <div className="pt-2">
@@ -239,20 +281,20 @@ const RegisterPage = () => {
                         </div>
 
                         <div className="text-center mt-4">
-                            <span className="text-slate-600 dark:text-slate-400 text-sm">¿Ya tienes una cuenta? </span>
+                            <span className="text-slate-600 dark:text-slate-400 text-sm">Ya tienes una cuenta? </span>
                             <button
                                 type="button"
                                 onClick={() => navigate('/login')}
                                 className="text-[#17468d] dark:text-blue-400 font-bold hover:underline bg-transparent border-none cursor-pointer p-0"
                             >
-                                Iniciar Sesión
+                                Iniciar Sesion
                             </button>
                         </div>
                     </form>
 
                     <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 flex flex-wrap justify-between items-center gap-4 text-xs text-slate-500 dark:text-slate-400 hidden lg:flex">
                         <div className="flex space-x-6">
-                            <a className="hover:text-slate-800 dark:hover:text-slate-200 transition-colors" href="#">Términos y Condiciones</a>
+                            <a className="hover:text-slate-800 dark:hover:text-slate-200 transition-colors" href="#">Terminos y Condiciones</a>
                             <a className="hover:text-slate-800 dark:hover:text-slate-200 transition-colors" href="#">Privacidad</a>
                         </div>
                     </div>

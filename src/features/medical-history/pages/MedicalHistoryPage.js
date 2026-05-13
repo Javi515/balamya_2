@@ -2,11 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { FaTh, FaThList } from 'react-icons/fa';
 import styles from './MedicalHistoryPage.module.css';
-import patientsStyles from '../../../styles/shared/PageHeader.module.css';
-import { MOCK_HISTORY } from '../../../data/mockData';
 import FiltersBar from '../../../components/common/FiltersBar/FiltersBar';
 import MedicalActivityChart from '../../../components/common/MedicalActivityChart/MedicalActivityChart';
 import RecordsTable from '../../../components/common/RecordsTable/RecordsTable';
+import { getMedicalHistory } from '../../../services/medicalHistoryService';
 
 const MedicalHistoryPage = () => {
   const { user } = useAuth();
@@ -17,8 +16,10 @@ const MedicalHistoryPage = () => {
   const [selectedDateFrom, setSelectedDateFrom] = useState('');
   const [selectedDateTo, setSelectedDateTo] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [baseRecords, setBaseRecords] = useState([]);
   const [filteredRecords, setFilteredRecords] = useState([]);
   const [viewMode, setViewMode] = useState('grid');
+  const [loading, setLoading] = useState(true);
 
   // Set initial category based on user role
   useEffect(() => {
@@ -31,9 +32,18 @@ const MedicalHistoryPage = () => {
     }
   }, [user]);
 
+  // Fetch all records from API
+  useEffect(() => {
+    setLoading(true);
+    getMedicalHistory()
+      .then(setBaseRecords)
+      .catch(() => setBaseRecords([]))
+      .finally(() => setLoading(false));
+  }, []);
+
   // Filter Logic
   useEffect(() => {
-    let results = MOCK_HISTORY;
+    let results = baseRecords;
 
     // 1. Filter by Category (Strict)
     if (selectedCategory !== 'all') {
@@ -77,17 +87,17 @@ const MedicalHistoryPage = () => {
     }
 
     setFilteredRecords(results);
-  }, [selectedCategory, selectedType, selectedDateFrom, selectedDateTo, selectedLocation, selectedDoctor, searchTerm, user]);
+  }, [baseRecords, selectedCategory, selectedType, selectedDateFrom, selectedDateTo, selectedLocation, selectedDoctor, searchTerm, user]);
 
   return (
     <div className={styles['medical-history-container']}>
-      <div className={patientsStyles['patients-page-header-row']} style={{ padding: '0 24px', marginBottom: '12px' }}>
+      <div className={styles['patients-page-header-row']} style={{ padding: '0 24px', marginBottom: '12px' }}>
         <div>
           <h1 className={styles['medical-history-title']} style={{ margin: 0 }}>Historial Clínico</h1>
           <p className={styles['medical-history-subtitle']} style={{ margin: 0, marginTop: '4px' }}>Gestión integral de expedientes médicos de la colección animal.</p>
         </div>
         <button
-          className={patientsStyles['view-toggle-btn']}
+          className={styles['view-toggle-btn']}
           onClick={() => setViewMode(viewMode === 'grid' ? 'table' : 'grid')}
           title={`Cambiar a vista de ${viewMode === 'grid' ? 'tabla' : 'tarjetas'}`}
         >
@@ -117,10 +127,15 @@ const MedicalHistoryPage = () => {
         <MedicalActivityChart records={filteredRecords} />
       </div>
 
-      <RecordsTable
-        records={filteredRecords}
-        viewMode={viewMode}
-      />
+      {loading ? (
+        <p style={{ color: '#94a3b8', fontStyle: 'italic', textAlign: 'center', padding: '40px 0' }}>Cargando historial clínico...</p>
+      ) : (
+        <RecordsTable
+          records={filteredRecords}
+          viewMode={viewMode}
+          origin="medical-history"
+        />
+      )}
     </div>
   );
 };

@@ -166,6 +166,12 @@
     background-color: #eff6ff;
 }
 
+.hosp-table .table-input:read-only {
+    color: #334155;
+    background-color: #f8fafc;
+    font-weight: 600;
+}
+
 .hosp-table .table-input.wide {
     text-align: left;
 }
@@ -243,6 +249,31 @@
     color: #2563eb;
     outline: none;
     box-shadow: none;
+}
+
+.add-row-btn:disabled {
+    color: #94a3b8;
+    cursor: not-allowed;
+}
+
+.form-status {
+    margin-top: 12px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 0.86rem;
+    font-weight: 600;
+}
+
+.form-status.success {
+    background: #f0fdf4;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+
+.form-status.error {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
 }
 
 /* Responsive */

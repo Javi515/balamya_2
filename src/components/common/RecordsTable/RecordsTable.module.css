@@ -111,7 +111,7 @@
 }
 
 
-/* Action button */
+/* Botón texto (default) */
 .view-record-btn {
     display: inline-flex;
     align-items: center;
@@ -132,6 +132,41 @@
     background: #eff6ff;
     color: #1d4ed8;
     border-color: #bfdbfe;
+}
+
+/* Action icons group */
+.action-icons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.icon-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+
+.icon-btn--view,
+.icon-btn--edit,
+.icon-btn--attach {
+    background: transparent;
+    color: #94a3b8;
+}
+
+.icon-btn--view:hover,
+.icon-btn--edit:hover,
+.icon-btn--attach:hover {
+    background: #f1f5f9;
+    color: #334155;
 }
 
 /* Empty */

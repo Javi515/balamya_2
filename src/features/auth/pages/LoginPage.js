@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
-import { MdPets, MdLock, MdMedicalServices, MdMail, MdVisibility, MdVisibilityOff } from 'react-icons/md';
+import { MdPets, MdLock, MdMail, MdVisibility, MdVisibilityOff } from 'react-icons/md';
 import jaguarImg from '../../../assets/unnamed.png';
+import logoZoomat from '../../../assets/Logo_zoomat.png';
 
 const LoginPage = () => {
     const navigate = useNavigate();
@@ -10,12 +11,10 @@ const LoginPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-    const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
     const handleLogin = async (e) => {
         e.preventDefault();
-        setError('');
         setIsLoading(true);
 
         try {
@@ -23,7 +22,7 @@ const LoginPage = () => {
             navigate('/dashboard');
         } catch (err) {
             console.error(err);
-            setError(err.message || 'Error al iniciar sesión');
+            alert(err.message || 'Error al iniciar sesión');
         } finally {
             setIsLoading(false);
         }
@@ -75,19 +74,14 @@ const LoginPage = () => {
                     <span className="text-xl font-bold">ZOOMAT</span>
                 </div>
                     <div className="mb-10">
-                        <div className="w-16 h-16 bg-[#17468d] rounded-full flex items-center justify-center shadow-lg mb-6">
-                            <MdMedicalServices className="text-white text-4xl" />
+                        <div className="mb-6 flex justify-center">
+                            <img src={logoZoomat} alt="Logo ZOOMAT" className="h-32 w-auto object-contain" />
                         </div>
                         <h2 className="text-4xl font-bold text-slate-900 dark:text-white mb-3 tracking-tight">¡Bienvenido de nuevo!</h2>
                         <p className="text-slate-500 dark:text-slate-400 text-base">Ingrese sus credenciales institucionales para acceder al sistema clínico.</p>
                     </div>
 
-                    {error && (
-                        <div className="mb-6 p-4 rounded bg-red-50 border border-red-200 text-red-600 text-sm flex items-center gap-2">
-                            <MdLock className="text-lg" />
-                            {error}
-                        </div>
-                    )}
+
 
                     <form onSubmit={handleLogin} className="space-y-6">
                         <div className="space-y-2">
@@ -100,10 +94,11 @@ const LoginPage = () => {
                                     className="block w-full pl-12 pr-4 py-3.5 text-base border border-slate-300 dark:border-slate-600 rounded bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17468d] focus:border-transparent transition-all duration-200 shadow-sm"
                                     id="email"
                                     name="email"
-                                    placeholder="nombre@zoomat.gob.mx"
+                                    placeholder="correo@zoomat.gob.mx"
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
+                                    autoComplete="off"
                                     required
                                 />
                             </div>
@@ -116,13 +111,14 @@ const LoginPage = () => {
                                     <MdLock className="text-slate-400 group-focus-within:text-[#17468d] transition-colors text-xl" />
                                 </div>
                                 <input
-                                    className="block w-full pl-12 pr-12 py-3.5 text-base border border-slate-300 dark:border-slate-600 rounded bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17468d] focus:border-transparent transition-all duration-200 shadow-sm"
+                                    className="hide-native-password-toggle block w-full pl-12 pr-12 py-3.5 text-base border border-slate-300 dark:border-slate-600 rounded bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#17468d] focus:border-transparent transition-all duration-200 shadow-sm"
                                     id="password"
                                     name="password"
                                     placeholder="••••••••"
                                     type={showPassword ? "text" : "password"}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
+                                    autoComplete="new-password"
                                     required
                                 />
                                 <button

@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaNotesMedical, FaStethoscope, FaSyringe, FaChartBar, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { FaNotesMedical, FaStethoscope, FaSyringe, FaChartBar, FaChevronLeft, FaChevronRight, FaEye, FaEdit } from 'react-icons/fa';
 import styles from './RecordsTable.module.css';
 import gridStyles from '../../../styles/shared/Pagination.module.css';
 
 const ITEMS_PER_PAGE = 10;
 
-const RecordsTable = ({ records, viewMode = 'grid' }) => {
+const RecordsTable = ({ records, viewMode = 'grid', origin = 'history', iconActions = false, onView, onEdit }) => {
     const navigate = useNavigate();
     const [currentPage, setCurrentPage] = useState(1);
 
@@ -34,6 +34,8 @@ const RecordsTable = ({ records, viewMode = 'grid' }) => {
         if (t.includes('TRATAMIENTO')) return 'treatment';
         if (t.includes('NECROPSIA')) return 'necropsy';
         if (t.includes('ANESTESIA')) return 'anesthesia';
+        if (t.includes('SEGUIMIENTO HOSPITALIZACIÓN')) return 'hospFollowUp';
+        if (t.includes('NOTIFICACIÓN DE ALTA') || t.includes('NOTIFICACION DE ALTA')) return 'notificacionAlta';
         if (t.includes('HOSPITALIZACIÓN')) return 'hospFollowUp';
         if (t.includes('DESPARASITACIÓN')) return 'deworming';
         return 'clinicalReview';
@@ -133,7 +135,7 @@ const RecordsTable = ({ records, viewMode = 'grid' }) => {
                             className="w-full flex justify-center items-center gap-2 py-2.5 px-4 bg-blue-50/50 hover:bg-blue-600 text-blue-600 hover:text-white rounded-xl text-sm font-bold transition-all duration-300 group/btn"
                             onClick={() => {
                                 const patientIdParam = record.patientId ? `&patientId=${record.patientId}` : '';
-                                navigate(`/forms?form=${formKey}&animalName=${encodeURIComponent(record.name)}&origin=history${patientIdParam}`);
+                                navigate(`/forms?form=${formKey}&animalName=${encodeURIComponent(record.name)}&origin=${origin}${patientIdParam}`);
                             }}
                         >
                             Ver Detalles
@@ -174,11 +176,12 @@ const RecordsTable = ({ records, viewMode = 'grid' }) => {
                     <table className={styles['records-table']}>
                         <thead>
                             <tr>
-                                <th>ID del Animal</th>
+                                <th>ID Animal</th>
                                 <th>Nombre Común</th>
-                                <th>Especie</th>
-                                <th>Ubicación</th>
-                                <th>Fecha que atendió</th>
+                                {origin !== 'history' && <th>Especie</th>}
+                                {origin !== 'history' && <th>Ubicación</th>}
+                                {origin === 'history' && <th>Edad</th>}
+                                <th>Fecha</th>
                                 <th>Veterinario</th>
                                 <th>Procedimiento</th>
                                 <th>Acción</th>
@@ -188,24 +191,57 @@ const RecordsTable = ({ records, viewMode = 'grid' }) => {
                             {currentItems.length > 0 ? (
                                 currentItems.map((record) => (
                                     <tr key={record.id}>
-                                        <td>{record.id}</td>
+                                        <td>{record.patientId || record.id}</td>
                                         <td>{record.commonName || 'Sin Nombre Común'}</td>
-                                        <td>{record.scientificName}</td>
-                                        <td>{record.location}</td>
-                                        <td>{record.date}</td>
+                                        {origin !== 'history' && <td>{record.scientificName}</td>}
+                                        {origin !== 'history' && <td>{record.location}</td>}
+                                        {origin === 'history' && <td>{record.age || '-'}</td>}
+                                        <td>
+                                            {record.date}
+                                            {origin === 'history' && record.time && (
+                                                <span style={{ display: 'block', fontSize: '0.75rem', color: '#64748b' }}>{record.time}</span>
+                                            )}
+                                        </td>
                                         <td>{record.doctor}</td>
                                         <td>{(record.type || '').toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}</td>
                                         <td>
-                                            <button
-                                                className={styles['view-record-btn']}
-                                                onClick={() => {
-                                                    const formKey = getFormKey(record.type);
-                                                    const patientIdParam = record.patientId ? `&patientId=${record.patientId}` : '';
-                                                    navigate(`/forms?form=${formKey}&animalName=${encodeURIComponent(record.name)}&origin=history${patientIdParam}`);
-                                                }}
-                                            >
-                                                Ver detalles
-                                            </button>
+                                            {iconActions ? (
+                                                <div className={styles['action-icons']}>
+                                                    <button
+                                                        className={`${styles['icon-btn']} ${styles['icon-btn--view']}`}
+                                                        title="Ver registro"
+                                                        onClick={() => {
+                                                            if (onView) { onView(record); return; }
+                                                            const formKey = getFormKey(record.type);
+                                                            const patientIdParam = record.patientId ? `&patientId=${record.patientId}` : '';
+                                                            navigate(`/forms?form=${formKey}&animalName=${encodeURIComponent(record.name)}&origin=${origin}${patientIdParam}`);
+                                                        }}
+                                                    >
+                                                        <FaEye />
+                                                    </button>
+                                                    {onEdit && (
+                                                        <button
+                                                            className={`${styles['icon-btn']} ${styles['icon-btn--edit']}`}
+                                                            title="Editar registro"
+                                                            onClick={() => onEdit(record)}
+                                                        >
+                                                            <FaEdit />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <button
+                                                    className={styles['view-record-btn']}
+                                                    onClick={() => {
+                                                        if (onView) { onView(record); return; }
+                                                        const formKey = getFormKey(record.type);
+                                                        const patientIdParam = record.patientId ? `&patientId=${record.patientId}` : '';
+                                                        navigate(`/forms?form=${formKey}&animalName=${encodeURIComponent(record.name)}&origin=${origin}${patientIdParam}`);
+                                                    }}
+                                                >
+                                                    Ver detalles
+                                                </button>
+                                            )}
                                         </td>
                                     </tr>
                                 ))

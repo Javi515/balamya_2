@@ -1,6 +1,4 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../../context/AuthContext';
 import {
     FaBell,
     FaCamera,
@@ -12,17 +10,12 @@ import {
     FaGraduationCap,
     FaCalendarAlt,
     FaLock,
-    FaGlobe,
     FaChevronRight,
-    FaSignOutAlt,
-    FaNotesMedical,
-    FaExclamationTriangle,
-    FaCog,
     FaHistory,
     FaStickyNote,
     FaPenNib
 } from 'react-icons/fa';
-import { MdPlace, MdBadge, MdTrendingUp } from 'react-icons/md';
+import { MdPlace, MdBadge } from 'react-icons/md';
 
 import pageStyles from './ProfilePage.module.css';
 import headerStyles from './ProfileHeader.module.css';
@@ -33,26 +26,6 @@ import settingsStyles from './ProfileSettings.module.css';
 const styles = Object.assign({}, pageStyles, headerStyles, heroStyles, statsStyles, settingsStyles);
 
 const ProfilePage = () => {
-    const { logout } = useAuth();
-    const navigate = useNavigate();
-
-    const confirmLogout = () => {
-        const overlay = document.createElement('div');
-        overlay.className = 'logout-overlay';
-        document.body.appendChild(overlay);
-        void overlay.offsetWidth;
-        overlay.classList.add('active');
-
-        setTimeout(() => {
-            logout();
-            navigate('/');
-            setTimeout(() => {
-                if (document.body.contains(overlay)) {
-                    document.body.removeChild(overlay);
-                }
-            }, 100);
-        }, 500);
-    };
 
     return (
         <div className={styles['profile-page-container']}>
@@ -180,31 +153,6 @@ const ProfilePage = () => {
                                         </div>
                                     </div>
 
-                                    <div className={`${styles['setting-item']} ${styles['group']}`}>
-                                        <div className={styles['setting-left']}>
-                                            <div className={styles['setting-icon-box']}><FaGlobe /></div>
-                                            <div className={styles['setting-text']}>
-                                                <h4>Idioma y Región</h4>
-                                                <p>Español (México) / GMT-6</p>
-                                            </div>
-                                        </div>
-                                        <FaChevronRight className={styles['setting-arrow']} />
-                                    </div>
-
-                                    {/* Action: Cerrar Sesión */}
-                                    <div
-                                        className={`${styles['setting-item']} ${styles['group']}`}
-                                        style={{ marginTop: '1rem', cursor: 'pointer', border: '1px solid #ef4444', backgroundColor: '#fef2f2' }}
-                                        onClick={confirmLogout}
-                                    >
-                                        <div className={styles['setting-left']}>
-                                            <div className={styles['setting-icon-box']} style={{ backgroundColor: '#fee2e2', color: '#ef4444' }}><FaSignOutAlt /></div>
-                                            <div className={styles['setting-text']}>
-                                                <h4 style={{ color: '#ef4444', margin: 0 }}>Cerrar Sesión</h4>
-                                                <p style={{ color: '#ef4444' }}>Salir de la cuenta de forma segura</p>
-                                            </div>
-                                        </div>
-                                    </div>
 
                                 </div>
                             </div>

@@ -22,7 +22,7 @@ class ErrorBoundary extends React.Component {
     };
 
     handleGoHome = () => {
-        window.location.href = '/';
+        window.location.href = import.meta.env.BASE_URL || '/';
     };
 
     render() {
@@ -46,7 +46,7 @@ class ErrorBoundary extends React.Component {
                             </button>
                         </div>
 
-                        {process.env.NODE_ENV === 'development' && (
+                        {import.meta.env.DEV && (
                             <details className={styles['error-details']}>
                                 <summary>Ver detalles técnicos</summary>
                                 <pre className={styles['error-pre']}>

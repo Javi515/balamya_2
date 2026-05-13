@@ -11,8 +11,10 @@ export const generateTreatmentPDF = (patientData, protocolRows, appliedRows, for
     });
 
     const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
     const margin = 12; // Margen uniforme
     const usableWidth = pageWidth - (margin * 2);
+    const isGroupTreatment = variant === 'grupal';
 
     // Tipografía base
     pdf.setFont('helvetica');
@@ -43,11 +45,17 @@ export const generateTreatmentPDF = (patientData, protocolRows, appliedRows, for
         currentY += 4;
     };
 
-    const drawGridOfFields = (fields, startY, colCount = 4) => {
+    const drawGridOfFields = (fields, startY, colCount = 4, options = {}) => {
         const colWidth = usableWidth / colCount;
+        const {
+            rowHeight = 10,
+            labelValueGap = 4,
+            underlineGap = 5,
+            bottomPadding = 2
+        } = options;
         let x = margin;
         let y = startY;
-        let maxRowHeight = 10;
+        let maxRowHeight = rowHeight;
 
         fields.forEach((field, index) => {
             if (index > 0 && index % colCount === 0) {
@@ -65,17 +73,17 @@ export const generateTreatmentPDF = (patientData, protocolRows, appliedRows, for
             pdf.setFontSize(8);
             pdf.setFont('helvetica', 'normal');
             const val = field.value || ' ';
-            pdf.text(val, x, y + 4);
+            pdf.text(val, x, y + labelValueGap);
 
             // Línea de subrayado
             pdf.setDrawColor(150, 150, 150);
             pdf.setLineWidth(0.2);
-            pdf.line(x, y + 5, x + colWidth - 5, y + 5);
+            pdf.line(x, y + underlineGap, x + colWidth - 5, y + underlineGap);
 
             x += colWidth;
         });
 
-        return y + maxRowHeight + 2;
+        return y + maxRowHeight + bottomPadding;
     };
 
     // --- HOJA PRINCIPAL ---
@@ -128,7 +136,14 @@ export const generateTreatmentPDF = (patientData, protocolRows, appliedRows, for
         ];
     }
 
-    currentY = drawGridOfFields(generalFields1, currentY, 4);
+    currentY = drawGridOfFields(
+        generalFields1,
+        currentY,
+        4,
+        isGroupTreatment
+            ? { rowHeight: 15, labelValueGap: 6, underlineGap: 8, bottomPadding: 5 }
+            : {}
+    );
 
     // 3. Anamnesis
     addSectionHeader('Anamnesis');
@@ -136,15 +151,21 @@ export const generateTreatmentPDF = (patientData, protocolRows, appliedRows, for
         startY: currentY,
         body: [[formRefs.anamnesis || ' ']],
         theme: 'plain',
-        bodyStyles: { fontSize: 8, textColor: [0, 0, 0], halign: 'justify', cellPadding: 1 },
+        bodyStyles: {
+            fontSize: 8,
+            textColor: [0, 0, 0],
+            halign: 'justify',
+            cellPadding: isGroupTreatment ? 3 : 1,
+            ...(isGroupTreatment ? { minCellHeight: 18 } : {}),
+        },
         margin: { left: margin, right: margin },
         tableWidth: usableWidth,
     });
-    currentY = pdf.lastAutoTable.finalY + 1;
+    currentY = pdf.lastAutoTable.finalY + (isGroupTreatment ? 3 : 1);
     pdf.setDrawColor(150, 150, 150);
     pdf.setLineWidth(0.2);
     pdf.line(margin, currentY, pageWidth - margin, currentY);
-    currentY += 8;
+    currentY += isGroupTreatment ? 12 : 8;
 
     // Impresiones Diagnósticas (Solo Variante Aves)
     if (variant === 'aves') {
@@ -177,10 +198,22 @@ export const generateTreatmentPDF = (patientData, protocolRows, appliedRows, for
         head: [['PRINCIPIO ACTIVO', dosisLabel, 'PRODUCTO COMERCIAL', 'CANTIDAD AL APLICAR', 'VÍA DE ADMÓN', 'FRECUENCIA', 'NO DE DÍAS']],
         body: protocolData.length > 0 ? protocolData : [['', '', '', '', '', '', ''], ['', '', '', '', '', '', '']],
         theme: 'grid',
-        headStyles: { fillColor: [230, 230, 230], textColor: [0, 0, 0], fontSize: 6, fontStyle: 'bold', halign: 'center' },
-        bodyStyles: { fontSize: 7, textColor: [0, 0, 0], halign: 'center' },
+        headStyles: {
+            fillColor: [230, 230, 230],
+            textColor: [0, 0, 0],
+            fontSize: 6,
+            fontStyle: 'bold',
+            halign: 'center',
+            ...(variant === 'grupal' ? { minCellHeight: 9 } : {}),
+        },
+        bodyStyles: {
+            fontSize: 7,
+            textColor: [0, 0, 0],
+            halign: 'center',
+            ...(variant === 'grupal' ? { minCellHeight: 10 } : {}),
+        },
         margin: { left: margin, right: margin },
-        styles: { cellPadding: 2, lineColor: [0, 0, 0], lineWidth: 0.2 },
+        styles: { cellPadding: variant === 'grupal' ? 2.5 : 2, lineColor: [0, 0, 0], lineWidth: 0.2 },
     });
     currentY = pdf.lastAutoTable.finalY + 8;
 
@@ -205,8 +238,18 @@ export const generateTreatmentPDF = (patientData, protocolRows, appliedRows, for
             head: [['FECHA', 'HORA', 'TRATAMIENTO', 'OBSERVACIONES', 'RESPONSABLE']],
             body: appliedAvesData.length > 0 ? appliedAvesData : [['', '', '', '', ''], ['', '', '', '', '']],
             theme: 'grid',
-            headStyles: { fillColor: [230, 230, 230], textColor: [0, 0, 0], fontSize: 7, fontStyle: 'bold', halign: 'center' },
-            bodyStyles: { fontSize: 8, textColor: [0, 0, 0], halign: 'center' },
+            headStyles: {
+                fillColor: [230, 230, 230],
+                textColor: [0, 0, 0],
+                fontSize: 7,
+                fontStyle: 'bold',
+                halign: 'center',
+            },
+            bodyStyles: {
+                fontSize: 8,
+                textColor: [0, 0, 0],
+                halign: 'center',
+            },
             margin: { left: margin, right: margin },
             styles: { cellPadding: 2, lineColor: [0, 0, 0], lineWidth: 0.2 },
         });
@@ -222,15 +265,27 @@ export const generateTreatmentPDF = (patientData, protocolRows, appliedRows, for
             head: [['FECHA', 'TRATAMIENTO APLICADO']],
             body: appliedGrupalData.length > 0 ? appliedGrupalData : [['', ''], ['', '']],
             theme: 'grid',
-            headStyles: { fillColor: [230, 230, 230], textColor: [0, 0, 0], fontSize: 7, fontStyle: 'bold', halign: 'center' },
-            bodyStyles: { fontSize: 8, textColor: [0, 0, 0], halign: 'center' },
+            headStyles: {
+                fillColor: [230, 230, 230],
+                textColor: [0, 0, 0],
+                fontSize: 7,
+                fontStyle: 'bold',
+                halign: 'center',
+                minCellHeight: 9,
+            },
+            bodyStyles: {
+                fontSize: 8,
+                textColor: [0, 0, 0],
+                halign: 'center',
+                minCellHeight: 11,
+            },
             margin: { left: margin, right: margin },
-            styles: { cellPadding: 2, lineColor: [0, 0, 0], lineWidth: 0.2 },
+            styles: { cellPadding: 2.5, lineColor: [0, 0, 0], lineWidth: 0.2 },
             columnStyles: {
                 0: { cellWidth: 35 } // Fecha width
             }
         });
-        currentY = pdf.lastAutoTable.finalY + 8;
+        currentY = pdf.lastAutoTable.finalY + 4;
 
     } else {
         // Variante NORMAL es especial, viene en bloques de 4 filas
@@ -290,11 +345,13 @@ export const generateTreatmentPDF = (patientData, protocolRows, appliedRows, for
     }
 
     // Paginación si es necesario para Firmas
-    if (currentY > 230) {
+    const signatureGap = isGroupTreatment ? 15 : 20;
+    const maxSignatureY = pageHeight - margin - 8;
+    if (currentY + signatureGap > maxSignatureY) {
         pdf.addPage();
-        currentY = margin;
+        currentY = isGroupTreatment ? margin + 18 : margin;
     } else {
-        currentY += 20;
+        currentY += signatureGap;
     }
 
 

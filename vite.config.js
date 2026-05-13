@@ -6,7 +6,7 @@ export default defineConfig({
     base: '/BALAMYA/',
     server: {
         port: 3000,
-        // open: true, // Removed to avoid confusion in builds
+        historyApiFallback: true,
     },
     build: {
         outDir: 'build',

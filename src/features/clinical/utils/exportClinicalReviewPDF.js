@@ -290,21 +290,23 @@ export const generateClinicalReviewPDF = (formRefs, variant = 'normal') => {
     drawTextArea(formRefs.impresionesDiagnosticas);
 
     // --- FIRMAS ---
-    currentY += 30;
+    currentY += 12;
     if (currentY > 260) {
         pdf.addPage();
         currentY = margin + 30;
     }
 
     const signWidth = 60;
-    let x = margin;
-    pdf.setDrawColor(0, 0, 0);
-    pdf.setLineWidth(0.5);
-    pdf.line(x, currentY, x + signWidth, currentY);
+    const signX = (pageWidth - signWidth) / 2;
 
     pdf.setFontSize(8);
     pdf.setFont('helvetica', 'normal');
-    pdf.text(formRefs.responsableClinico || 'Responsable Clínico', x + (signWidth / 2), currentY + 5, { align: 'center' });
+    pdf.text(formRefs.responsableClinico || 'Responsable Clínico', signX + (signWidth / 2), currentY, { align: 'center' });
+
+    currentY += 5;
+    pdf.setDrawColor(0, 0, 0);
+    pdf.setLineWidth(0.5);
+    pdf.line(signX, currentY, signX + signWidth, currentY);
 
     if (variant === 'aves') {
         pdf.text(`Hoja: ${formRefs.numeroHoja || '1'}`, pageWidth - margin - 20, currentY);

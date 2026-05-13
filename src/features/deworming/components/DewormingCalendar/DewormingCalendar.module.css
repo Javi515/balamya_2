@@ -1,7 +1,33 @@
-/* 
+/*
   Styles for DewormingCalendar.js
   Restores the professional card-based layout.
 */
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.table-spinner {
+    width: 36px;
+    height: 36px;
+    border: 4px solid #e2e8f0;
+    border-top-color: #1e40af;
+    border-radius: 50%;
+    animation: spin 0.75s linear infinite;
+}
+
+.table-loading-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 32px 0;
+}
+
+.table-loading-text {
+    color: #64748b;
+    font-size: 0.9rem;
+}
 
 /* Main card container for the form */
 .deworming-card {
@@ -16,7 +42,9 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+  overflow: hidden;
 }
+
 
 .header-logo {
   max-height: 70px;
@@ -67,6 +95,8 @@ h4 {
 .deworming-form-field {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
 .deworming-form-label {
@@ -88,8 +118,19 @@ h4 {
   background-color: transparent;
   padding: 4px 0;
   font-size: 0.95rem;
+  text-align: center;
   transition: border-color 0.3s ease;
 }
+
+input[type="date"].deworming-form-input {
+  text-align: center;
+  text-align-last: center;
+}
+
+input[type="date"].deworming-form-input::-webkit-date-and-time-value {
+  text-align: center;
+}
+
 
 .deworming-form-input:focus,
 .deworming-form-select:focus {
@@ -131,28 +172,105 @@ h4 {
   margin-top: 10px;
 }
 
+.row-selection-hint {
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+  color: #475569;
+}
+
 .deworming-table {
   width: 100%;
   border-collapse: collapse;
+  min-width: 700px;
 }
 
 .deworming-table th,
 .deworming-table td {
   border: 1px solid #e0e0e0;
-  padding: 8px 10px;
-  text-align: left;
-  font-size: 0.9rem;
+  padding: 5px 6px;
+  text-align: center;
+  font-size: 0.78rem;
+  word-break: break-word;
 }
 
 .deworming-table th {
   background-color: #f8f9fa;
   font-weight: 600;
   text-transform: uppercase;
-  font-size: 0.85rem;
+  font-size: 0.72rem;
+  line-height: 1.2;
 }
 
 .deworming-table tbody tr:nth-child(even) {
   background-color: #f8f9fa;
+}
+
+.table-row-selectable {
+  cursor: pointer;
+}
+
+.table-row-selectable:hover td {
+  background-color: #eef4ff;
+}
+
+.deworming-row-selected td {
+  background-color: #dbeafe !important;
+  color: #0f172a;
+}
+
+.edit-record-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #2563eb;
+  padding: 4px 6px;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.edit-record-btn:hover {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+/* Navegación entre formatos */
+.sheet-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  background: #f0f4ff;
+  border-radius: 8px;
+}
+
+.sheet-nav-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.sheet-nav-btn {
+  background: #fff;
+  border: 1px solid #c7d2fe;
+  color: #3b5bdb;
+  padding: 5px 14px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.sheet-nav-btn:hover:not(:disabled) {
+  background: #e0e7ff;
+}
+
+.sheet-nav-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
 
 /* Back button basic style */
@@ -189,7 +307,8 @@ h4 {
   padding: 30px 40px;
   border-radius: 10px;
   width: 90%;
-  /* Adjusted for 3 columns */
+  max-height: 90vh;
+  overflow-y: auto;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
@@ -205,7 +324,6 @@ h4 {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 30px;
-  /* Generous gap */
 }
 
 /* Modal action buttons container */
@@ -283,4 +401,43 @@ h4 {
 .btn-delete:hover {
   background-color: #fdecea;
   color: #b02a37;
+}
+
+@media (max-width: 640px) {
+  .modal-content {
+    padding: 20px 16px;
+    width: 95%;
+  }
+
+  .modal-form-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .deworming-card {
+    padding: 12px 14px;
+  }
+
+  .deworming-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .deworming-header-flex > :first-child,
+  .deworming-header-flex > :last-child {
+    flex: 0 0 56px;
+    max-width: 56px;
+  }
+
+  .deworming-header-flex > :nth-child(2) {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .deworming-header-title {
+    font-size: 1rem;
+  }
+
+  .deworming-header-subtitle {
+    font-size: 0.7rem;
+  }
 }

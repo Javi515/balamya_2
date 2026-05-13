@@ -1,8 +1,8 @@
 import React from 'react';
 import cardStyles from '../../../../styles/shared/Card.module.css';
-import { patients } from '../../../../data/mockData';
 import styles from './PatientList.module.css';
 import rowStyles from './PatientRow.module.css';
+import { getRecentPatients } from '../../../../services/patientsService';
 
 const PatientRow = ({ patient }) => {
   return (
@@ -16,6 +16,8 @@ const PatientRow = ({ patient }) => {
 };
 
 const PatientList = () => {
+  const patients = getRecentPatients();
+
   return (
     <div className={`${cardStyles.card} ${styles['patient-list-card']}`}>
       <h3 className={styles['dashboard-section-title']}>Pacientes Recientes</h3>
@@ -30,7 +32,7 @@ const PatientList = () => {
             </tr>
           </thead>
           <tbody>
-            {patients.slice(0, 5).map((patient) => (
+            {patients.map((patient) => (
               <PatientRow key={patient.id} patient={patient} />
             ))}
           </tbody>

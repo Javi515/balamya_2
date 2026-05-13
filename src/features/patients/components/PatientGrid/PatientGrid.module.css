@@ -31,13 +31,13 @@
     }
 }
 
-/* --- Table View Styles (Refined & Minimalist) --- */
+/* --- Table View Styles --- */
 .list-view-container {
-    background: transparent;
-    border-radius: 0;
-    box-shadow: none;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06);
+    border: 1px solid #f1f5f9;
     overflow: hidden;
-    border: none;
     margin-top: 10px;
     animation: fadeIn 0.4s ease-out;
 }
@@ -45,101 +45,64 @@
 .table-responsive-container {
     width: 100%;
     overflow-x: auto;
-    /* Permite scroll horizontal en lugar de tapar el contenido */
-    max-height: none !important;
-    overflow-y: visible !important;
     -webkit-overflow-scrolling: touch;
-    /* Suavidad en dispositivos táctiles */
-    padding-bottom: 8px;
-    /* Espacio para la barra de scroll */
-}
-
-/* Custom horizontal scrollbar for the table */
-.table-responsive-container::-webkit-scrollbar {
-    height: 6px;
-}
-
-.table-responsive-container::-webkit-scrollbar-track {
-    background: #f1f5f9;
-    border-radius: 4px;
-}
-
-.table-responsive-container::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 4px;
-}
-
-.table-responsive-container::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
 }
 
 .patient-table {
     width: 100%;
-    border-collapse: separate;
-    border-spacing: 0 8px;
-    /* Spacing between rows for a cleaner look */
+    border-collapse: collapse;
     text-align: left;
-    white-space: normal;
     font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-    table-layout: auto;
+    table-layout: fixed;
 }
 
 .patient-table th {
-    padding: 12px 12px;
-    font-size: 0.75rem;
+    padding: 11px 14px;
+    font-size: 0.7rem;
     font-weight: 700;
-    color: #9ca3af;
+    color: #94a3b8;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    border-bottom: none;
-    text-align: center;
+    letter-spacing: 0.08em;
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    white-space: nowrap;
+    text-align: left;
 }
 
 .patient-table-row {
     background-color: #ffffff;
-    transition: all 0.2s ease;
+    transition: background 0.15s ease;
 }
 
-.patient-table-row td {
-    padding: 14px 12px;
-    vertical-align: middle;
-    border-top: 1px solid #f3f4f6;
-    border-bottom: 1px solid #f3f4f6;
-    color: #1f2937;
-    font-size: 0.9rem;
-    text-align: center;
-}
-
-/* Rounded corners for the rows */
-.patient-table-row td:first-child {
-    border-left: 1px solid #f3f4f6;
-    border-top-left-radius: 12px;
-    border-bottom-left-radius: 12px;
-}
-
-.patient-table-row td:last-child {
-    border-right: 1px solid #f3f4f6;
-    border-top-right-radius: 12px;
-    border-bottom-right-radius: 12px;
+.patient-table-row:not(:last-child) td {
+    border-bottom: 1px solid #f1f5f9;
 }
 
 .patient-table-row:hover {
-    transform: scale(1.002);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-    border-color: #e5e7eb;
+    background-color: #f8fafc;
+}
+
+.patient-table-row td {
+    padding: 12px 14px;
+    vertical-align: middle;
+    color: #1e293b;
+    font-size: 0.875rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .table-img-cell {
-    width: 60px;
+    width: 56px;
 }
 
 .table-img-wrapper {
-    width: 44px;
-    height: 44px;
-    border-radius: 10px;
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    margin: 0 auto;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    flex-shrink: 0;
 }
 
 .table-img-wrapper img {
@@ -149,73 +112,116 @@
 }
 
 .table-id-cell {
-    font-weight: 700;
-    color: #4b5563;
+    width: 80px;
+    font-weight: 600;
+    color: #64748b;
     font-family: 'ui-monospace', 'SFMono-Regular', Menlo, Monaco, Consolas, monospace;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
+}
+
+.table-cell-main {
+    overflow: hidden;
 }
 
 .table-name {
     font-weight: 700;
-    color: #111827;
-    font-size: 1rem;
-    margin-bottom: 1px;
+    color: #0f172a;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .table-species {
-    font-weight: 600;
-    color: #374151;
+    font-size: 0.78rem;
+    color: #64748b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .table-age {
     font-weight: 600;
-    color: #374151;
+    color: #334155;
+    font-size: 0.875rem;
 }
 
 .table-subtext {
     font-size: 0.75rem;
-    color: #9ca3af;
-    font-weight: 500;
+    color: #94a3b8;
 }
 
-/* Badges for Table */
-.table-badge {
-    font-size: 0.9rem;
+.table-weight {
     font-weight: 600;
-    color: #4b5563;
+    color: #334155;
 }
 
-.badge-normal {
-    background-color: transparent;
+/* Location badge */
+.table-badge {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #334155;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
 }
 
 .badge-quarantine {
-    background-color: transparent;
-    color: #ef4444;
-}
-
-/* Status Badges */
-.table-weight {
-    font-weight: 600;
-    color: #374151;
+    color: #dc2626;
 }
 
 .table-actions-cell {
-    width: 120px;
+    width: 96px;
+    text-align: right !important;
 }
 
-.text-center {
-    text-align: center;
-}
-
-.flex.justify-center {
+.table-actions-group {
     display: flex;
-    justify-content: center;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
 }
 
-.gap-2 {
-    gap: 0.5rem;
+.table-action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    flex-shrink: 0;
 }
+
+.table-action-btn:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+/* Column widths for non-API mode */
+.col-foto   { width: 56px; }
+.col-id     { width: 80px; }
+.col-nombre { width: auto; }
+.col-especie{ width: 18%; }
+.col-peso   { width: 90px; }
+.col-edad   { width: 110px; }
+.col-ubi    { width: 140px; }
+.col-acc    { width: 96px; }
+
+/* Column widths for API mode */
+.col-id-api     { width: 80px; }
+.col-nombre-api { width: auto; }
+.col-cientifico { width: 18%; }
+.col-grupo      { width: 14%; }
+.col-edad-api   { width: 80px; }
+.col-sexo       { width: 70px; }
+.col-proc       { width: 13%; }
+.col-recinto    { width: 130px; }
 
 /* Paginación */
 .pagination {

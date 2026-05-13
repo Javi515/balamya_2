@@ -1,18 +1,19 @@
 import React from 'react';
+import { FiUsers, FiCheckCircle, FiActivity, FiAlertCircle, FiMinus } from 'react-icons/fi';
 import cardStyles from '../../../../styles/shared/Card.module.css';
 import styles from './StatGrid.module.css';
 import statCardStyles from './StatCard.module.css';
 
-const StatCard = ({ title, value, subtitle, icon, iconType = "default" }) => {
+const StatCard = ({ title, value, subtitle, icon, accent }) => {
   return (
-    <div className={`${cardStyles.card} ${statCardStyles['stat-card']}`}>
-      <div className={`${statCardStyles['stat-icon-wrapper']} ${statCardStyles[`type-${iconType}`]}`}>
+    <div className={`${cardStyles.card} ${statCardStyles['stat-card']}`} style={{ borderLeft: `3px solid ${accent}` }}>
+      <div className={statCardStyles['stat-icon-wrapper']} style={{ color: accent }}>
         {icon}
       </div>
       <div className={statCardStyles['stat-card-info']}>
         <div className={statCardStyles['stat-card-header']}>
           <span className={statCardStyles['stat-card-value']}>{value}</span>
-          {subtitle && <span className={statCardStyles['stat-card-subtitle']}>{subtitle}</span>}
+          {subtitle && <span className={statCardStyles['stat-card-subtitle']} style={{ color: accent }}>{subtitle}</span>}
         </div>
         <span className={statCardStyles['stat-card-title']}>{title}</span>
       </div>
@@ -24,7 +25,6 @@ const StatGrid = ({ data }) => {
   if (!data) return null;
   const { totalPopulation, healthy, inTreatment, quarantine, deceased } = data;
 
-  // Excluimos Población Total para sacar el porcentaje correcto de las 4 subcategorías
   const activeTotal = healthy + inTreatment + quarantine + deceased;
   const getPercentage = (value) => activeTotal > 0 ? Math.round((value / activeTotal) * 100) + '%' : '0%';
 
@@ -33,36 +33,36 @@ const StatGrid = ({ data }) => {
       <StatCard
         title="Población Total"
         value={totalPopulation}
-        iconType="primary"
-        icon='🐾'
+        accent="#3b5bdb"
+        icon={<FiUsers size={22} />}
       />
       <StatCard
         title="Sanos"
         value={healthy}
         subtitle={getPercentage(healthy)}
-        iconType="success"
-        icon='💓'
+        accent="#2f9e44"
+        icon={<FiCheckCircle size={22} />}
       />
       <StatCard
         title="En Tratamiento"
         value={inTreatment}
         subtitle={getPercentage(inTreatment)}
-        iconType="info"
-        icon='🩺'
+        accent="#1971c2"
+        icon={<FiActivity size={22} />}
       />
       <StatCard
-        title={"Cuarentena/\nHospital"}
+        title="Cuarentena / Hospital"
         value={quarantine}
         subtitle={getPercentage(quarantine)}
-        iconType="warning"
-        icon='⚠️'
+        accent="#e67700"
+        icon={<FiAlertCircle size={22} />}
       />
       <StatCard
         title="Fallecidos"
         value={deceased}
         subtitle={getPercentage(deceased)}
-        iconType="danger"
-        icon='🕊️'
+        accent="#c92a2a"
+        icon={<FiMinus size={22} />}
       />
     </div>
   );

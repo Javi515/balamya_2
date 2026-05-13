@@ -34,11 +34,11 @@
 }
 
 .floating-btn.save-btn {
-    background-color: #007bff;
+    background-color: #16a34a;
 }
 
 .floating-btn.save-btn:hover {
-    background-color: #0056b3;
+    background-color: #15803d;
 }
 
 .floating-btn.pdf-btn {
@@ -55,4 +55,64 @@
 
 .floating-btn.print-btn:hover {
     background-color: #5a6268;
+}
+
+.floating-btn.attach-btn {
+    background-color: #059669;
+}
+
+.floating-btn.attach-btn:hover {
+    background-color: #047857;
+}
+
+/* Modal de adjuntos */
+.attach-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 9998;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.attach-modal {
+    background: #fff;
+    border-radius: 16px;
+    padding: 24px;
+    width: 420px;
+    max-width: 90vw;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+.attach-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.attach-modal-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+}
+
+.attach-modal-close {
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    transition: color 0.15s;
+}
+
+.attach-modal-close:hover {
+    color: #ef4444;
 }

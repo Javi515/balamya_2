@@ -1,33 +1,121 @@
-import React, { useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { FaDove, FaFileAlt, FaLeaf } from 'react-icons/fa';
 
 import { useAuth } from '../../../../context/AuthContext';
 import useFormState from '../../../../hooks/useFormState';
 import { generateClinicalReviewPDF } from '../../utils/exportClinicalReviewPDF';
 
-// Import subcomponents
 import ReptilesReviewVariant from './ReptilesReviewVariant';
 import NormalAvesReviewVariant from './NormalAvesReviewVariant';
 
-const ClinicalReviewForm = ({ patient, existingRecord, onSave }) => {
+const initFields = (ex, patient) => ({
+  // Datos generales
+  fecha: ex?.fecha || (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })(),
+  familia: ex?.familia || patient?.family || '',
+  nombreCientifico: ex?.nombreCientifico || patient?.scientificName || '',
+  nombreComun: ex?.nombreComun || patient?.commonName || '',
+  ubicacion: ex?.ubicacion || patient?.location || '',
+  identificacion: ex?.identificacion || patient?.id || '',
+  edad: ex?.edad || (patient?.age ? `${patient.age} años` : ''),
+  peso: ex?.peso || patient?.weight || '',
+  sexo: ex?.sexo || patient?.sex || '',
+  nombre: ex?.nombre || patient?.name || '',
+  // Constantes fisiológicas
+  frecuenciaCardiaca: ex?.frecuenciaCardiaca || '',
+  frecuenciaRespiratoria: ex?.frecuenciaRespiratoria || '',
+  temperatura: ex?.temperatura || '',
+  tllc: ex?.tllc || '',
+  // Sistemas (texto para normal/aves, "Afectado"/'' para reptiles)
+  anamnesis: ex?.anamnesis || '',
+  aspectoGeneral: ex?.aspectoGeneral || '',
+  pielPlumas: ex?.pielPlumas || '',
+  cardiovascular: ex?.cardiovascular || '',
+  respiratorio: ex?.respiratorio || '',
+  digestivo: ex?.digestivo || '',
+  musculoesqueletico: ex?.musculoesqueletico || '',
+  visualAuditivo: ex?.visualAuditivo || '',
+  urogenital: ex?.urogenital || '',
+  nervioso: ex?.nervioso || '',
+  gangliosLinfaticos: ex?.gangliosLinfaticos || '',
+  impresionesdiagnosticas: ex?.impresionesdiagnosticas || '',
+  tratamientos: ex?.tratamientos || '',
+  // Pruebas de laboratorio — general/normal
+  bh: ex?.bh || '',
+  qs: ex?.qs || '',
+  frotis: ex?.frotis || '',
+  paf: ex?.paf || '',
+  ego: ex?.ego || '',
+  coproparasitoscopico: ex?.coproparasitoscopico || '',
+  rayosX: ex?.rayosX || '',
+  ultrasonido: ex?.ultrasonido || '',
+  // Pruebas de laboratorio — aves
+  h: ex?.h || '',
+  numeroHoja: ex?.numeroHoja || '',
+  // Reptiles
+  entornoAmbiente: ex?.entornoAmbiente || '',
+  descripcionProblema: ex?.descripcionProblema || '',
+  hemograma: ex?.hemograma || '',
+  quimiaSanguinea: ex?.quimiaSanguinea || '',
+  observaciones: ex?.observaciones || '',
+  metabolico: ex?.metabolico || '',
+  otroEspecificar: ex?.otroEspecificar || '',
+});
+
+const ClinicalReviewForm = ({ patient, existingRecord, onSave, onUpdate }) => {
   const formRef = useRef(null);
-  const { step, isSaved, handleNext, handleBack, handleSave: originalHandleSave } = useFormState(1);
+  const { step, isSaved, handleNext, handleBack, handleSave: originalHandleSave } = useFormState(1, Boolean(existingRecord));
   const { user } = useAuth();
 
-  const userRole = user?.role || '';
-  const isAdmin = userRole === 'admin';
-  const isAves = userRole === 'aves';
-  const isReptiles = userRole === 'reptiles';
+  const animalCategory = (patient?.category || patient?.taxonomicGroup || '').toLowerCase();
+  const isAnimalAves = animalCategory.includes('ave');
+  const isAnimalReptil = animalCategory.includes('reptil');
 
   const getDefaultVariant = () => {
-    if (isAves) return 'aves';
-    if (isReptiles) return 'reptiles';
-    if (isAdmin) return 'normal';
+    if (existingRecord?.variante === 'aves') return 'aves';
+    if (existingRecord?.variante === 'reptiles') return 'reptiles';
+    if (isAnimalAves) return 'aves';
+    if (isAnimalReptil) return 'reptiles';
     return 'normal';
   };
 
   const [variant, setVariant] = useState(getDefaultVariant);
-  const canToggle = isAdmin;
+  const [fields, setFields] = useState(() => initFields(existingRecord, patient));
+  const [isDirty, setIsDirty] = useState(false);
+  const [savedRecordId, setSavedRecordId] = useState(existingRecord?.idRevision || null);
+  const canToggle = false;
+
+  const handleChange = (field, value) => {
+    setFields(prev => ({ ...prev, [field]: value }));
+    if (existingRecord) setIsDirty(true);
+  };
+
+  const handleUpdateSave = async () => {
+    if (!onUpdate) return;
+
+    const isNum = (val) => val === '' || !isNaN(Number(val));
+    const numericFields = [
+      { key: 'frecuenciaCardiaca', label: 'F.C. (lpm)', example: 'ej: 68.5' },
+      { key: 'frecuenciaRespiratoria', label: 'F.R. (rpm)', example: 'ej: 18.5' },
+      { key: 'temperatura', label: 'Temp. (°C)', example: 'ej: 38.5' },
+      { key: 'tllc', label: 'T.LL.C. (seg)', example: 'ej: 2.5' },
+      { key: 'numeroHoja', label: 'Hoja', example: 'ej: 1' },
+    ];
+    const invalid = numericFields.filter(f => fields[f.key] !== undefined && !isNum(fields[f.key]));
+    if (invalid.length > 0) {
+      alert('Corrige los siguientes campos antes de guardar:\n' + invalid.map(f => `• ${f.label}: debe ser un número (${f.example})`).join('\n'));
+      return;
+    }
+
+    try {
+      await onUpdate(fields);
+      setIsDirty(false);
+      alert('Revisión clínica actualizada correctamente.');
+    } catch (err) {
+      alert(err?.message || 'No se pudo guardar la revisión clínica.');
+    }
+  };
+
+  const canUpdate = Boolean(existingRecord) && (variant === 'normal' || variant === 'aves' || variant === 'reptiles') && Boolean(onUpdate);
 
   const getTitle = () => {
     switch (variant) {
@@ -41,187 +129,157 @@ const ClinicalReviewForm = ({ patient, existingRecord, onSave }) => {
     const el = formRef.current;
     if (!el) return;
 
-    const getText = (index) => {
-      const inputs = Array.from(el.querySelectorAll('input[type="text"]'));
-      return inputs[index] ? inputs[index].value : '';
-    };
-
-    const getArea = (index) => {
-      const textareas = Array.from(el.querySelectorAll('textarea'));
-      return textareas[index] ? textareas[index].value : '';
-    };
-
     const getLogoSrc = (selector) => {
       const img = el.querySelector(`${selector} img[class*="uploaded-image"]`);
       return img ? img.src : null;
     };
 
-    const getCheckboxes = (selector) => {
-      const checkboxes = Array.from(el.querySelectorAll(selector));
-      return checkboxes.filter(cb => cb.checked).map(cb => cb.nextSibling?.textContent?.trim() || cb.value);
-    };
+    const responsableClinico = existingRecord?.responsable || user?.name || '';
 
-    // Index calculation depends on variant
     const formRefs = {
       logoLeft: getLogoSrc('.header-logo-left'),
       logoRight: getLogoSrc('.header-logo-right'),
     };
 
     if (variant === 'aves') {
-      formRefs.familia = getText(0);
-      formRefs.nombreCientifico = getText(1);
-      formRefs.nombreComun = getText(2);
-      formRefs.ubicacion = getText(3);
-      formRefs.identificacion = getText(4);
-      formRefs.edad = getText(5);
-      formRefs.peso = getText(6);
-      formRefs.sexo = getText(7);
-
-      formRefs.anamnesis = getArea(0);
-
-      formRefs.fc = getText(8);
-      formRefs.fr = getText(9);
-      formRefs.temp = getText(10);
-      formRefs.tllc = getText(11);
-
-      formRefs.aspectoGeneral = getArea(1);
-      formRefs.pielPlumas = getArea(2);
-      formRefs.cardiovascular = getArea(3);
-      formRefs.respiratorio = getArea(4);
-      formRefs.digestivo = getArea(5);
-      formRefs.musculoEsqueletico = getArea(6);
-      formRefs.visualAuditivo = getArea(7);
-      formRefs.urogenital = getArea(8);
-      formRefs.nervioso = getArea(9);
-
-      // Aves specific tests
-      formRefs.pruebaH = getText(12);
-      formRefs.pruebaQs = getText(13);
-      formRefs.pruebaFrotis = getText(14);
-      formRefs.pruebaPaf = getText(15);
-      formRefs.pruebaCopro = getText(16);
-      formRefs.pruebaRx = getText(17);
-      formRefs.pruebaUsg = getText(18);
-
-      formRefs.impresionesDiagnosticas = getArea(10);
-      formRefs.responsableClinico = getText(19);
-      formRefs.numeroHoja = getText(20);
+      formRefs.familia = fields.familia;
+      formRefs.nombreCientifico = fields.nombreCientifico;
+      formRefs.nombreComun = fields.nombreComun;
+      formRefs.ubicacion = fields.ubicacion;
+      formRefs.identificacion = fields.identificacion;
+      formRefs.edad = fields.edad;
+      formRefs.peso = fields.peso;
+      formRefs.sexo = fields.sexo;
+      formRefs.anamnesis = fields.anamnesis;
+      formRefs.fc = fields.frecuenciaCardiaca;
+      formRefs.fr = fields.frecuenciaRespiratoria;
+      formRefs.temp = fields.temperatura;
+      formRefs.tllc = fields.tllc;
+      formRefs.aspectoGeneral = fields.aspectoGeneral;
+      formRefs.pielPlumas = fields.pielPlumas;
+      formRefs.cardiovascular = fields.cardiovascular;
+      formRefs.respiratorio = fields.respiratorio;
+      formRefs.digestivo = fields.digestivo;
+      formRefs.musculoEsqueletico = fields.musculoesqueletico;
+      formRefs.visualAuditivo = fields.visualAuditivo;
+      formRefs.urogenital = fields.urogenital;
+      formRefs.nervioso = fields.nervioso;
+      formRefs.pruebaH = fields.h;
+      formRefs.pruebaQs = fields.qs;
+      formRefs.pruebaFrotis = fields.frotis;
+      formRefs.pruebaPaf = fields.paf;
+      formRefs.pruebaCopro = fields.coproparasitoscopico;
+      formRefs.pruebaRx = fields.rayosX;
+      formRefs.pruebaUsg = fields.ultrasonido;
+      formRefs.impresionesDiagnosticas = fields.impresionesdiagnosticas;
+      formRefs.responsableClinico = responsableClinico;
+      formRefs.numeroHoja = fields.numeroHoja;
 
     } else if (variant === 'reptiles') {
-      const dateInput = el.querySelector('input[type="date"]');
-      formRefs.fecha = dateInput ? dateInput.value : '';
-      formRefs.especie = getText(0);
-      formRefs.nombreComun = getText(1);
-      formRefs.identificacion = getText(2);
-      formRefs.ubicacion = getText(3);
-      formRefs.edad = getText(4);
-      formRefs.sexo = getText(5);
-      formRefs.peso = getText(6);
-      formRefs.nombre = getText(7);
-
-      formRefs.anamnesis = getArea(0);
-      formRefs.aspectoGeneral = getArea(1);
-      formRefs.entornoAmbiente = getArea(2);
-
-      formRefs.sistemasAfectados = getCheckboxes('input[type="checkbox"]');
-      formRefs.descripcionProblema = getArea(3);
-
-      formRefs.pruebaBh = getText(8);
-      formRefs.pruebaQs = getText(9);
-      formRefs.pruebaCopro = getText(10);
-      formRefs.pruebaOtra = getText(11);
-      formRefs.pruebaRx = getText(12);
-      formRefs.pruebaUsg = getText(13);
-
-      formRefs.observacionesLab = getArea(4);
-      formRefs.impresionesDiagnosticas = getArea(5);
-
-      formRefs.responsableClinico = getText(14);
+      const sistemaLabels = {
+        pielPlumas: 'Piel', digestivo: 'Digestivo', respiratorio: 'Respiratorio',
+        cardiovascular: 'Cardiovascular', visualAuditivo: 'Visual/auditivo',
+        musculoesqueletico: 'Musculoesquelético', urogenital: 'Urinario/genital',
+        nervioso: 'Nervioso', metabolico: 'Metabólico',
+      };
+      formRefs.fecha = fields.fecha;
+      formRefs.especie = fields.nombreCientifico;
+      formRefs.nombreComun = fields.nombreComun;
+      formRefs.nombre = fields.nombre;
+      formRefs.identificacion = fields.identificacion;
+      formRefs.ubicacion = fields.ubicacion;
+      formRefs.edad = fields.edad;
+      formRefs.sexo = fields.sexo;
+      formRefs.peso = fields.peso;
+      formRefs.anamnesis = fields.anamnesis;
+      formRefs.aspectoGeneral = fields.aspectoGeneral;
+      formRefs.entornoAmbiente = fields.entornoAmbiente;
+      formRefs.sistemasAfectados = Object.entries(sistemaLabels)
+        .filter(([k]) => fields[k] === 'Afectado')
+        .map(([, label]) => label);
+      formRefs.descripcionProblema = fields.descripcionProblema;
+      formRefs.pruebaBh = fields.hemograma;
+      formRefs.pruebaQs = fields.quimiaSanguinea;
+      formRefs.pruebaCopro = fields.coproparasitoscopico;
+      formRefs.pruebaOtra = '';
+      formRefs.pruebaRx = fields.rayosX;
+      formRefs.pruebaUsg = fields.ultrasonido;
+      formRefs.observacionesLab = fields.observaciones;
+      formRefs.impresionesDiagnosticas = fields.impresionesdiagnosticas;
+      formRefs.responsableClinico = responsableClinico;
 
     } else {
-      // variant === 'normal'
-      const dateInput = el.querySelector('input[type="date"]');
-      formRefs.fecha = dateInput ? dateInput.value : '';
-      formRefs.nombreCientifico = getText(0);
-      formRefs.nombreComun = getText(1);
-      formRefs.ubicacion = getText(2);
-      formRefs.identificacion = getText(3);
-      formRefs.edad = getText(4);
-      formRefs.peso = getText(5);
-      formRefs.sexo = getText(6);
-
-      formRefs.anamnesis = getArea(0);
-
-      formRefs.fc = getText(7);
-      formRefs.fr = getText(8);
-      formRefs.temp = getText(9);
-      formRefs.tllc = getText(10);
-
-      formRefs.aspectoGeneral = getArea(1);
-      formRefs.pielPlumas = getArea(2);
-      formRefs.cardiovascular = getArea(3);
-      formRefs.respiratorio = getArea(4);
-      formRefs.digestivo = getArea(5);
-      formRefs.musculoEsqueletico = getArea(6);
-      formRefs.visualAuditivo = getArea(7);
-      formRefs.urogenital = getArea(8);
-      formRefs.nervioso = getArea(9);
-      formRefs.gangliosLinfaticos = getArea(10);
-
-      // General specific tests
-      formRefs.pruebaBh = getText(11);
-      formRefs.pruebaQs = getText(12);
-      formRefs.pruebaFrotis = getText(13);
-      formRefs.pruebaPaf = getText(14);
-      formRefs.pruebaEgo = getText(15);
-      formRefs.pruebaCopro = getText(16);
-      formRefs.pruebaRx = getText(17);
-      formRefs.pruebaUsg = getText(18);
-
-      formRefs.impresionesDiagnosticas = getArea(11);
-      formRefs.responsableClinico = getText(19);
+      formRefs.fecha = fields.fecha;
+      formRefs.nombreCientifico = fields.nombreCientifico;
+      formRefs.nombreComun = fields.nombreComun;
+      formRefs.ubicacion = fields.ubicacion;
+      formRefs.identificacion = fields.identificacion;
+      formRefs.edad = fields.edad;
+      formRefs.peso = fields.peso;
+      formRefs.sexo = fields.sexo;
+      formRefs.anamnesis = fields.anamnesis;
+      formRefs.fc = fields.frecuenciaCardiaca;
+      formRefs.fr = fields.frecuenciaRespiratoria;
+      formRefs.temp = fields.temperatura;
+      formRefs.tllc = fields.tllc;
+      formRefs.aspectoGeneral = fields.aspectoGeneral;
+      formRefs.pielPlumas = fields.pielPlumas;
+      formRefs.cardiovascular = fields.cardiovascular;
+      formRefs.respiratorio = fields.respiratorio;
+      formRefs.digestivo = fields.digestivo;
+      formRefs.musculoEsqueletico = fields.musculoesqueletico;
+      formRefs.visualAuditivo = fields.visualAuditivo;
+      formRefs.urogenital = fields.urogenital;
+      formRefs.nervioso = fields.nervioso;
+      formRefs.gangliosLinfaticos = fields.gangliosLinfaticos;
+      formRefs.pruebaBh = fields.bh;
+      formRefs.pruebaQs = fields.qs;
+      formRefs.pruebaFrotis = fields.frotis;
+      formRefs.pruebaPaf = fields.paf;
+      formRefs.pruebaEgo = fields.ego;
+      formRefs.pruebaCopro = fields.coproparasitoscopico;
+      formRefs.pruebaRx = fields.rayosX;
+      formRefs.pruebaUsg = fields.ultrasonido;
+      formRefs.impresionesDiagnosticas = fields.impresionesdiagnosticas;
+      formRefs.responsableClinico = responsableClinico;
     }
 
     generateClinicalReviewPDF(formRefs, variant);
   };
 
-  const handleFormSave = () => {
-    const el = formRef.current;
-    if (!el) {
-      originalHandleSave();
+  const handleFormSave = async () => {
+    const formData = { ...fields, variante: variant };
+
+    const isNum = (val) => val === '' || !isNaN(Number(val));
+    const numericFields = [
+      { key: 'peso', label: 'Peso (kg)', example: 'ej: 72.5' },
+      { key: 'frecuenciaCardiaca', label: 'F.C. (lpm)', example: 'ej: 68' },
+      { key: 'frecuenciaRespiratoria', label: 'F.R. (rpm)', example: 'ej: 18' },
+      { key: 'temperatura', label: 'Temp. (°C)', example: 'ej: 38.5' },
+    ];
+    const invalidFields = numericFields.filter(
+      f => formData[f.key] !== undefined && !isNum(formData[f.key])
+    );
+    if (invalidFields.length > 0) {
+      const msg = invalidFields.map(f => `• ${f.label}: debe ser un número (${f.example})`).join('\n');
+      alert('Corrige los siguientes campos antes de guardar:\n' + msg);
       return;
     }
 
-    const dateInput = el.querySelector('input[type="date"]');
-    const fecha = dateInput ? dateInput.value : new Date().toISOString().split('T')[0];
-
-    let responsable = '';
-    const textInputs = Array.from(el.querySelectorAll('input[type="text"]'));
-    if (variant === 'aves') {
-      responsable = textInputs[19] ? textInputs[19].value : '';
-    } else if (variant === 'reptiles') {
-      responsable = textInputs[14] ? textInputs[14].value : '';
-    } else {
-      responsable = textInputs[19] ? textInputs[19].value : '';
-    }
-
-    const recordMeta = {
-      fecha,
-      responsable,
-      variante: variant
-    };
-
-    originalHandleSave();
     if (onSave) {
-      onSave(recordMeta);
+      const res = await onSave(formData);
+      const id = res?.id_revision || res?.idRevision || res?.revision?.id_revision || null;
+      if (id) setSavedRecordId(id);
     }
+    originalHandleSave();
   };
+
+  const responsable = existingRecord?.responsable || user?.name || '';
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Premium Floating Variant Selector (only for admin) */}
       {canToggle && (
-        <div className="flex justify-center w-full ">
+        <div className="flex justify-center w-full">
           <div className="flex gap-2 p-1.5 bg-white/80 backdrop-blur-md rounded-full shadow-md border border-gray-100">
             <button
               className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 ${variant === 'normal' ? 'bg-blue-600 text-white shadow-md transform scale-105' : 'text-gray-500 hover:text-gray-800 hover:bg-gray-100'}`}
@@ -245,31 +303,29 @@ const ClinicalReviewForm = ({ patient, existingRecord, onSave }) => {
         </div>
       )}
 
-      {/* Main Document Card */}
-      <div
-        className="bg-transparent global-form-width"
-        ref={formRef}
-      >
-        <style>
-          {`
-            .page-separator {
-              height: 20px;
-              background-color: transparent;
-            }
-          `}
-        </style>
+      <div className="bg-transparent global-form-width" ref={formRef}>
+        <style>{`.page-separator { height: 20px; background-color: transparent; }`}</style>
         <div className="block">
           {variant === 'reptiles' ? (
             <ReptilesReviewVariant
               patient={patient}
+              fields={fields}
+              handleChange={handleChange}
               getTitle={getTitle}
               isSaved={isSaved}
               handleSave={handleFormSave}
               handleExportPDF={handleExportPDF}
+              responsable={responsable}
+              canUpdate={canUpdate}
+              isDirty={isDirty}
+              onUpdateSave={handleUpdateSave}
+              idRegistro={savedRecordId}
             />
           ) : (
             <NormalAvesReviewVariant
               patient={patient}
+              fields={fields}
+              handleChange={handleChange}
               step={step}
               getTitle={getTitle}
               isSaved={isSaved}
@@ -278,6 +334,11 @@ const ClinicalReviewForm = ({ patient, existingRecord, onSave }) => {
               handleSave={handleFormSave}
               handleExportPDF={handleExportPDF}
               isAves={variant === 'aves'}
+              responsable={responsable}
+              canUpdate={canUpdate}
+              isDirty={isDirty}
+              onUpdateSave={handleUpdateSave}
+              idRegistro={savedRecordId}
             />
           )}
         </div>

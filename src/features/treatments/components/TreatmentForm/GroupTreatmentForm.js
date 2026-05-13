@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { FaSave, FaPrint, FaFilePdf } from 'react-icons/fa';
+import { FaSave, FaFilePdf } from 'react-icons/fa';
 import { generateTreatmentPDF } from '../../utils/exportTreatmentPDF';
 import styles from './TreatmentForm.module.css';
 
@@ -8,9 +8,13 @@ import cardStyles from '../../../../styles/shared/Card.module.css';
 
 import useFormState from '../../../../hooks/useFormState';
 import ImageUploader from '../../../../components/common/ImageUploader/ImageUploader';
+import { createGroupTreatmentApi } from '../../../../services/treatmentsService';
+import { useAuth } from '../../../../context/AuthContext';
 
 const GroupTreatmentForm = ({ onBack, patient }) => {
     const { isSaved, handleSave } = useFormState();
+    const { user } = useAuth();
+    const [isSaving, setIsSaving] = useState(false);
 
     // Dynamic Rows for Protocolo de Tratamiento
     const [protocolRows, setProtocolRows] = useState([
@@ -29,6 +33,71 @@ const GroupTreatmentForm = ({ onBack, patient }) => {
     const removeAppliedRow = (idToRemove) => setAppliedRows(appliedRows.filter(row => row.id !== idToRemove));
 
     const formRef = useRef(null);
+
+    const handleApiSave = async () => {
+        const el = formRef.current;
+        if (!el) return;
+
+        const textInputs = Array.from(el.querySelectorAll(`.${styles['form-grid-2']} input[type="text"], .${styles['form-grid-2']} input[type="number"]`));
+        const textareas = Array.from(el.querySelectorAll('textarea'));
+
+        const getTableRows = (dataTable) => {
+            const table = el.querySelector(`[data-table="${dataTable}"]`);
+            if (!table) return [];
+            return Array.from(table.querySelectorAll('tbody tr')).map((row) =>
+                Array.from(row.querySelectorAll('input')).map((input) => input.value || '')
+            );
+        };
+
+        const medicamentos = getTableRows('protocol')
+            .filter((cols) => cols[0])
+            .map(([principioActivo, dosisMgKg, productoComercial, cantidadAplicar, viaAdministracion, frecuencia, numeroDias]) => ({
+                principioActivo,
+                dosisMgKg: dosisMgKg ? Number(dosisMgKg) : null,
+                productoComercial,
+                cantidadAplicar: cantidadAplicar ? Number(cantidadAplicar) : null,
+                viaAdministracion,
+                frecuencia,
+                numeroDias: numeroDias ? Number(numeroDias) : null,
+            }));
+
+        const seguimientos = getTableRows('applied')
+            .filter((cols) => cols[0] && cols[1])
+            .map(([fecha, tratamientoAplicado]) => ({ fecha, tratamientoAplicado }));
+
+        const payload = {
+            idEjemplar: patient?.idEjemplar || patient?.id || '',
+            ubicacion: textInputs[2]?.value || '',
+            numeroEjemplares: textInputs[3]?.value ? Number(textInputs[3].value) : null,
+            anamnesisMotivo: textareas[0]?.value || '',
+            observaciones: textareas[1]?.value || '',
+            medicamentos,
+            seguimientos,
+        };
+
+        console.log('[GroupTreatment] payload:', JSON.stringify(payload, null, 2));
+
+        if (!payload.idEjemplar) {
+            alert('No hay un ejemplar seleccionado.');
+            return;
+        }
+
+        try {
+            setIsSaving(true);
+            await createGroupTreatmentApi(payload);
+            handleSave();
+        } catch (err) {
+            const fieldErrors = Array.isArray(err.data?.errors)
+                ? err.data.errors.map((e) => `• ${e.message}`).join('\n')
+                : null;
+            alert(fieldErrors
+                ? `Error al guardar:\n${fieldErrors}`
+                : `Error al guardar: ${err.message}`
+            );
+        } finally {
+            setIsSaving(false);
+        }
+    };
 
     const handleExportPDF = () => {
         const el = formRef.current;
@@ -69,7 +138,7 @@ const GroupTreatmentForm = ({ onBack, patient }) => {
             numeroHoja: '1'
         };
 
-        generateTreatmentPDF(patient, protocolRows, appliedRows, null, formRefs, 'grupal');
+        generateTreatmentPDF(patient, protocolRows, appliedRows, formRefs, 'grupal');
     };
 
     return (
@@ -94,21 +163,21 @@ const GroupTreatmentForm = ({ onBack, patient }) => {
                         <div className={styles['form-grid-2']}>
                             <div className={`${styles['form-group']} ${styles['compact']}`}>
                                 <label>Nombre científico</label>
-                                <input type="text" className={styles['form-input']} placeholder="Nombre científico" defaultValue={patient?.scientificName || ''} />
+                                <input type="text" className={styles['form-input']} placeholder="Nombre científico" defaultValue={patient?.scientificName || ''} readOnly />
                             </div>
                             <div className={`${styles['form-group']} ${styles['compact']}`}>
                                 <label>Nombre común</label>
-                                <input type="text" className={styles['form-input']} placeholder="Nombre común" defaultValue={patient?.commonName || ''} />
+                                <input type="text" className={styles['form-input']} placeholder="Nombre común" defaultValue={patient?.commonName || ''} readOnly />
                             </div>
                         </div>
                         <div className={styles['form-grid-2']}>
                             <div className={`${styles['form-group']} ${styles['compact']}`}>
                                 <label>Ubicación</label>
-                                <input type="text" className={styles['form-input']} placeholder="Ubicación" defaultValue={patient?.location || ''} />
+                                <input type="text" className={styles['form-input']} placeholder="Ubicación" defaultValue={patient?.location || ''} readOnly />
                             </div>
                             <div className={`${styles['form-group']} ${styles['compact']}`}>
                                 <label>No de ejemplares</label>
-                                <input type="number" className={styles['form-input']} placeholder="Cantidad" />
+                                <input type="number" className={styles['form-input']} placeholder="Cantidad" defaultValue={patient?.specimenCount || ''} readOnly />
                             </div>
                         </div>
                         <div className={`${styles['form-group']} ${styles['full-width']}`}>
@@ -120,7 +189,7 @@ const GroupTreatmentForm = ({ onBack, patient }) => {
                     {/* Tabla de Protocolo de Tratamiento */}
                     <div className={styles['form-section']}>
                         <h4 className={styles['section-title']}>Protocolo de Tratamiento</h4>
-                        <table className={styles['treatment-table']}>
+                        <table className={styles['treatment-table']} data-table="protocol">
                             <thead>
                                 <tr>
                                     <th>Principio activo</th>
@@ -137,12 +206,12 @@ const GroupTreatmentForm = ({ onBack, patient }) => {
                                 {protocolRows.map((row) => (
                                     <tr key={row.id} className={styles['protocol-row']}>
                                         <td><input type="text" className={styles['table-input']} /></td>
+                                        <td><input type="number" min="0" step="0.01" placeholder="Ej: 1.5" className={styles['table-input']} onKeyDown={(e) => ['e','E','+','-'].includes(e.key) && e.preventDefault()} /></td>
+                                        <td><input type="text" className={styles['table-input']} /></td>
+                                        <td><input type="number" min="0" step="0.01" placeholder="Ej: 2.0" className={styles['table-input']} onKeyDown={(e) => ['e','E','+','-'].includes(e.key) && e.preventDefault()} /></td>
                                         <td><input type="text" className={styles['table-input']} /></td>
                                         <td><input type="text" className={styles['table-input']} /></td>
-                                        <td><input type="text" className={styles['table-input']} /></td>
-                                        <td><input type="text" className={styles['table-input']} /></td>
-                                        <td><input type="text" className={styles['table-input']} /></td>
-                                        <td><input type="text" className={styles['table-input']} /></td>
+                                        <td><input type="number" min="1" step="1" placeholder="Ej: 7" className={styles['table-input']} onKeyDown={(e) => ['e','E','+','-','.'].includes(e.key) && e.preventDefault()} /></td>
                                         <td className={`${styles['action-col']}`} style={{ verticalAlign: 'middle' }}>
                                             <button className={styles['delete-row-btn']} onClick={() => removeProtocolRow(row.id)} title="Eliminar fila">-</button>
                                         </td>
@@ -160,7 +229,7 @@ const GroupTreatmentForm = ({ onBack, patient }) => {
                     {/* Tabla de Tratamiento Aplicado */}
                     <div className={styles['form-section']}>
                         <h4 className={styles['section-title']}>Tratamiento Aplicado</h4>
-                        <table className={`${styles['treatment-table']} ${styles['applied-table']}`}>
+                        <table className={styles['treatment-table']} data-table="applied">
                             <thead>
                                 <tr>
                                     <th style={{ width: '100px' }}>Fecha</th>
@@ -195,9 +264,10 @@ const GroupTreatmentForm = ({ onBack, patient }) => {
 
                     {/* Pie del formulario */}
                     <div className={styles['treatment-footer']}>
-                        <div className={styles['footer-field']}>
-                            <label>Responsable clínico:</label>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '2px', minWidth: '200px' }}>
+                            <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>{user?.name || ''}</span>
                             <div className={styles['signature-line']}></div>
+                            <label style={{ fontSize: '0.8rem', color: '#555' }}>Responsable clínico</label>
                         </div>
                     </div>
 
@@ -207,11 +277,11 @@ const GroupTreatmentForm = ({ onBack, patient }) => {
             {/* Acciones flotantes */}
             <div className="floating-actions ">
                 {!isSaved ? (
-                    <button className="floating-btn save-btn" onClick={handleSave} title="Guardar">
+                    <button className="floating-btn save-btn" onClick={handleApiSave} disabled={isSaving} title="Guardar">
                         <FaSave />
                     </button>
                 ) : (
-                    <button className="floating-btn print-btn" onClick={handleExportPDF} title="Exportar PDF/Imprimir">
+                    <button className="floating-btn pdf-btn" onClick={handleExportPDF} title="Descargar PDF">
                         <FaFilePdf />
                     </button>
                 )}

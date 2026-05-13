@@ -1,0 +1,337 @@
+.necropsy-report-form {
+    background-color: transparent;
+    padding: 0;
+    margin: 20px auto;
+    font-family: Arial, sans-serif;
+    color: #333;
+    font-size: 0.78rem;
+    line-height: 1.3;
+}
+
+.necropsy-report-form .form-page {
+    display: block;
+    background-color: #ffffff;
+    padding: 25px 30px;
+    border-radius: 4px;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.12);
+    margin-bottom: 30px;
+}
+
+.necropsy-report-form .page-separator {
+    display: none;
+}
+
+.necropsy-report-form .form-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 8px;
+    width: 100%;
+}
+
+.necropsy-report-form .header-subtitle,
+.necropsy-report-form .header-title,
+.necropsy-report-form .header-department,
+.necropsy-report-form .header-form-name {
+    font-weight: 700;
+    color: #333;
+    text-transform: uppercase;
+    margin: 1px 0;
+    letter-spacing: 0.3px;
+    line-height: 1.2;
+}
+
+.necropsy-report-form .header-subtitle {
+    font-size: 0.72rem;
+}
+
+.necropsy-report-form .header-title {
+    font-size: 0.82rem;
+}
+
+.necropsy-report-form .header-department {
+    font-size: 0.78rem;
+}
+
+.necropsy-report-form .header-form-name {
+    font-size: 0.85rem;
+    margin-top: 4px;
+}
+
+.necropsy-report-form .form-section {
+    margin-bottom: 12px;
+    border: none;
+}
+
+.necropsy-report-form .section-title {
+    font-size: 0.74rem;
+    font-weight: bold;
+    color: #333;
+    background-color: #f8f9fa;
+    padding: 4px 10px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    border-left: 3px solid #007bff;
+}
+
+.necropsy-report-form .form-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+
+.necropsy-report-form .header-info-row {
+    gap: 8px;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.necropsy-report-form .form-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.necropsy-report-form .form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 3px;
+}
+
+.necropsy-report-form .form-group label {
+    font-size: 0.68rem;
+    font-weight: bold;
+    color: #555;
+    margin-bottom: 2px;
+    text-transform: uppercase;
+}
+
+.necropsy-report-form .form-input,
+.necropsy-report-form .form-textarea {
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    background-color: #fff;
+    padding: 4px 6px;
+    font-size: 0.76rem;
+    font-family: inherit;
+    transition: border-color 0.3s;
+    width: 100%;
+    line-height: 1.3;
+}
+
+.necropsy-report-form .form-input:focus,
+.necropsy-report-form .form-textarea:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 1px rgba(0, 123, 255, 0.1);
+}
+
+.necropsy-report-form .form-textarea {
+    resize: vertical;
+    min-height: 40px;
+}
+
+.necropsy-report-form .simple-textarea {
+    border: 1px solid #ccc !important;
+    background: #fff !important;
+    line-height: 1.3 !important;
+    padding: 4px 6px !important;
+    border-radius: 3px !important;
+}
+
+.necropsy-report-form .form-group.inline {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    overflow: visible;
+}
+
+.necropsy-report-form .form-group.inline label {
+    margin-bottom: 0;
+    white-space: nowrap;
+    font-size: 0.62rem;
+}
+
+.necropsy-report-form .form-input.underline-input {
+    border: none;
+    border-bottom: 1px solid #333;
+    border-radius: 0;
+    padding: 4px 2px 6px;
+    background-color: transparent;
+    font-weight: 500;
+    text-align: center;
+    min-width: 60px;
+    max-width: 110px;
+    font-size: 0.72rem;
+    line-height: 1.5;
+    overflow: visible;
+    height: 28px;
+    box-sizing: border-box;
+}
+
+.necropsy-report-form .form-input.underline-input:focus {
+    border-bottom-color: #007bff;
+    box-shadow: none;
+}
+
+.necropsy-report-form .form-input.professional-text-input {
+    border: none;
+    border-bottom: 1px solid #ccc;
+    border-radius: 0;
+    padding: 4px 0;
+    background-color: transparent;
+    font-size: 0.76rem;
+    transition: border-color 0.3s;
+}
+
+.necropsy-report-form .form-input.professional-text-input:focus {
+    outline: none;
+    border-bottom: 1px solid #007bff;
+    box-shadow: none;
+}
+
+.necropsy-report-form .radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-start;
+    padding: 3px 0;
+}
+
+.necropsy-report-form .radio-group label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: normal;
+    font-size: 0.74rem;
+    color: #333;
+    text-transform: none;
+    margin-bottom: 0;
+}
+
+.necropsy-report-form .radio-group input[type="radio"] {
+    accent-color: #007bff;
+    width: 0.9em;
+    height: 0.9em;
+}
+
+.necropsy-report-form .sample-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    padding: 4px 0;
+    align-items: center;
+}
+
+.necropsy-report-form .sample-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0;
+    border-bottom: none;
+}
+
+.necropsy-report-form .sample-item label {
+    margin: 0;
+    font-size: 0.72rem;
+    color: #444;
+    font-weight: normal;
+    text-transform: none;
+    white-space: nowrap;
+}
+
+.necropsy-report-form .sample-item input[type="checkbox"] {
+    accent-color: #007bff;
+    width: 0.9em;
+    height: 0.9em;
+    margin: 0;
+    cursor: pointer;
+}
+
+.necropsy-report-form input[type="date"]:invalid::-webkit-datetime-edit {
+    color: transparent;
+}
+
+.necropsy-report-form input[type="date"]:focus::-webkit-datetime-edit {
+    color: inherit;
+}
+
+.necropsy-report-form input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    filter: invert(0.4);
+}
+
+.necropsy-report-form .signature-section {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 25px;
+    align-items: flex-start;
+}
+
+.necropsy-report-form .signature-block {
+    text-align: center;
+    width: 35%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.necropsy-report-form .signature-input {
+    border: none;
+    border-bottom: 2px solid #000;
+    width: 100%;
+    max-width: 220px;
+    text-align: center;
+    font-size: 0.8rem;
+    background: transparent;
+    padding: 3px;
+    margin-bottom: 3px;
+    outline: none;
+}
+
+.necropsy-report-form .signature-input:focus {
+    border-bottom-color: #007bff;
+}
+
+@media (max-width: 500px) {
+    .necropsy-report-form .form-page {
+        padding: 16px 14px;
+    }
+
+    .necropsy-report-form .header-info-row {
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .necropsy-report-form .form-group.inline {
+        flex-wrap: wrap;
+    }
+
+    .necropsy-report-form .signature-section {
+        flex-direction: column;
+        align-items: center;
+        gap: 24px;
+    }
+
+    .necropsy-report-form .signature-block {
+        width: 80%;
+    }
+}
+
+
+.view-only input:not([readOnly]),
+.view-only textarea,
+.view-only select,
+.view-only input[type="checkbox"],
+.view-only input[type="date"] {
+    pointer-events: none;
+    background-color: #f8fafc;
+    color: #64748b;
+}

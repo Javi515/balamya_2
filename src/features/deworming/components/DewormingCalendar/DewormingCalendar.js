@@ -1,30 +1,79 @@
-import React, { useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import ReactDOM from 'react-dom';
-import { FaPlus, FaSave, FaFilePdf } from 'react-icons/fa';
+import { FaPlus, FaSave, FaFilePdf, FaEdit } from 'react-icons/fa';
 import ImageUploader from '../../../../components/common/ImageUploader/ImageUploader';
 import styles from './DewormingCalendar.module.css';
 
 import '../../../../styles/FloatingActions.css';
 import { generateDewormingPDF } from '../../utils/exportDewormingPDF';
+import { updateDewormingApi } from '../../../../services/dewormingService';
 
-const DewormingCalendar = () => {
+const normalizeDewormingRecord = (r) => ({
+    fecha: r.fecha || '',
+    principioActivo: r.principioActivo || r.principio_activo || '',
+    dosisMgKg: r.dosisMgKg || r.dosis_mg_kg || '',
+    productoComercial: r.productoComercial || r.producto_comercial || '',
+    dosisTotal: r.dosisTotal || r.dosis_total || '',
+    via: r.via || r.viaAdministracion || r.via_administracion || '',
+    frecuencia: r.frecuencia || '',
+    proxima: r.proxima || r.proximaDesparasitacion || r.proxima_desparasitacion || '',
+});
+
+const EMPTY_MODAL = { fecha: '', principioActivo: '', dosisMgKg: '', productoComercial: '', dosisTotal: '', via: '', frecuencia: '', proxima: '' };
+
+const DewormingCalendar = ({ patient, existingRecord, viewOnly = false }) => {
     const formRef = useRef(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [records, setRecords] = useState([]);
+    const [editingIndex, setEditingIndex] = useState(null);
+    const [modalData, setModalData] = useState(EMPTY_MODAL);
+    const [records, setRecords] = useState(existingRecord ? [normalizeDewormingRecord(existingRecord)] : []);
     const [generalData, setGeneralData] = useState({
-        grupo: '',
-        nombreCientifico: '',
-        nombreComun: '',
-        peso: '',
-        edad: '',
-        identificacion: '',
-        ubicacion: '',
-        sexo: '',
-        estadoFisiologico: ''
+        grupo: existingRecord?.grupo || '',
+        nombreCientifico: patient?.scientificName || patient?.species || '',
+        nombreComun: patient?.commonName || '',
+        peso: existingRecord?.peso || existingRecord?.peso_kg || '',
+        edad: patient?.ageText || (patient?.age ? `${patient.age} años` : ''),
+        identificacion: patient?.id || '',
+        ubicacion: patient?.location || existingRecord?.ubicacion || '',
+        sexo: patient?.sex || '',
+        estadoFisiologico: existingRecord?.estadoFisiologico || existingRecord?.estado_fisiologico || '',
     });
-    const [isSaved, setIsSaved] = useState(false);
+    const [isSaved, setIsSaved] = useState(!!existingRecord);
+    const [isSaving, setIsSaving] = useState(false);
 
-    const handleSave = () => {
+    const handleSave = async () => {
+        if (generalData.peso !== '' && isNaN(Number(generalData.peso))) {
+            alert('El campo Peso (kg) solo acepta números.\nEjemplo: 12.5');
+            return;
+        }
+        if (existingRecord) {
+            const idCalendario = existingRecord.idCalendario || existingRecord.id_calendario || existingRecord.id;
+            const rec = records[0] || {};
+            const payload = {
+                fecha: rec.fecha,
+                principioActivo: rec.principioActivo,
+                productoComercial: rec.productoComercial,
+                dosisMgKg: rec.dosisMgKg,
+                dosisTotal: rec.dosisTotal,
+                viaAdministracion: rec.via,
+                frecuencia: rec.frecuencia,
+                proximaDesparasitacion: rec.proxima,
+                ...(generalData.grupo && { grupo: generalData.grupo }),
+                ...(generalData.peso && { peso: generalData.peso }),
+                ...(generalData.ubicacion && { ubicacion: generalData.ubicacion }),
+                ...(generalData.estadoFisiologico && { estadoFisiologico: generalData.estadoFisiologico }),
+            };
+            try {
+                setIsSaving(true);
+                await updateDewormingApi(idCalendario, payload);
+                alert('Desparasitación actualizada correctamente.');
+            } catch (err) {
+                alert(`Error al actualizar: ${err.message}`);
+                return;
+            } finally {
+                setIsSaving(false);
+            }
+        }
         setIsSaved(true);
     };
 
@@ -45,30 +94,52 @@ const DewormingCalendar = () => {
         generateDewormingPDF(generalData, records, formRefs);
     };
 
-    const openModal = () => setIsModalOpen(true);
+    const openModal = () => { setEditingIndex(null); setModalData(EMPTY_MODAL); setIsModalOpen(true); };
+    const openEditModal = (index) => { setEditingIndex(index); setModalData({ ...records[index] }); setIsModalOpen(true); };
     const closeModal = () => setIsModalOpen(false);
+
+    const handleModalChange = (e) => {
+        const { name, value } = e.target;
+        setModalData(prev => ({ ...prev, [name]: value }));
+    };
 
     const handleDataChange = (e) => {
         const { name, value } = e.target;
-        setGeneralData(prevData => ({
-            ...prevData,
-            [name]: value
-        }));
+        setGeneralData(prevData => ({ ...prevData, [name]: value }));
     };
 
-    const handleAddRecord = (e) => {
+    const handleAddRecord = async (e) => {
         e.preventDefault();
-        const newRecord = {
-            fecha: e.target.fecha.value,
-            principioActivo: e.target.principioActivo.value,
-            dosisMgKg: e.target.dosisMgKg.value,
-            productoComercial: e.target.productoComercial.value,
-            dosisTotal: e.target.dosisTotal.value,
-            via: e.target.via.value,
-            frecuencia: e.target.frecuencia.value,
-            proxima: e.target.proxima.value,
-        };
-        setRecords([...records, newRecord]);
+        if (editingIndex !== null && existingRecord) {
+            const idCalendario = existingRecord.idCalendario || existingRecord.id_calendario || existingRecord.id;
+            const payload = {
+                fecha: modalData.fecha,
+                principioActivo: modalData.principioActivo,
+                productoComercial: modalData.productoComercial,
+                dosisMgKg: modalData.dosisMgKg,
+                dosisTotal: modalData.dosisTotal,
+                viaAdministracion: modalData.via,
+                frecuencia: modalData.frecuencia,
+                proximaDesparasitacion: modalData.proxima,
+                ...(generalData.grupo && { grupo: generalData.grupo }),
+                ...(generalData.peso && { peso: generalData.peso }),
+                ...(generalData.ubicacion && { ubicacion: generalData.ubicacion }),
+                ...(generalData.estadoFisiologico && { estadoFisiologico: generalData.estadoFisiologico }),
+            };
+            try {
+                setIsSaving(true);
+                await updateDewormingApi(idCalendario, payload);
+                setRecords(prev => prev.map((r, i) => i === editingIndex ? { ...modalData } : r));
+                alert('Desparasitación actualizada correctamente.');
+            } catch (err) {
+                alert(`Error al actualizar: ${err.message}`);
+                return;
+            } finally {
+                setIsSaving(false);
+            }
+        } else {
+            setRecords(prev => [...prev, { ...modalData }]);
+        }
         closeModal();
     };
 
@@ -108,11 +179,13 @@ const DewormingCalendar = () => {
                     <div className={styles['deworming-form-field']}><label className={styles['deworming-form-label']}>IDENTIFICACIÓN</label><input type="text" name="identificacion" value={generalData.identificacion} onChange={handleDataChange} className={styles['deworming-form-input']} /></div>
                 </div>
 
+                {!existingRecord && (
                 <div className={`${styles['add-record-button-container']}`}>
                     <button onClick={openModal} className={styles['add-record-button']}>
                         <FaPlus /> Agregar Registro
                     </button>
                 </div>
+                )}
 
                 <div className={styles['table-container']}>
                     <table className={styles['deworming-table']}>
@@ -126,6 +199,7 @@ const DewormingCalendar = () => {
                                 <th>VÍA DE ADMINISTRACIÓN</th>
                                 <th>FRECUENCIA</th>
                                 <th>PRÓXIMA DESPARASITACIÓN</th>
+                                {existingRecord && !viewOnly && <th></th>}
                             </tr>
                         </thead>
                         <tbody>
@@ -144,6 +218,13 @@ const DewormingCalendar = () => {
                                         <td>{rec.via}</td>
                                         <td>{rec.frecuencia}</td>
                                         <td>{rec.proxima}</td>
+                                        {existingRecord && !viewOnly && (
+                                            <td>
+                                                <button type="button" onClick={() => openEditModal(index)} title="Editar registro" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#4a7c59' }}>
+                                                    <FaEdit />
+                                                </button>
+                                            </td>
+                                        )}
                                     </tr>
                                 ))
                             )}
@@ -153,7 +234,7 @@ const DewormingCalendar = () => {
 
                 <div className="floating-actions ">
                     {!isSaved ? (
-                        <button className="floating-btn save-btn" onClick={handleSave} title="Guardar">
+                        <button className="floating-btn save-btn" onClick={handleSave} disabled={isSaving} title="Guardar">
                             <FaSave />
                         </button>
                     ) : (
@@ -173,35 +254,35 @@ const DewormingCalendar = () => {
                                     <div className={styles['modal-form-grid']}>
                                         <div className={styles['deworming-form-field']}>
                                             <label className={styles['deworming-form-label']}>FECHA</label>
-                                            <input name="fecha" type="date" required className={styles['deworming-form-input']} />
+                                            <input name="fecha" type="date" required className={styles['deworming-form-input']} value={modalData.fecha} onChange={handleModalChange} />
                                         </div>
                                         <div className={styles['deworming-form-field']}>
                                             <label className={styles['deworming-form-label']}>PRINCIPIO ACTIVO</label>
-                                            <input name="principioActivo" type="text" required className={styles['deworming-form-input']} />
+                                            <input name="principioActivo" type="text" required className={styles['deworming-form-input']} value={modalData.principioActivo} onChange={handleModalChange} />
                                         </div>
                                         <div className={styles['deworming-form-field']}>
                                             <label className={styles['deworming-form-label']}>DOSIS MG/KG</label>
-                                            <input name="dosisMgKg" type="text" required className={styles['deworming-form-input']} />
+                                            <input name="dosisMgKg" type="text" required className={styles['deworming-form-input']} value={modalData.dosisMgKg} onChange={handleModalChange} />
                                         </div>
                                         <div className={styles['deworming-form-field']}>
                                             <label className={styles['deworming-form-label']}>PRODUCTO COMERCIAL</label>
-                                            <input name="productoComercial" type="text" required className={styles['deworming-form-input']} />
+                                            <input name="productoComercial" type="text" required className={styles['deworming-form-input']} value={modalData.productoComercial} onChange={handleModalChange} />
                                         </div>
                                         <div className={styles['deworming-form-field']}>
                                             <label className={styles['deworming-form-label']}>DOSIS TOTAL (ml o tabletas)</label>
-                                            <input name="dosisTotal" type="text" required className={styles['deworming-form-input']} />
+                                            <input name="dosisTotal" type="text" required className={styles['deworming-form-input']} value={modalData.dosisTotal} onChange={handleModalChange} />
                                         </div>
                                         <div className={styles['deworming-form-field']}>
                                             <label className={styles['deworming-form-label']}>VÍA DE ADMINISTRACIÓN</label>
-                                            <input name="via" type="text" required className={styles['deworming-form-input']} />
+                                            <input name="via" type="text" required className={styles['deworming-form-input']} value={modalData.via} onChange={handleModalChange} />
                                         </div>
                                         <div className={styles['deworming-form-field']}>
                                             <label className={styles['deworming-form-label']}>FRECUENCIA</label>
-                                            <input name="frecuencia" type="text" required className={styles['deworming-form-input']} />
+                                            <input name="frecuencia" type="text" required className={styles['deworming-form-input']} value={modalData.frecuencia} onChange={handleModalChange} />
                                         </div>
                                         <div className={styles['deworming-form-field']}>
                                             <label className={styles['deworming-form-label']}>PRÓXIMA DESPARASITACIÓN</label>
-                                            <input name="proxima" type="date" required className={styles['deworming-form-input']} />
+                                            <input name="proxima" type="date" required className={styles['deworming-form-input']} value={modalData.proxima} onChange={handleModalChange} />
                                         </div>
                                     </div>
                                     <div className={styles['modal-actions']}>

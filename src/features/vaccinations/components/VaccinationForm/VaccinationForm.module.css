@@ -74,6 +74,8 @@ h4 {
 .vaccination-form-field {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
 .vaccination-form-label {
@@ -95,8 +97,15 @@ h4 {
   background-color: transparent;
   padding: 8px 0;
   font-size: 1rem;
+  text-align: center;
   transition: border-color 0.3s ease;
 }
+
+input[type="date"].vaccination-form-input {
+  text-align: center;
+  text-align-last: center;
+}
+
 
 .vaccination-form-input:focus,
 .vaccination-form-select:focus {
@@ -146,9 +155,9 @@ h4 {
 .vaccination-table th,
 .vaccination-table td {
   border: 1px solid #e0e0e0;
-  padding: 12px 15px;
-  text-align: left;
-  font-size: 0.95rem;
+  padding: 8px 10px;
+  text-align: center;
+  font-size: 0.85rem;
   vertical-align: middle;
 }
 
@@ -156,7 +165,7 @@ h4 {
   background-color: #f8f9fa;
   font-weight: 600;
   text-transform: uppercase;
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   color: #333;
 }
 
@@ -276,6 +285,46 @@ h4 {
 
 .footer-button.cancel-button:hover {
   background-color: #5a6268;
+}
+
+.edit-record-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #16a34a;
+  padding: 4px 6px;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.edit-record-btn:hover {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.hover-edit-btn {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #16a34a;
+  padding: 4px 6px;
+  border-radius: 4px;
+  font-size: 13px;
+  transition: opacity 0.2s;
+}
+
+.vaccination-table tbody tr:hover .hover-edit-btn {
+  opacity: 1;
+}
+
+.hover-edit-btn:hover {
+  background: #dcfce7;
 }
 
 /* Table row action buttons */

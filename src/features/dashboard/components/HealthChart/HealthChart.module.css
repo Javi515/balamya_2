@@ -28,7 +28,6 @@
   width: 160px;
   height: 160px;
   flex-shrink: 0;
-  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.05));
 }
 
 .health-chart {
@@ -38,11 +37,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.3s ease;
-}
-
-.health-chart:hover {
-  transform: scale(1.02);
 }
 
 .inner-circle {
@@ -54,7 +48,6 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.04);
 }
 
 .inner-total {
@@ -84,10 +77,10 @@
 }
 
 .legend-color {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  margin-right: 12px;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  margin-right: 10px;
   flex-shrink: 0;
 }
 
@@ -106,26 +99,10 @@
   color: #94a3b8;
 }
 
-/* Modern Palette */
-.legend-color.healthy {
-  background-color: #10b981;
-  box-shadow: 0 0 0 3px #d1fae5;
-}
-
-.legend-color.in-treatment {
-  background-color: #3b82f6;
-  box-shadow: 0 0 0 3px #dbeafe;
-}
-
-.legend-color.quarantine {
-  background-color: #f59e0b;
-  box-shadow: 0 0 0 3px #fef3c7;
-}
-
-.legend-color.deceased {
-  background-color: #ef4444;
-  box-shadow: 0 0 0 3px #fee2e2;
-}
+.legend-color.healthy    { background-color: #2f9e44; }
+.legend-color.in-treatment { background-color: #1971c2; }
+.legend-color.quarantine { background-color: #e67700; }
+.legend-color.deceased   { background-color: #c92a2a; }
 
 @media (max-width: 500px) {
   .health-chart-container {
