@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaBell, FaSignOutAlt, FaUserMd } from 'react-icons/fa';
+import { FaBell, FaSignOutAlt } from 'react-icons/fa';
 import { useAuth } from '../../../context/AuthContext';
 import { useAlertsContext } from '../../../context/AlertsContext';
 import Modal from '../../common/Modal/Modal';
@@ -161,15 +161,7 @@ const Topbar = ({ toggleSidebar }) => {
 
             {isMenuOpen && (
               <div className={styles['profile-dropdown']}>
-                <Link
-                  to="/profile"
-                  className={styles['profile-dropdown-item']}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <FaUserMd className={styles['dropdown-icon']} />
-                  Mi Perfil
-                </Link>
-                <Link
+<Link
                   to="/alerts"
                   className={styles['profile-dropdown-item']}
                   onClick={() => setIsMenuOpen(false)}
