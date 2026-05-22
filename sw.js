@@ -54,8 +54,8 @@ self.addEventListener('push', (event) => {
     event.waitUntil(
         self.registration.showNotification(data.titulo || 'Nueva alerta', {
             body: details.filter(Boolean).join('\n'),
-            icon: '/BALAMYA/logo_zoo.png',
-            badge: '/BALAMYA/logo_zoo.png',
+            icon: `${self.registration.scope}Logo_zoomat.png`,
+            badge: `${self.registration.scope}Logo_zoomat.png`,
             tag: `global:${data.id_notificacion ?? 'alerta'}`,
             renotify: true,
             vibrate: [160, 80, 160],
@@ -66,5 +66,5 @@ self.addEventListener('push', (event) => {
 
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
-    event.waitUntil(clients.openWindow('/BALAMYA/alerts'));
+    event.waitUntil(clients.openWindow(`${self.registration.scope}alerts`));
 });
