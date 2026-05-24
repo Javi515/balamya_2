@@ -5,7 +5,7 @@ import { FaTimes, FaCamera } from 'react-icons/fa';
 import logoZoomat from '../../../assets/Logo_zoomat.png';
 import useSidebar from '../../../hooks/useSidebar';
 import { useAuth } from '../../../context/AuthContext';
-import { apiFetch } from '../../../services/api';
+import { apiFetch, normalizedBaseUrl } from '../../../services/api';
 
 const Sidebar = ({ isOpen, toggle }) => {
   const { user, updateUser } = useAuth();
@@ -23,7 +23,7 @@ const Sidebar = ({ isOpen, toggle }) => {
         body: formData,
         auth: true,
       });
-      updateUser({ fotoUrl: response?.fotoUrl });
+      updateUser({ fotoUrl: `${normalizedBaseUrl}${response.fotoUrl}` });
     } catch (err) {
       console.error('Error al subir foto:', err.message);
     }
