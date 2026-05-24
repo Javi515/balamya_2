@@ -66,7 +66,13 @@ const buildUrl = (path = '') => {
     }
 
     if (/^https?:\/\//i.test(path)) {
-        return path;
+        if (!normalizedBaseUrl || path.startsWith(normalizedBaseUrl)) return path;
+        try {
+            const { pathname, search, hash } = new URL(path);
+            return `${normalizedBaseUrl}${pathname}${search}${hash}`;
+        } catch {
+            return path;
+        }
     }
 
     if (!normalizedBaseUrl) {
