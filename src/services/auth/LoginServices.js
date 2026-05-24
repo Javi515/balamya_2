@@ -48,6 +48,7 @@ const normalizeBackendUser = (user) => {
         name: user?.nombreCompleto || '',
         role: roleConfig.role,
         specialty,
+        fotoUrl: user?.fotoPerfilUrl ?? user?.fotoUrl ?? null,
     };
 };
 

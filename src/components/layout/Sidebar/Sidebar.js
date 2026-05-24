@@ -23,7 +23,7 @@ const Sidebar = ({ isOpen, toggle }) => {
         body: formData,
         auth: true,
       });
-      updateUser({ fotoUrl: response?.fotoUrl });
+      updateUser({ fotoUrl: response?.fotoPerfilUrl ?? response?.fotoUrl });
     } catch (err) {
       console.error('Error al subir foto:', err.message);
     }
